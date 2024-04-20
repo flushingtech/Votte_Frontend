@@ -1,17 +1,35 @@
-import React from 'react';
-import '../styles/IdeaList.css'
+import React, { useState } from 'react';
+import '../styles/IdeaList.css';
 
-const IdeaList = ({ ideas }) => {
+const IdeaList = () => {
+  const [ideaList, setIdeaList] = useState([]);
+  const [newIdeaText, setNewIdeaText] = useState('');
 
-  
+  const handleAddIdea = () => {
+    if (newIdeaText.trim() !== '') {
+      const newIdea = { text: newIdeaText, id: Date.now() };
+      setIdeaList([...ideaList, newIdea]);
+      setNewIdeaText('');
+    }
+  };
+
   return (
     <div className="idea-container">
       <h2>List of Ideas</h2>
       <ul className="idea-list">
-        {ideas.map((idea, index) => (
-          <li key={index}>{idea}</li>
+        {ideaList.map((idea) => (
+          <li key={idea.id}>{idea.text}</li>
         ))}
       </ul>
+      <div className="add-idea">
+        <input
+          type="text"
+          value={newIdeaText}
+          onChange={(e) => setNewIdeaText(e.target.value)}
+          placeholder="Enter new idea..."
+        />
+        <button onClick={handleAddIdea}>Add an Idea</button>
+      </div>
     </div>
   );
 };
