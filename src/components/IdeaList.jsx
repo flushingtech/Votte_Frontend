@@ -7,10 +7,20 @@ const IdeaList = () => {
 
   const handleAddIdea = () => {
     if (newIdeaText.trim() !== '') {
-      const newIdea = { text: newIdeaText, id: Date.now() };
+      const newIdea = { text: newIdeaText, id: Date.now(), votes: 0 };
       setIdeaList([...ideaList, newIdea]);
       setNewIdeaText('');
     }
+  };
+
+  const handleVote = (id) => {
+    const updatedIdeas = ideaList.map((idea) => {
+      if (idea.id === id) {
+        return { ...idea, votes: idea.votes + 1 };
+      }
+      return idea;
+    });
+    setIdeaList(updatedIdeas);
   };
 
   return (
@@ -18,7 +28,13 @@ const IdeaList = () => {
       <h2>List of Ideas</h2>
       <ul className="idea-list">
         {ideaList.map((idea) => (
-          <li key={idea.id}>{idea.text}</li>
+          <li key={idea.id} className="idea-item">
+            <span>{idea.text}</span>
+            <div className="vote-section">
+              <span>Votes: {idea.votes}</span>
+              <button onClick={() => handleVote(idea.id)}>Vote</button>
+            </div>
+          </li>
         ))}
       </ul>
       <div className="add-idea">
