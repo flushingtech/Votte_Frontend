@@ -9,7 +9,7 @@ const Home = () => {
       <Navbar />
       <div className="max-w-7xl mx-auto px-4">
         <Header /> 
-        <div className="p-6 rounded shadow-lg bg-white">
+        <div className="p-6 rounded shadow-lg">
           <IdeaList />
         </div>
       </div>
