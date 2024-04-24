@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../styles/IdeaList.css';
 
 const IdeaList = () => {
   const [ideaList, setIdeaList] = useState([]);
@@ -24,27 +23,38 @@ const IdeaList = () => {
   };
 
   return (
-    <div className="idea-container">
-      <h2>List of Ideas</h2>
+    <div className="idea-container p-4 bg-black rounded-md shadow-md">
+      <h2 className="text-xl font-semibold mb-4">List of Ideas</h2>
       <ul className="idea-list">
         {ideaList.map((idea) => (
-          <li key={idea.id} className="idea-item">
-            <span>{idea.text}</span>
-            <div className="vote-section">
-              <span>Votes: {idea.votes}</span>
-              <button onClick={() => handleVote(idea.id)}>Vote</button>
+          <li key={idea.id} className="idea-item bg-white rounded-md shadow-sm p-4 mb-4 flex justify-between items-center">
+            <span className="text-lg text-gray-800">{idea.text}</span>
+            <div className="vote-section flex items-center">
+              <span className="text-sm text-gray-600 mr-2">Votes: {idea.votes}</span>
+              <button
+                className="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none"
+                onClick={() => handleVote(idea.id)}
+              >
+                Vote
+              </button>
             </div>
           </li>
         ))}
       </ul>
-      <div className="add-idea">
+      <div className="add-idea mt-4 flex items-center">
         <input
           type="text"
           value={newIdeaText}
           onChange={(e) => setNewIdeaText(e.target.value)}
+          className="p-2 border rounded-md mr-2 focus:outline-none"
           placeholder="Enter new idea..."
         />
-        <button onClick={handleAddIdea}>Add an Idea</button>
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+          onClick={handleAddIdea}
+        >
+          Add an Idea
+        </button>
       </div>
     </div>
   );
