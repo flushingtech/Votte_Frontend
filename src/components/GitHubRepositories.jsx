@@ -28,7 +28,7 @@ const GitHubRepositories = ({ orgName }) => {
         {repos.map((repo) => (
           <div
             key={repo.id}
-            className="bg-white p-4 rounded-lg shadow-md flex items-center space-x-4"
+            className="bg-white p-4 shadow-md flex items-center space-x-4"
           >
             <div className="text-gray-800">
               <FaGithub size={24} />

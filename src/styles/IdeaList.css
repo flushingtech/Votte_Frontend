@@ -1,0 +1,12 @@
+@keyframes fireAnimation {
+    0% {
+      background-color: red;
+    }
+    50% {
+      background-color: orange;
+    }
+    100% {
+      background-color: red;
+    }
+  }
+  

@@ -6,6 +6,7 @@ import handleAddIdea from '../scripts/ideas/handleAddIdea';
 import handleVote from '../scripts/ideas/handleVote';
 import handleUnvote from '../scripts/ideas/handleUnvote';
 import hasVoted from '../scripts/ideas/hasVoted';
+import '../styles/IdeaList.css'; // Import a CSS file for custom styles
 
 const IdeaList = () => {
   const [ideaList, setIdeaList] = useState([]);
@@ -16,11 +17,22 @@ const IdeaList = () => {
   // Function to fetch ideas and user votes from backend
   const fetchData = async () => {
     const ideas = await fetchIdeas();
-    setIdeaList(ideas);
-
     const votes = await fetchUserVotes();
-    const userVoteSet = new Set(votes.map((vote) => vote.idea_id));
-    setUserVotes(userVoteSet);
+
+    // Map votes to ideas to calculate the total votes for each idea
+    const ideasWithVotes = ideas.map((idea) => {
+      const votesForIdea = votes.filter((vote) => vote.idea_id === idea.id);
+      return {
+        ...idea,
+        votes: votesForIdea.length, // Set votes count for each idea
+      };
+    });
+
+    // Sort ideas based on the number of votes (descending order)
+    const sortedIdeas = ideasWithVotes.sort((a, b) => b.votes - a.votes);
+    
+    setIdeaList(sortedIdeas);
+    setUserVotes(new Set(votes.map((vote) => vote.idea_id)));
   };
 
   // Fetch initial data on component mount
@@ -48,32 +60,48 @@ const IdeaList = () => {
       <AddIdeaForm onAddIdea={handleAddNewIdea} />
 
       <ul>
-        {ideaList.map((idea) => (
+        {ideaList.map((idea, index) => (
           <li
             key={idea.id}
-            className="bg-white rounded-md shadow-sm p-4 mb-2 flex justify-between items-center"
+            className="idea-card shadow-sm p-1 mb-2 flex justify-between items-center"
             onMouseEnter={() => setHoveredId(idea.id)}
             onMouseLeave={() => setHoveredId(null)}
+            style={{
+              background: index === 0 ? 'linear-gradient(to right, #8EE700, #43DDE6)' : 'white',
+              position: 'relative', // Make the position relative for absolute positioning of the label
+            }}
           >
+            {index === 0 && ( // Render "Most Popular!" label if this is the most voted idea
+              <div
+                className="most-popular-label text-xs px-2 py-1 mb-2 absolute top-0 left-0 text-black"
+                style={{
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 1,
+                  animation: 'fireAnimation 1s infinite alternate',
+                }}
+              >
+                Most Popular!
+              </div>
+            )}
             <span className="text-lg text-gray-800">{idea.text}</span>
             <div className="vote-section flex items-center">
               <span className="text-sm text-gray-600 mr-2">Votes: {idea.votes}</span>
               {hasVoted(userVotes, idea.id) ? (
                 hoveredId === idea.id ? (
                   <button
-                    className="px-4 py-1 bg-red-500 text-white rounded-md"
+                    className="px-4 py-3 bg-red-500 text-white rounded-md"
                     onClick={() => handleUnvoteForIdea(idea.id)}
                   >
                     Unvote?
                   </button>
                 ) : (
-                  <button className="px-6 py-1 bg-green-500 text-white rounded-md">
+                  <button className="px-6 py-3 bg-green-500 text-white rounded-md">
                     Voted
                   </button>
                 )
               ) : (
                 <button
-                  className="px-7 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none"
+                  className="px-7 py-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none"
                   onClick={() => handleVoteForIdea(idea.id)}
                 >
                   Vote
