@@ -30,7 +30,7 @@ const IdeaList = () => {
 
     // Sort ideas based on the number of votes (descending order)
     const sortedIdeas = ideasWithVotes.sort((a, b) => b.votes - a.votes);
-    
+
     setIdeaList(sortedIdeas);
     setUserVotes(new Set(votes.map((vote) => vote.idea_id)));
   };
@@ -60,7 +60,7 @@ const IdeaList = () => {
   const tiedIdeas = ideaList.filter((idea) => idea.votes === highestVotes);
 
   return (
-    <div className="idea-container p-4 bg-black rounded-md shadow-md font-bold text-center">
+    <div className="idea-container p-4 bg-black rounded-md shadow-md font-bold">
       <AddIdeaForm onAddIdea={handleAddNewIdea} />
 
       <ul>
@@ -89,25 +89,30 @@ const IdeaList = () => {
                   Most Popular!
                 </div>
               )}
-              <span className="text-lg text-gray-800">{idea.text}</span>
+              <span className="text-lg text-gray-800" style={{ flex: '1' }}>{idea.text}</span>
               <div className="vote-section flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Votes: {idea.votes}</span>
+                <span className="text-sm text-gray-600 mr-2" style={{ whiteSpace: 'nowrap' }}>Votes: {idea.votes}</span>
                 {hasVoted(userVotes, idea.id) ? (
                   hoveredId === idea.id ? (
                     <button
-                      className="px-4 py-3 bg-red-500 text-white"
+                      className="bg-red-500 text-white"
+                      style={{ padding: '20% 0', width: '80px' }}
                       onClick={() => handleUnvoteForIdea(idea.id)}
                     >
                       Unvote?
                     </button>
                   ) : (
-                    <button className="px-6 py-3 bg-green-500 text-white">
+                    <button
+                      className="items-center bg-green-500 text-white"
+                      style={{ padding: '20% 0', width: '80px' }} // Adjust the percentage as needed
+                    >
                       Voted
                     </button>
                   )
                 ) : (
                   <button
-                    className="px-7 py-3 bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none"
+                    className="bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none"
+                    style={{ padding: '20% 0', width: '80px' }}
                     onClick={() => handleVoteForIdea(idea.id)}
                   >
                     Vote

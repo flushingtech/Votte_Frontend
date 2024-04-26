@@ -1,3 +1,4 @@
+// AdminIdeaList.jsx
 import React, { useState, useEffect } from 'react';
 import AddIdeaForm from '../AddIdeaForm';
 import fetchIdeas from '../../scripts/ideas/fetchIdeas';
@@ -6,6 +7,8 @@ import handleDeleteIdea from '../../scripts/ideas/handleDeleteIdea'; // Import d
 import ResetAllVotesButton from './ResetAllVotesButton'; // Import ResetAllVotesButton component
 import ResetVotesButton from './ResetVotesButton'; // Import ResetVotesButton component
 import DeleteIdeaButton from './DeleteIdeaButton'; // Import DeleteIdeaButton component
+import DeleteAllIdeasButton from './DeleteAllIdeasButton'; // Import DeleteAllIdeas component
+import handleDeleteAllIdeas from '../../scripts/ideas/handleDeleteAllIdeas'; // Import handleDeleteAllIdeas function
 import '../../styles/IdeaList.css'; // Import a CSS file for custom styles
 
 const AdminIdeaList = () => {
@@ -32,33 +35,18 @@ const AdminIdeaList = () => {
     fetchData(); // Refresh data after deleting idea
   };
 
-  const handleResetVotesClick = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:your_backend_port/ideas/${id}/reset-votes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any necessary authentication headers if required
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reset vote count');
-      }
-
-      // Vote count reset successfully
-      console.log('Vote count reset successfully');
-      fetchData(); // Refresh idea list after resetting vote count
-    } catch (error) {
-      console.error('Error resetting vote count:', error.message);
-      // Handle error appropriately (e.g., show error message to the user)
+  const handleDeleteAllIdeasClick = async () => {
+    const success = await handleDeleteAllIdeas();
+    if (success) {
+      fetchData(); // Refresh idea list after deleting all ideas
     }
   };
 
   return (
     <div className="idea-container p-4 bg-black rounded-md shadow-md font-bold text-center">
-      <AddIdeaForm onAddIdea={handleAddNewIdea} />
+      {/* <AddIdeaForm onAddIdea={handleAddNewIdea} /> */}
       <ResetAllVotesButton /> {/* Add ResetAllVotesButton component */}
+      <DeleteAllIdeasButton onDeleteAllClick={handleDeleteAllIdeasClick} /> {/* Add DeleteAllIdeas component */}
       <ul>
         {ideaList.map((idea) => (
           <li
