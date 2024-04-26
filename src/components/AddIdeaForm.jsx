@@ -16,11 +16,12 @@ const AddIdeaForm = ({ onAddIdea }) => {
         type="text"
         value={newIdeaText}
         onChange={(e) => setNewIdeaText(e.target.value)}
-        className="p-2 border rounded-md mr-2 text-black focus:outline-none"
+        className="p-4 border mr-2 text-black focus:outline-none flex-grow" // Use flex-grow to expand input
+        style={{ maxWidth: '100%' }} // Set maximum width to 100% to ensure it expands
         placeholder="Enter new idea..."
       />
       <button
-        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+        className="px-4 py-4 bg-green-500 text-white  hover:bg-green-600 focus:outline-none"
         onClick={handleAddNewIdea}
       >
         Add an Idea

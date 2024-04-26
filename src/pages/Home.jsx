@@ -18,7 +18,7 @@ const Home = () => {
               <IdeaList />
             </div>
           </div>
-          <div className="w-1/4 ml-0"> {/* Container for GitHubRepositories, takes half the width */}
+          <div className="w-1/4 ml-0 mt-4"> {/* Container for GitHubRepositories, takes half the width */}
             <div className="p-0 rounded shadow-lg">
               <GitHubRepositories orgName={orgName} />
             </div>

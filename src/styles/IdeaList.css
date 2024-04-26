@@ -1,4 +1,17 @@
-@keyframes fireAnimation {
+/* IdeaList.css */
+
+.idea-container {
+    font-family: 'Quicksand', sans-serif;
+    
+  }
+  
+  .most-popular-label {
+    font-family: 'Quicksand', sans-serif; 
+    font-weight: bold;
+  }
+  
+  /* Define keyframes for fire animation */
+  @keyframes fireAnimation {
     0% {
       background-color: red;
     }

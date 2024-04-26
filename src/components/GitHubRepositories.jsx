@@ -23,7 +23,7 @@ const GitHubRepositories = ({ orgName }) => {
 
   return (
     <div className="github-repositories">
-      <h2 className="text-xl font-bold mb-4">GitHub Repositories</h2>
+      <h2 className="text-xl text-black font-bold p-4 bg-gray-300 mb-4">GitHub Repositories</h2>
       <div className="grid grid-cols-1 gap-4">
         {repos.map((repo) => (
           <div
