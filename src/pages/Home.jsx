@@ -1,32 +1,53 @@
-import React from 'react';
-import IdeaList from '../components/IdeaList';
-import Navbar from '../components/Navbar';
-import Header from '../components/Header';
-import GitHubRepositories from '../components/GitHubRepositories';
+import { useEffect, useState } from 'react';
+import IdeaSubmission from '../components/IdeaSubmission';
+import IdeasList from '../components/IdeasList';  // Import the IdeasList component
+import Navbar from '../components/Navbar';  // Import the Navbar component
 
-const Home = () => {
-  const orgName = 'flushingtech';
+// Function to decode JWT manually
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split('.')[1];  // Get the payload part of the JWT
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    );
+    return JSON.parse(jsonPayload);  // Parse the payload as JSON
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    return null;
+  }
+};
+
+function Home() {
+  const [userName, setUserName] = useState('');
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const decodedToken = decodeToken(token);  // Decode the token manually
+      setUserName(decodedToken?.email || 'Guest');  // Set the user's email as the name
+      setEmail(decodedToken?.email || '');  // Set the email instead of google_id
+      console.log('Email extracted:', decodedToken?.email);  // Log email for debugging
+    }
+  }, []);
 
   return (
-    <div className="bg-black min-h-screen text-white">
-      <Navbar />
-      <div className="max-w-7xl mx-auto px-20">
-        <Header />
-        <div className="flex justify-between mt-8"> {/* Use flex container to position components side by side */}
-          <div className="w-3/4 mr-0"> {/* Container for IdeaList, takes half the width */}
-            <div className="p-0 rounded shadow-lg">
-              <IdeaList />
-            </div>
-          </div>
-          <div className="w-1/4 ml-0 mt-4"> {/* Container for GitHubRepositories, takes half the width */}
-            <div className="p-0 rounded shadow-lg">
-              <GitHubRepositories orgName={orgName} />
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="home-page" style={{ backgroundColor: '#FBE8D8', minHeight: '100vh' }}>
+      <Navbar userName={userName} />  {/* Add the Navbar component here */}
+
+      {/* Call the IdeaSubmission component and pass the email */}
+      <IdeaSubmission email={email} />
+      
+      <hr />
+
+      {/* Display the list of submitted ideas */}
+      <IdeasList />
     </div>
   );
-};
+}
 
 export default Home;
