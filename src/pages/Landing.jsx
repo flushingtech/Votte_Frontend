@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Header from '../components/Header';
+import LandingNavbar from '../components/LandingNavbar';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 
 function Landing() {
@@ -29,13 +29,24 @@ function Landing() {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <Header />
-      <div className="mt-6">
-        <GoogleLoginButton 
-          onClick={googleLogin}
-          isLoading={isLoadingWithGoogle}
-        />
+    <div className="relative flex flex-col justify-center items-center min-h-screen bg-[#1E2A3A] text-white px-8">
+      <LandingNavbar />
+      <div className="max-w-lg w-full text-left" style={{ marginRight: '20px' }}> {/* Added 20px margin to the right */}
+        {/* Header Section */}
+        <h1 className="text-4xl font-bold">
+          Welcome to <span style={{ color: '#FF6B35' }}>Votte</span>
+        </h1>
+        <p className="mt-4 text-lg">
+          Submit your ideas and vote on the best ones for our hackathons and tech events!
+        </p>
+
+        {/* Google Login Button */}
+        <div className="mt-6">
+          <GoogleLoginButton 
+            onClick={googleLogin}
+            isLoading={isLoadingWithGoogle}
+          />
+        </div>
       </div>
     </div>
   );
