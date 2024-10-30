@@ -15,32 +15,33 @@ function Landing() {
       try {
         const url = `${import.meta.env.VITE_BASE_URL}/googlelogin`;
         const { data } = await axios.post(url, { access_token: tokenResponse.access_token });
+
+        // Save token and user email in localStorage
         localStorage.setItem('authToken', JSON.stringify(data.token));
-        navigate('/home');
+        localStorage.setItem('user', JSON.stringify({ email: data.user.email }));
+
+        navigate('/home'); // Redirect to the home page after successful login
       } catch (error) {
-        console.log(error);
+        console.error('Login failed:', error);
       } finally {
         setIsLoadingWithGoogle(false);
       }
     },
     onNonOAuthError: (err) => {
-      console.log(err);
+      console.error('Non-OAuth error:', err);
     },
   });
 
   return (
     <div className="relative flex flex-col justify-center items-center min-h-screen bg-[#1E2A3A] text-white px-8">
       <LandingNavbar />
-      <div className="max-w-lg w-full text-left" style={{ marginRight: '20px' }}> {/* Added 20px margin to the right */}
-        {/* Header Section */}
+      <div className="max-w-lg w-full text-left" style={{ marginRight: '20px' }}>
         <h1 className="text-4xl font-bold">
           Welcome to <span style={{ color: '#FF6B35' }}>Votte</span>
         </h1>
         <p className="mt-4 text-lg">
           Submit your ideas and vote on the best ones for our hackathons and tech events!
         </p>
-
-        {/* Google Login Button */}
         <div className="mt-6">
           <GoogleLoginButton 
             onClick={googleLogin}
