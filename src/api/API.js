@@ -82,3 +82,28 @@ export const getVotedIdeas = async (email) => {
     throw error;
   }
 };
+
+export const addEvent = async (email, title, eventDate) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, {
+      email,
+      title,
+      eventDate,
+    });
+    return response.data; // Return the data from the response
+  } catch (error) {
+    console.error('Error adding event:', error);
+    throw error; // Rethrow the error to be handled by the calling function
+  }
+};
+
+
+export const getEvents = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/all-events`);
+    return response.data.events;  // Return only the events array
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
+};

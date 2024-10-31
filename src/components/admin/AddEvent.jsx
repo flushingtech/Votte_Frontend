@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { addEvent } from '../../api/API';
 
 const AddEvent = ({ userEmail }) => {
   const [title, setTitle] = useState('');
@@ -11,12 +11,8 @@ const AddEvent = ({ userEmail }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/events/add-event', {
-        email: userEmail,
-        title,
-        eventDate,
-      });
-      setMessage(`🎉 Event "${response.data.title}" added successfully!`);
+      const eventData = await addEvent(userEmail, title, eventDate); // Use addEvent from api.js
+      setMessage(`🎉 Event "${eventData.title}" added successfully!`);
       setTitle('');
       setEventDate('');
     } catch (error) {
