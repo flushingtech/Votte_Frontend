@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getEvents } from '../../api/API';
+import { getEvents, deleteEvent } from '../../api/API';
 
 const EventsList = () => {
   const [events, setEvents] = useState([]);
@@ -21,6 +21,16 @@ const EventsList = () => {
     fetchEvents();
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      await deleteEvent(id); // Use deleteEvent from api.js
+      setEvents(events.filter((event) => event.id !== id)); // Remove deleted event from state
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      alert('Failed to delete event');
+    }
+  };
+
   if (loading) return <p>Loading events...</p>;
   if (error) return <p>{error}</p>;
 
@@ -34,6 +44,12 @@ const EventsList = () => {
               <h3 className="text-lg font-semibold">{event.title}</h3>
               <p className="text-gray-400">{new Date(event.event_date).toLocaleDateString()}</p>
             </div>
+            <button
+              onClick={() => handleDelete(event.id)}
+              className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition-all"
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>

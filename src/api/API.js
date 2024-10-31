@@ -107,3 +107,13 @@ export const getEvents = async () => {
     throw error;
   }
 };
+
+export const deleteEvent = async (id) => {
+  try {
+    const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/events/delete-event/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};
