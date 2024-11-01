@@ -1,17 +1,18 @@
 import axios from 'axios';
 
-// Function to submit an idea
-export const submitIdea = async (email, idea, description, technologies) => {
+// Function to submit an idea associated with a specific event
+export const submitIdea = async (email, idea, description, technologies, event_id) => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/submitIdea`, {
       email,
       idea,
       description,
-      technologies, // Include the technologies field
+      technologies,
+      event_id, // Include the event ID to associate the idea with an event
     });
     return response;
   } catch (error) {
-    throw error;  // Rethrow the error to be handled by the calling function
+    throw error;
   }
 };
 
@@ -19,9 +20,20 @@ export const submitIdea = async (email, idea, description, technologies) => {
 export const getIdeas = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/allIdeas`);
-    return response.data.ideas;  // Return only the ideas
+    return response.data.ideas; // Return only the ideas
   } catch (error) {
-    throw error;  // Rethrow the error to be handled by the calling function
+    throw error;
+  }
+};
+
+// Function to get ideas by event ID
+export const getIdeasByEvent = async (eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);
+    return response.data.ideas;  // Ensure you're returning the ideas array
+  } catch (error) {
+    console.error('Error fetching ideas by event:', error);
+    throw error;
   }
 };
 
@@ -35,10 +47,11 @@ export const editIdea = async (id, idea, description, technologies) => {
     });
     return response.data;
   } catch (error) {
-    throw error;  // Rethrow the error to be handled by the calling function
+    throw error;
   }
 };
 
+// Function to delete an idea
 export const deleteIdea = async (id) => {
   try {
     const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}`);
@@ -77,12 +90,13 @@ export const unvoteForIdea = async (ideaId, email) => {
 export const getVotedIdeas = async (email) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/votedIdeas/${email}`);
-    return response.data.votedIdeaIds;  // Return only the voted idea IDs
+    return response.data.votedIdeaIds; // Return only the voted idea IDs
   } catch (error) {
     throw error;
   }
 };
 
+// Function to add a new event
 export const addEvent = async (email, title, eventDate) => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, {
@@ -93,21 +107,22 @@ export const addEvent = async (email, title, eventDate) => {
     return response.data; // Return the data from the response
   } catch (error) {
     console.error('Error adding event:', error);
-    throw error; // Rethrow the error to be handled by the calling function
+    throw error;
   }
 };
 
-
+// Function to get all events
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/all-events`);
-    return response.data.events;  // Return only the events array
+    return response.data.events; // Return only the events array
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;
   }
 };
 
+// Function to delete an event
 export const deleteEvent = async (id) => {
   try {
     const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/events/delete-event/${id}`);

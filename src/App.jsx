@@ -4,7 +4,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Home from './pages/Home';
-import AdminPage from './pages/Admin'; // Import AdminPage
+import AdminPage from './pages/Admin';
+import EventScreen from './pages/EventScreen';
+import EventsList from './components/EventsList'; // Import EventsList
 
 const adminEmails = ['flushingtech.nyc@gmail.com', 'admin2@example.com'];
 
@@ -29,6 +31,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/events" element={<EventsList />} /> {/* Route for Events List */}
+          <Route path="/event/:eventId" element={<EventScreen />} /> {/* Route for Event Details */}
           <Route
             path="/admin"
             element={
