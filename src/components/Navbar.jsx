@@ -16,7 +16,7 @@ function Navbar({ userName }) {
   };
 
   return (
-    <nav className="flex items-center justify-between p-2" style={{ backgroundColor: '#CC9F97' }}>
+    <nav className="flex items-center justify-between p-3" style={{ backgroundColor: '#FFE4CE' }}>
       <div className="flex items-center">
         <a href="https://flushingtech.org" className="flex items-center text-black text-sm">
           <span className="mt-1.5 ml-4 material-icons text-black text-2xl font-bold">arrow_back</span>
