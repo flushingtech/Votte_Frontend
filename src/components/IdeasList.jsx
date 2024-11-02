@@ -48,8 +48,8 @@ function IdeasList({ eventId }) {
   }
 
   return (
-    <div className="ideas-list max-w-3xl mx-auto my-4 p-5 space-y-4" style={{ backgroundColor: '#FBE8D8' }}>
-      <h2 className="text-2xl font-bold mb-6 text-black">Submitted Ideas for Event</h2>
+    <div className="ideas-list max-w-3xl mx-auto my-4 p-5 space-y-4" style={{ backgroundColor: 'transparent' }}>
+      <h2 className="text-2xl font-bold mb-2 text-white">Ideas</h2>
       {ideas.length === 0 ? (
         <p className="text-center text-gray-500">No ideas have been submitted for this event yet.</p>
       ) : (
@@ -57,7 +57,7 @@ function IdeasList({ eventId }) {
           {ideas.map((idea) => (
             <li
               key={idea.id}
-              className="relative p-2 shadow hover:shadow-md transition-shadow duration-300 border border-orange-500"
+              className="relative p-2 shadow hover:shadow-md transition-shadow duration-300 border"
               style={{ backgroundColor: '#1E2A3A' }}
             >
               <div className="flex justify-between items-center">

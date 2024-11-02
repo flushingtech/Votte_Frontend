@@ -40,14 +40,14 @@ function VoteButton({ ideaId, currentUserEmail, initialVotes, hasVoted, onVoteCh
     <div className="vote-button">
       {voted ? (
         <button
-          className="mt-2 bg-red-600 text-white py-2 px-4 text-sm font-semibold hover:bg-red-700 focus:outline-none"
+          className="mt-2 bg-red-600 text-white py-2 px-2 text-sm font-semibold hover:bg-red-700 focus:outline-none"
           onClick={handleUnvote}
         >
           Unvote
         </button>
       ) : (
         <button
-          className="mt-2 bg-green-600 text-white py-2 px-4 text-sm font-semibold hover:bg-green-700 focus:outline-none"
+          className="mt-2 bg-white text-black py-2 px-4 text-sm font-semibold hover:bg-green-700 focus:outline-none"
           onClick={handleVote}
         >
           Vote

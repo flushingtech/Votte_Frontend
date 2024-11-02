@@ -9,7 +9,7 @@ const EventsList = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const eventsData = await getEvents(); // Use getEvents from api.js
+        const eventsData = await getEvents();
         setEvents(eventsData);
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -23,8 +23,8 @@ const EventsList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteEvent(id); // Use deleteEvent from api.js
-      setEvents(events.filter((event) => event.id !== id)); // Remove deleted event from state
+      await deleteEvent(id);
+      setEvents(events.filter((event) => event.id !== id));
     } catch (err) {
       console.error('Error deleting event:', err);
       alert('Failed to delete event');
@@ -35,18 +35,18 @@ const EventsList = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="max-w-lg w-full text-left">
-      <h2 className="text-3xl font-bold mb-4">Upcoming Events</h2>
-      <ul className="space-y-4">
+    <div className="w-full text-left">
+      <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
+      <ul className="space-y-3">
         {events.map((event) => (
-          <li key={event.id} className="flex justify-between items-center bg-[#2E3B4E] p-4 rounded">
+          <li key={event.id} className="flex justify-between items-center bg-[#2E3B4E] p-3 rounded">
             <div>
-              <h3 className="text-lg font-semibold">{event.title}</h3>
-              <p className="text-gray-400">{new Date(event.event_date).toLocaleDateString()}</p>
+              <h3 className="text-md font-semibold">{event.title}</h3>
+              <p className="text-gray-400 text-sm">{new Date(event.event_date).toLocaleDateString()}</p>
             </div>
             <button
               onClick={() => handleDelete(event.id)}
-              className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition-all"
+              className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 transition-all"
             >
               Delete
             </button>

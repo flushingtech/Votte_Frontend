@@ -132,3 +132,23 @@ export const deleteEvent = async (id) => {
     throw error;
   }
 };
+
+export const getUserIdeas = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/user/${email}`);
+    return response.data.ideas;
+  } catch (error) {
+    console.error('Error fetching user ideas:', error);
+    throw error;
+  }
+};
+
+export const getVotedIdeasByUser = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/voted/${email}`);
+    return response.data.ideas;
+  } catch (error) {
+    console.error('Error fetching voted ideas:', error);
+    throw error;
+  }
+};
