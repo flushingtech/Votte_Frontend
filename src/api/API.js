@@ -8,7 +8,7 @@ export const submitIdea = async (email, idea, description, technologies, event_i
       idea,
       description,
       technologies,
-      event_id, // Include the event ID to associate the idea with an event
+      event_id,
     });
     return response;
   } catch (error) {
@@ -20,7 +20,7 @@ export const submitIdea = async (email, idea, description, technologies, event_i
 export const getIdeas = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/allIdeas`);
-    return response.data.ideas; // Return only the ideas
+    return response.data.ideas;
   } catch (error) {
     throw error;
   }
@@ -30,7 +30,7 @@ export const getIdeas = async () => {
 export const getIdeasByEvent = async (eventId) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);
-    return response.data.ideas;  // Ensure you're returning the ideas array
+    return response.data.ideas;
   } catch (error) {
     console.error('Error fetching ideas by event:', error);
     throw error;
@@ -43,7 +43,7 @@ export const editIdea = async (id, idea, description, technologies) => {
     const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/editIdea/${id}`, {
       idea,
       description,
-      technologies, // Include technologies in the payload
+      technologies,
     });
     return response.data;
   } catch (error) {
@@ -62,11 +62,11 @@ export const deleteIdea = async (id) => {
   }
 };
 
-// Function to vote for an idea
-export const voteForIdea = async (ideaId, email) => {
+// Function to like an idea
+export const likeIdea = async (ideaId, email) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/vote/${ideaId}`, {
-      email
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/like/${ideaId}`, {
+      email,
     });
     return response.data;
   } catch (error) {
@@ -74,11 +74,11 @@ export const voteForIdea = async (ideaId, email) => {
   }
 };
 
-// Function to unvote for an idea
-export const unvoteForIdea = async (ideaId, email) => {
+// Function to unlike an idea
+export const unlikeIdea = async (ideaId, email) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/unvote/${ideaId}`, {
-      email
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/unlike/${ideaId}`, {
+      email,
     });
     return response.data;
   } catch (error) {
@@ -86,11 +86,11 @@ export const unvoteForIdea = async (ideaId, email) => {
   }
 };
 
-// Function to get ideas the user has voted for
-export const getVotedIdeas = async (email) => {
+// Function to get ideas the user has liked
+export const getLikedIdeas = async (email) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/votedIdeas/${email}`);
-    return response.data.votedIdeaIds; // Return only the voted idea IDs
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/likedIdeas/${email}`);
+    return response.data.likedIdeaIds;
   } catch (error) {
     throw error;
   }
@@ -104,7 +104,7 @@ export const addEvent = async (email, title, eventDate) => {
       title,
       eventDate,
     });
-    return response.data; // Return the data from the response
+    return response.data;
   } catch (error) {
     console.error('Error adding event:', error);
     throw error;
@@ -115,7 +115,7 @@ export const addEvent = async (email, title, eventDate) => {
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/all-events`);
-    return response.data.events; // Return only the events array
+    return response.data.events;
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;
@@ -143,12 +143,12 @@ export const getUserIdeas = async (email) => {
   }
 };
 
-export const getVotedIdeasByUser = async (email) => {
+export const getLikedIdeasByUser = async (email) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/voted/${email}`);
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/liked/${email}`);
     return response.data.ideas;
   } catch (error) {
-    console.error('Error fetching voted ideas:', error);
+    console.error('Error fetching liked ideas:', error);
     throw error;
   }
 };

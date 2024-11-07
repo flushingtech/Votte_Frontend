@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
-import VotedIdeas from '../components/VotedIdeas';
+import LikedIdeas from '../components/LikedIdeas';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -49,7 +49,7 @@ function Home() {
           <MyIdeas email={userEmail} />
         </div>
         <div className="w-full md:w-1/2 p-4">
-          <VotedIdeas email={userEmail} />
+          <LikedIdeas email={userEmail} />
         </div>
       </div>
     </div>

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getIdeasByEvent, getVotedIdeas } from '../api/API';
-import VoteButton from './VoteButton';
+import { getIdeasByEvent, getLikedIdeas } from '../api/API';
+import LikeButton from './LikeButton';
 
 function IdeasList({ eventId }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const userEmail = localStorage.getItem('userEmail'); // Get user email from local storage
-  const [userVotedIdeas, setUserVotedIdeas] = useState([]); // Track ideas user has voted for
+  const userEmail = localStorage.getItem('userEmail');
+  const [userLikedIdeas, setUserLikedIdeas] = useState([]); // Track ideas user has liked
 
   useEffect(() => {
     const fetchIdeas = async () => {
@@ -15,11 +15,11 @@ function IdeasList({ eventId }) {
         // Fetch the ideas for the event
         const eventIdeas = await getIdeasByEvent(eventId);
         setIdeas(eventIdeas);
-        
-        // Fetch the user's voted ideas
+
+        // Fetch the user's liked ideas
         if (userEmail) {
-          const votedIdeas = await getVotedIdeas(userEmail); // Fetch ideas user voted for
-          setUserVotedIdeas(votedIdeas);
+          const likedIdeas = await getLikedIdeas(userEmail);
+          setUserLikedIdeas(likedIdeas);
         }
 
         setLoading(false);
@@ -33,7 +33,7 @@ function IdeasList({ eventId }) {
     fetchIdeas();
   }, [eventId, userEmail]);
 
-  const handleVoteChange = (updatedIdea) => {
+  const handleLikeChange = (updatedIdea) => {
     setIdeas((prevIdeas) =>
       prevIdeas.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
     );
@@ -69,14 +69,14 @@ function IdeasList({ eventId }) {
                   <p className="text-gray-100 mt-0">{idea.description}</p>
                   <p className="text-sm text-gray-300">Tech Magic: {idea.technologies}</p>
                 </div>
-                <p className="text-sm text-gray-300 leading-loose">Votes: {idea.votes}</p>
+                <p className="text-sm text-gray-300 leading-loose">Likes: {idea.likes}</p>
               </div>
-              <VoteButton
+              <LikeButton
                 ideaId={idea.id}
                 currentUserEmail={userEmail}
-                initialVotes={idea.votes}
-                hasVoted={userVotedIdeas.includes(idea.id)} // Check if user has voted for this idea
-                onVoteChange={handleVoteChange} // Callback to update votes in IdeasList
+                initialLikes={idea.likes}
+                hasLiked={userLikedIdeas.includes(idea.id)} // Check if user has liked this idea
+                onLikeChange={handleLikeChange} // Callback to update likes in IdeasList
               />
             </li>
           ))}

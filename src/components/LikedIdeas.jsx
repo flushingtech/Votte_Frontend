@@ -1,38 +1,37 @@
-// VotedIdeas.jsx
 import { useEffect, useState } from 'react';
-import { getVotedIdeasByUser } from '../api/API';
+import { getLikedIdeasByUser } from '../api/API';
 
-function VotedIdeas({ email }) {
+function LikedIdeas({ email }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchVotedIdeas = async () => {
+    const fetchLikedIdeas = async () => {
       try {
-        const votedIdeas = await getVotedIdeasByUser(email);
-        setIdeas(votedIdeas);
+        const likedIdeas = await getLikedIdeasByUser(email);
+        setIdeas(likedIdeas);
       } catch (err) {
-        console.error('Error fetching voted ideas:', err);
-        setError('Failed to load voted ideas');
+        console.error('Error fetching liked ideas:', err);
+        setError('Failed to load liked ideas');
       } finally {
         setLoading(false);
       }
     };
 
     if (email) {
-      fetchVotedIdeas();
+      fetchLikedIdeas();
     }
   }, [email]);
 
-  if (loading) return <p>Loading your voted ideas...</p>;
+  if (loading) return <p>Loading your liked ideas...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="voted-ideas-section bg-transparent">
-      <h2 className="text-xl font-bold text-white mb-2">Ideas I Voted For</h2>
+    <div className="liked-ideas-section bg-transparent">
+      <h2 className="text-xl font-bold text-white mb-2">Ideas I Liked</h2>
       {ideas.length === 0 ? (
-        <p className="text-center text-gray-500">You haven’t voted for any ideas yet.</p>
+        <p className="text-center text-gray-500">You haven’t liked any ideas yet.</p>
       ) : (
         <ul className="space-y-3">
           {ideas.map((idea) => (
@@ -41,7 +40,7 @@ function VotedIdeas({ email }) {
               <p className="text-gray-400 text-sm">Event ID: {idea.event_id}</p>
               <p className="text-gray-300 text-xs">{idea.description}</p>
               <p className="text-gray-500 text-xs mt-1">Tech: {idea.technologies}</p>
-              <p className="text-gray-500 text-xs">Votes: {idea.votes}</p>
+              <p className="text-gray-500 text-xs">Likes: {idea.likes}</p> {/* Updated label */}
             </li>
           ))}
         </ul>
@@ -50,4 +49,4 @@ function VotedIdeas({ email }) {
   );
 }
 
-export default VotedIdeas;
+export default LikedIdeas;
