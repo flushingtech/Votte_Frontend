@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Function to submit an idea associated with a specific event
-export const submitIdea = async (email, idea, description, technologies, event_id) => {
+export const submitIdea = async (email, idea, description, technologies, event_id, is_built = false) => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/submitIdea`, {
       email,
@@ -9,6 +9,7 @@ export const submitIdea = async (email, idea, description, technologies, event_i
       description,
       technologies,
       event_id,
+      is_built,  // Include is_built field
     });
     return response;
   } catch (error) {

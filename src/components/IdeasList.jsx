@@ -68,6 +68,9 @@ function IdeasList({ eventId }) {
                 <div className="max-w-xs">
                   <p className="text-gray-100 mt-0">{idea.description}</p>
                   <p className="text-sm text-gray-300">Tech Magic: {idea.technologies}</p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Status: {idea.is_built ? "Built" : "Not Built"}
+                  </p> {/* Display built status */}
                 </div>
                 <p className="text-sm text-gray-300 leading-loose">Likes: {idea.likes}</p>
               </div>

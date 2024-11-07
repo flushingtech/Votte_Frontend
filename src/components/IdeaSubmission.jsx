@@ -5,6 +5,7 @@ function IdeaSubmission({ email, eventId }) {
   const [idea, setIdea] = useState('');
   const [description, setDescription] = useState('');
   const [technologies, setTechnologies] = useState('');
+  const [isBuilt, setIsBuilt] = useState(false); // New state for checkbox
   const [message, setMessage] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
 
@@ -17,13 +18,14 @@ function IdeaSubmission({ email, eventId }) {
     }
 
     try {
-      const response = await submitIdea(email, idea, description, technologies, eventId);
+      const response = await submitIdea(email, idea, description, technologies, eventId, isBuilt); // Include isBuilt
 
       if (response.status === 201) {
         setMessage('Idea submitted successfully!');
         setIdea('');
         setDescription('');
         setTechnologies('');
+        setIsBuilt(false); // Reset checkbox
         setIsFormVisible(false); // Hide the form after submission
       }
     } catch (error) {
@@ -38,7 +40,6 @@ function IdeaSubmission({ email, eventId }) {
 
   return (
     <div className="w-full text-center my-6">
-      {/* Centered Add Idea Button */}
       <button
         onClick={() => setIsFormVisible(true)}
         className="bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
@@ -46,13 +47,10 @@ function IdeaSubmission({ email, eventId }) {
         Add Idea
       </button>
 
-      {/* Modal for Idea Submission Form */}
       {isFormVisible && (
         <>
-          {/* Overlay */}
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
 
-          {/* Modal Container */}
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-gray-800 p-8 max-w-4xl mx-auto rounded-lg space-y-4 w-11/12 md:w-1/2">
               <h2 className="text-2xl font-bold text-white text-center">Submit Your Idea</h2>
@@ -84,6 +82,16 @@ function IdeaSubmission({ email, eventId }) {
                     placeholder="What cool technologies will you use to bring this to life?"
                   />
                 </div>
+                {/* Checkbox for "Is Built" */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isBuilt}
+                    onChange={(e) => setIsBuilt(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label className="text-sm font-bold text-gray-300">Is this idea already built?</label>
+                </div>
                 <button
                   type="submit"
                   className="w-full bg-orange-600 text-white py-2 px-4 font-semibold hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -98,7 +106,6 @@ function IdeaSubmission({ email, eventId }) {
                 </p>
               )}
 
-              {/* Close Button */}
               <button
                 onClick={() => setIsFormVisible(false)}
                 className="mt-4 w-full bg-red-600 text-white py-2 px-4 font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
