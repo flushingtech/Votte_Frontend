@@ -1,3 +1,4 @@
+// LikedIdeas.jsx
 import { useEffect, useState } from 'react';
 import { getLikedIdeasByUser } from '../api/API';
 
@@ -37,7 +38,7 @@ function LikedIdeas({ email }) {
           {ideas.map((idea) => (
             <li key={idea.id} className="p-3 shadow-md border" style={{ backgroundColor: '#1E2A3A' }}>
               <h3 className="text-lg font-bold text-white">{idea.idea}</h3>
-              <p className="text-gray-400 text-sm">Event ID: {idea.event_id}</p>
+              <p className="text-gray-400 text-sm">Event: {idea.event_title}</p> {/* Display event title */}
               <p className="text-gray-300 text-xs">{idea.description}</p>
               <p className="text-gray-500 text-xs mt-1">Tech: {idea.technologies}</p>
               <p className="text-gray-500 text-xs">Likes: {idea.likes}</p> {/* Updated label */}
