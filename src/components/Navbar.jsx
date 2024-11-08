@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com'];
+
 function Navbar({ userName }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate(); // Use navigate for redirecting
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userEmail = user?.email || '';
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -13,6 +17,11 @@ function Navbar({ userName }) {
     localStorage.removeItem('user'); // Clear user data from localStorage
     setIsDropdownOpen(false); // Close dropdown
     navigate('/'); // Redirect to landing page
+  };
+
+  const goToAdminPage = () => {
+    setIsDropdownOpen(false); // Close dropdown
+    navigate('/admin'); // Navigate to admin page
   };
 
   return (
@@ -36,6 +45,14 @@ function Navbar({ userName }) {
 
         {isDropdownOpen && (
           <div className="absolute right-0 top-full mt-1 w-24 bg-white rounded shadow-lg text-center z-10">
+            {adminEmails.includes(userEmail) && (
+              <button
+                onClick={goToAdminPage}
+                className="w-full text-sm px-4 py-2 text-black hover:bg-gray-200"
+              >
+                Admin
+              </button>
+            )}
             <button
               onClick={handleSignOut}
               className="w-full text-sm px-4 py-2 text-black hover:bg-gray-200"
