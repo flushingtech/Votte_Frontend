@@ -52,10 +52,18 @@ export const editIdea = async (id, idea, description, technologies) => {
   }
 };
 
-// Function to delete an idea
-export const deleteIdea = async (id) => {
+// Function to delete an idea (only if user is an admin)
+export const deleteIdea = async (id, email) => {
+  const isAdmin = await checkAdminStatus(email);
+  if (!isAdmin) {
+    throw new Error('Unauthorized access: User is not an admin');
+  }
   try {
-    const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}`);
+    const response = await axios({
+      method: 'delete',
+      url: `${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}`,
+      data: { email },
+    });
     return response.data;
   } catch (error) {
     console.error('Error deleting idea:', error);
@@ -97,14 +105,14 @@ export const getLikedIdeas = async (email) => {
   }
 };
 
-// Function to add a new event
+// Function to add a new event (only if user is an admin)
 export const addEvent = async (email, title, eventDate) => {
+  const isAdmin = await checkAdminStatus(email);
+  if (!isAdmin) {
+    throw new Error('Unauthorized access: User is not an admin');
+  }
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, {
-      email,
-      title,
-      eventDate,
-    });
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, { email, title, eventDate });
     return response.data;
   } catch (error) {
     console.error('Error adding event:', error);
@@ -150,6 +158,17 @@ export const getLikedIdeasByUser = async (email) => {
     return response.data.ideas;
   } catch (error) {
     console.error('Error fetching liked ideas:', error);
+    throw error;
+  }
+};
+
+// Function to check if a user is an admin
+export const checkAdminStatus = async (email) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/check-admin`, { email });
+    return response.data.isAdmin;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
     throw error;
   }
 };

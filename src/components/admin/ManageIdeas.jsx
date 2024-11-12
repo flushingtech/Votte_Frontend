@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getIdeas, deleteIdea } from '../../api/API';
 
-const ManageIdeas = () => {
+const ManageIdeas = ({ userEmail }) => {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +23,7 @@ const ManageIdeas = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteIdea(id);
+      await deleteIdea(id, userEmail);  // Pass userEmail to check admin status
       setIdeas(ideas.filter((idea) => idea.id !== id));
     } catch (err) {
       console.error('Error deleting idea:', err);
@@ -41,7 +41,7 @@ const ManageIdeas = () => {
         {ideas.map((idea) => (
           <li key={idea.id} className="flex justify-between items-center bg-[#2E3B4E] p-3 rounded">
             <div>
-              <h3 className="text-md font-semibold">{idea.title}</h3>
+              <h3 className="text-md font-semibold">{idea.idea}</h3>
               <p className="text-gray-400 text-sm">{idea.description}</p>
             </div>
             <button

@@ -6,24 +6,35 @@ import Home from './pages/Home';
 import AdminPage from './pages/Admin';
 import EventScreen from './pages/EventScreen';
 import EventsList from './components/EventsList';
-
-const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com'];
+import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   return user?.email || null;
 };
 
+const RequireAdmin = ({ children, userEmail }) => {
+  const [isAdmin, setIsAdmin] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchAdminStatus = async () => {
+      try {
+        const isAdmin = await checkAdminStatus(userEmail);
+        setIsAdmin(isAdmin);
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    fetchAdminStatus();
+  }, [userEmail]);
+
+  if (isAdmin === null) return <div>Loading...</div>;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return React.cloneElement(children, { userEmail });
+};
+
 function App() {
   const userEmail = getUserEmail();
-
-  const RequireAdmin = ({ children }) => {
-    // Ensure the email matches one in the admin list
-    if (!adminEmails.includes(userEmail)) {
-      return <Navigate to="/" replace />; // Redirect to landing page if not authorized
-    }
-    return children;
-  };
 
   return (
     <GoogleOAuthProvider clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}>
@@ -36,8 +47,8 @@ function App() {
           <Route
             path="/admin"
             element={
-              <RequireAdmin>
-                <AdminPage userEmail={userEmail} />
+              <RequireAdmin userEmail={userEmail}>
+                <AdminPage />
               </RequireAdmin>
             }
           />
