@@ -23,7 +23,8 @@ const ManageIdeas = ({ userEmail }) => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteIdea(id, userEmail);  // Pass userEmail to check admin status
+      console.log('Attempting to delete idea:', id, 'by admin:', userEmail); // Debugging
+      await deleteIdea(id, userEmail); // Ensure userEmail is passed correctly
       setIdeas(ideas.filter((idea) => idea.id !== id));
     } catch (err) {
       console.error('Error deleting idea:', err);

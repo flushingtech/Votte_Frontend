@@ -3,7 +3,11 @@ import ManageIdeas from '../components/admin/ManageIdeas';
 import EventsList from '../components/admin/EventsList';
 import Navbar from '../components/Navbar';
 
-const AdminPage = ({ userEmail }) => {
+const AdminPage = () => {
+  // Get user email from localStorage (as a fallback)
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userEmail = user?.email || '';
+
   return (
     <div className="bg-[#030C18] text-white min-h-screen">
       {/* Full-width Navbar */}
@@ -18,7 +22,7 @@ const AdminPage = ({ userEmail }) => {
             <EventsList />
           </div>
           <div className="w-full md:w-1/2 p-4">
-            <ManageIdeas />
+            <ManageIdeas userEmail={userEmail} />
           </div>
         </div>
       </div>

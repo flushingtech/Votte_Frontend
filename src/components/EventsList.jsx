@@ -81,6 +81,7 @@ function EventsList() {
                 border: 'none',
                 width: '150px',
                 height: '40px',
+                borderRadius: '4px',
               }}
             >
               View Event
