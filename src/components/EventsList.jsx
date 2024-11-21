@@ -48,25 +48,43 @@ function EventsList() {
         {events.map((event) => (
           <div
             key={event.id}
-            onClick={() => handleEventClick(event.id)}
-            className="shadow-lg rounded-sm p-3 cursor-pointer"
+            className="shadow-lg p-3 flex justify-between items-center"
             style={{
               backgroundColor: '#FFE4CE',
             }}
           >
-            <h3
-              className="text-sm font-bold text-black truncate"
+            {/* Event Title and Date */}
+            <div>
+              <h3
+                className="text-sm font-bold text-black truncate"
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {event.title}
+              </h3>
+              <p className="text-gray-500 text-xs mt-1">
+                {new Date(event.event_date).toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* View Event Button */}
+            <button
+              className="text-sm font-semibold bg-[#1E2A3A] text-white px-5 py-2 hover:bg-[#16202B] transition-all"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the parent onClick
+                handleEventClick(event.id);
+              }}
               style={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                border: 'none',
+                width: '150px',
+                height: '40px',
               }}
             >
-              {event.title}
-            </h3>
-            <p className="text-gray-500 text-xs mt-1">
-              {new Date(event.event_date).toLocaleDateString()}
-            </p>
+              View Event
+            </button>
           </div>
         ))}
       </div>

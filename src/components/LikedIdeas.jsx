@@ -1,4 +1,3 @@
-// LikedIdeas.jsx
 import { useEffect, useState } from 'react';
 import { getLikedIdeasByUser } from '../api/API';
 
@@ -32,7 +31,15 @@ function LikedIdeas({ email }) {
     <div className="liked-ideas-section bg-transparent">
       <h2 className="text-xl font-bold text-white mb-2">Ideas I Liked</h2>
       {ideas.length === 0 ? (
-        <p className="text-center text-gray-500">You haven’t liked any ideas yet.</p>
+        <div
+          className="p-4 shadow-md border"
+          style={{ backgroundColor: '#1E2A3A', textAlign: 'left' }}
+        >
+          <h3 className="text-lg font-bold text-white">You haven’t liked any ideas yet.</h3>
+          <p className="text-gray-400 text-sm mt-2">
+            Explore events and like ideas that inspire you!
+          </p>
+        </div>
       ) : (
         <ul className="space-y-3">
           {ideas.map((idea) => (

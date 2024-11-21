@@ -1,4 +1,3 @@
-// MyIdeas.jsx
 import { useEffect, useState } from 'react';
 import { getUserIdeas } from '../api/API';
 
@@ -32,7 +31,15 @@ function MyIdeas({ email }) {
     <div className="my-ideas-section bg-transparent">
       <h2 className="text-xl font-bold mb-2 text-white">My Ideas</h2>
       {ideas.length === 0 ? (
-        <p className="text-center text-gray-500">You haven’t submitted any ideas yet.</p>
+        <div
+          className="p-4 shadow-md border"
+          style={{ backgroundColor: '#1E2A3A', textAlign: 'left' }}
+        >
+          <h3 className="text-lg font-bold text-white">You haven’t submitted any ideas yet.</h3>
+          <p className="text-gray-400 text-sm mt-2">
+            Click on an event and add your ideas there.
+          </p>
+        </div>
       ) : (
         <ul className="space-y-3">
           {ideas.map((idea) => (
