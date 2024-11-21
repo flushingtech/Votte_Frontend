@@ -7,8 +7,9 @@ import IdeasList from '../components/IdeasList';
 
 function EventScreen() {
   const { eventId } = useParams();
-  const email = localStorage.getItem('userEmail');  // Get email directly from local storage
+  const email = localStorage.getItem('userEmail'); // Get email directly from local storage
   const [event, setEvent] = useState(null);
+  const [ideasRefreshKey, setIdeasRefreshKey] = useState(0); // Key to trigger re-render for IdeasList
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -39,19 +40,38 @@ function EventScreen() {
     fetchEventDetails();
   }, [eventId, email]);
 
-  if (loading) return <p>Loading event details...</p>;
-  if (error) return <p>{error}</p>;
+  const refreshIdeas = () => {
+    setIdeasRefreshKey((prevKey) => prevKey + 1); // Update key to force IdeasList re-render
+  };
+
+  if (loading)
+    return (
+      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+        <Navbar userName={email} />
+        <p className="text-center mt-10">Loading event details...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+        <Navbar userName={email} />
+        <p className="text-center mt-10">{error}</p>
+      </div>
+    );
 
   return (
     <div style={{ backgroundColor: '#030C18', minHeight: '100vh' }}>
       <Navbar userName={email} />
       <div className="p-10">
         <h2 className="text-3xl font-bold text-center text-white mb-6">{event?.title}</h2>
-        <p className="text-center text-gray-400 mb-6">{new Date(event?.event_date).toLocaleDateString()}</p>
+        <p className="text-center text-gray-400 mb-6">
+          {new Date(event?.event_date).toLocaleDateString()}
+        </p>
         <div className="mb-10">
-          <IdeaSubmission email={email} eventId={eventId} />  {/* Pass email from local storage */}
+          <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} /> {/* Pass refreshIdeas */}
         </div>
-        <IdeasList eventId={eventId} />
+        <IdeasList key={ideasRefreshKey} eventId={eventId} /> {/* Trigger re-render */}
       </div>
     </div>
   );
