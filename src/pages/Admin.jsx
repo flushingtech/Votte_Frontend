@@ -10,8 +10,8 @@ const AdminPage = () => {
 
   return (
     <div className="bg-[#030C18] text-white min-h-screen">
-      {/* Full-width Navbar */}
-      <Navbar userName={userEmail} />
+      {/* Full-width Navbar with Home Button */}
+      <Navbar userName={userEmail} backToHome={true} />
 
       <div className="flex flex-col items-center px-8 mt-4">
         <AddEvent userEmail={userEmail} />

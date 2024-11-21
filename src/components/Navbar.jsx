@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com'];
 
-function Navbar({ userName }) {
+function Navbar({ userName, backToHome }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate(); // Use navigate for redirecting
   const user = JSON.parse(localStorage.getItem('user'));
@@ -24,15 +24,29 @@ function Navbar({ userName }) {
     navigate('/admin'); // Navigate to admin page
   };
 
+  const goToHome = () => {
+    navigate('/home'); // Navigate to Home.jsx
+  };
+
   return (
     <nav className="flex items-center justify-between p-3" style={{ backgroundColor: '#FFE4CE' }}>
       <div className="flex items-center">
-        <a href="https://flushingtech.org" className="flex items-center text-black text-sm">
-          <span className="mt-1.5 ml-4 material-icons text-black text-2xl font-bold">arrow_back</span>
-          <span className="ml-3 lowercase text-black text-2xl">
-            c.tech<span style={{ color: '#CA2828' }}>(flushing)</span>
-          </span>
-        </a>
+        {backToHome ? ( // Conditionally render "Home" link
+          <button
+            onClick={goToHome}
+            className="flex items-center bg-black text-white py-2 px-4 rounded shadow hover:bg-gray-800 transition-all"
+          >
+            <span className="material-icons text-white text-xl font-bold">arrow_back</span>
+            <span className="ml-2 text-sm font-semibold">Home</span> {/* Smaller text */}
+          </button>
+        ) : (
+          <a href="https://flushingtech.org" className="flex items-center text-black text-sm">
+            <span className="mt-1.5 ml-4 material-icons text-black text-2xl font-bold">arrow_back</span>
+            <span className="ml-3 lowercase text-black text-2xl">
+              c.tech<span style={{ color: '#CA2828' }}>(flushing)</span>
+            </span>
+          </a>
+        )}
       </div>
       <div className="relative text-black text-xl mr-4 flex items-center">
         Hello, <span className="font-bold ml-1" style={{ color: '#CA2828' }}>{userName}</span>

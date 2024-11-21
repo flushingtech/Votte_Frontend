@@ -47,7 +47,7 @@ function EventScreen() {
   if (loading)
     return (
       <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar userName={email} />
+        <Navbar userName={email} backToHome={true} />
         <p className="text-center mt-10">Loading event details...</p>
       </div>
     );
@@ -55,23 +55,23 @@ function EventScreen() {
   if (error)
     return (
       <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar userName={email} />
+        <Navbar userName={email} backToHome={true} />
         <p className="text-center mt-10">{error}</p>
       </div>
     );
 
   return (
     <div style={{ backgroundColor: '#030C18', minHeight: '100vh' }}>
-      <Navbar userName={email} />
+      <Navbar userName={email} backToHome={true} />
       <div className="p-10">
         <h2 className="text-3xl font-bold text-center text-white mb-6">{event?.title}</h2>
         <p className="text-center text-gray-400 mb-6">
           {new Date(event?.event_date).toLocaleDateString()}
         </p>
         <div className="mb-10">
-          <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} /> {/* Pass refreshIdeas */}
+          <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
         </div>
-        <IdeasList key={ideasRefreshKey} eventId={eventId} /> {/* Trigger re-render */}
+        <IdeasList key={ideasRefreshKey} eventId={eventId} />
       </div>
     </div>
   );
