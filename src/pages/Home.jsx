@@ -1,4 +1,3 @@
-// Home.jsx
 import { useEffect, useState } from 'react';
 import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
@@ -34,22 +33,56 @@ function Home() {
       const email = decodedToken?.email || 'Guest';
       setUserName(email);
       setUserEmail(email);
-      localStorage.setItem('userEmail', email);  // Store email in local storage
+      localStorage.setItem('userEmail', email); // Store email in local storage
     }
   }, []);
 
   return (
-    <div className="home-page" style={{ backgroundColor: '#030C18', minHeight: '100vh' }}>
+    <div
+      className="home-page flex flex-col"
+      style={{ backgroundColor: '#030C18', minHeight: '100vh' }}
+    >
       <Navbar userName={userName} />
-      <EventsList />
-      
-      {/* Flex container for side-by-side sections */}
-      <div className="flex flex-wrap justify-between max-w-6xl mx-auto p-6">
-        <div className="w-full md:w-1/2 p-4">
-          <MyIdeas email={userEmail} />
+
+      {/* Flex container for the main content */}
+      <div
+        className="flex flex-wrap md:flex-nowrap flex-grow mx-auto p-4 gap-4"
+        style={{ maxWidth: '100%', width: '100%' }}
+      >
+        {/* Left Section: MyIdeas and LikedIdeas */}
+        <div className="w-full md:w-[98%] flex flex-col gap-6">
+          {/* MyIdeas */}
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '1.5rem',
+              width: '100%',
+            }}
+          >
+            <MyIdeas email={userEmail} />
+          </div>
+
+          {/* LikedIdeas */}
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '1.5rem',
+              width: '100%',
+            }}
+          >
+            <LikedIdeas email={userEmail} />
+          </div>
         </div>
-        <div className="w-full md:w-1/2 p-4">
-          <LikedIdeas email={userEmail} />
+
+        {/* Right Section: EventsList */}
+        <div
+          className="w-full md:w-[2%] border border-white shadow-sm"
+          style={{
+            padding: '0.25rem',
+            width: '100%',
+          }}
+        >
+          <EventsList />
         </div>
       </div>
     </div>

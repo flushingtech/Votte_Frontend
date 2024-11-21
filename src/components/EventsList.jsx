@@ -31,21 +31,42 @@ function EventsList() {
   };
 
   return (
-    <div className="p-10" style={{ backgroundColor: '#030C18' }}>
-      <h2 className="text-3xl font-bold text-center text-white mb-6">Upcoming Events</h2>
+    <div
+      className="p-6 mx-auto"
+      style={{
+        backgroundColor: '#030C18',
+        maxWidth: '95%', // Allow the container to use more of the screen
+      }}
+    >
+      <h2 className="text-3xl font-bold text-center text-white mb-4">Upcoming Events</h2>
       <div
-        className="events-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-auto"
-        style={{ maxWidth: '75%', paddingRight: '1rem' }}
+        className="events-list flex flex-col gap-3 mx-auto"
+        style={{
+          maxWidth: '100%', // Allow events to use the full width of the container
+        }}
       >
         {events.map((event) => (
           <div
             key={event.id}
             onClick={() => handleEventClick(event.id)}
-            className="shadow-lg rounded-sm p-4 cursor-pointer"
-            style={{ backgroundColor: '#FFE4CE' }}
+            className="shadow-lg rounded-sm p-3 cursor-pointer"
+            style={{
+              backgroundColor: '#FFE4CE',
+            }}
           >
-            <h3 className="text-xl font-bold text-black">{event.title}</h3>
-            <p className="text-gray-500 text-xs mt-0">{new Date(event.event_date).toLocaleDateString()}</p>
+            <h3
+              className="text-sm font-bold text-black truncate"
+              style={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {event.title}
+            </h3>
+            <p className="text-gray-500 text-xs mt-1">
+              {new Date(event.event_date).toLocaleDateString()}
+            </p>
           </div>
         ))}
       </div>
