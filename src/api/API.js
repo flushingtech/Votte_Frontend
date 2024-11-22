@@ -135,6 +135,24 @@ export const deleteEvent = async (id) => {
   }
 };
 
+export const getIdeasForEvent = async (eventId) => {
+  if (!eventId) {
+    console.error("Event ID is missing");
+    throw new Error("Event ID is required");
+  }
+
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/api/events/${eventId}/ideas`
+    );
+    return response.data.ideas;
+  } catch (error) {
+    console.error("Error fetching ideas for event:", error);
+    throw error;
+  }
+};
+
+
 export const getUserIdeas = async (email) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/user/${email}`);
