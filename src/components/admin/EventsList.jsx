@@ -54,7 +54,7 @@ const EventsList = ({ onEventSelect }) => {
         {events.map((event) => (
           <li
             key={event.id}
-            className="flex justify-between items-center bg-[#2E3B4E] p-3 rounded shadow"
+            className="flex justify-between items-center bg-[#2E3B4E] p-3 shadow border border-white"
           >
             <div>
               <h3 className="text-md font-semibold text-white">{event.title}</h3>
@@ -68,13 +68,13 @@ const EventsList = ({ onEventSelect }) => {
             <div className="flex space-x-3">
               <button
                 onClick={() => onEventSelect(event)}
-                className="px-3 py-1 text-sm bg-white text-black rounded hover:bg-gray-200 transition-all"
+                className="px-3 py-1 text-sm bg-white text-black hover:bg-gray-200 transition-all"
               >
                 View Ideas
               </button>
               <button
                 onClick={() => handleDelete(event.id)}
-                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-all"
+                className="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 transition-all"
               >
                 Delete
               </button>

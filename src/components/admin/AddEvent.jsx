@@ -1,73 +1,58 @@
 import { useState } from 'react';
 import { addEvent } from '../../api/API';
 
-const AddEvent = ({ userEmail }) => {
+const AddEvent = ({ userEmail, onSuccess }) => {
   const [title, setTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const eventData = await addEvent(userEmail, title, eventDate); // Use addEvent from api.js
-      setMessage(`🎉 Event "${eventData.title}" added successfully!`);
+      await addEvent(userEmail, title, eventDate);
+      onSuccess(); // Call the onSuccess callback to close the modal and refresh the admin page
       setTitle('');
       setEventDate('');
     } catch (error) {
       console.error('Error adding event:', error);
-      setMessage('⚠️ Failed to add event. Please try again.');
+      alert('⚠️ Failed to add event. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-lg w-full text-left">
-      <h2 className="text-4xl font-bold mb-6">
-        Admin: <span style={{ color: '#FF6B35' }}>Add New Event</span>
-      </h2>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-300 mb-1">Event Title</label>
-          <input
-            type="text"
-            placeholder="Enter event title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="px-4 py-2 rounded bg-[#2E3B4E] border border-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6B35] text-white"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-300 mb-1">Event Date</label>
-          <input
-            type="date"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-            required
-            className="px-4 py-2 rounded bg-[#2E3B4E] border border-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6B35] text-white"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full px-4 py-2 mt-4 text-lg font-semibold text-white bg-[#FF6B35] rounded hover:bg-[#ff773f] transition-all duration-300"
-          disabled={loading}
-        >
-          {loading ? 'Adding Event...' : '📅 Add Event'}
-        </button>
-      </form>
-
-      {message && (
-        <p className="mt-4 text-center text-lg font-medium">
-          {message}
-        </p>
-      )}
-    </div>
+    <form onSubmit={handleSubmit} className="p-4 border border-gray-300 space-y-4 bg-[#1E2A3A] text-white rounded">
+      <div>
+        <label className="block text-sm font-medium mb-1">Event Title:</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 shadow-sm bg-[#2E3B4E] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Enter event title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Event Date:</label>
+        <input
+          type="date"
+          className="w-full px-3 py-2 border border-gray-300 shadow-sm bg-[#2E3B4E] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+          required
+        />
+      </div>
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none"
+        disabled={loading}
+      >
+        {loading ? 'Adding Event...' : '📅 Add Event'}
+      </button>
+    </form>
   );
 };
 
