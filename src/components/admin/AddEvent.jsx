@@ -23,7 +23,10 @@ const AddEvent = ({ userEmail, onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border border-gray-300 space-y-4 bg-[#1E2A3A] text-white rounded">
+    <form
+      onSubmit={handleSubmit}
+      className="p-4 border border-gray-300 bg-[#1E2A3A] text-white space-y-6 w-full flex flex-col justify-center"
+    >
       <div>
         <label className="block text-sm font-medium mb-1">Event Title:</label>
         <input
