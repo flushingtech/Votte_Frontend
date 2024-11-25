@@ -68,7 +68,13 @@ const IdeasForEvent = ({ userEmail }) => {
         </div>
 
         {/* Ideas Container */}
-        <div className="border border-white p-5">
+        <div
+          className="border border-white p-5"
+          style={{
+            height: 'calc(100vh - 200px)', // Adjust the height to fill the screen dynamically
+            overflowY: 'auto', // Enable scrolling when content overflows
+          }}
+        >
           <h2 className="text-2xl font-bold mb-4 text-white">
             Ideas for Event: {event.title} ({ideas.length} ideas)
           </h2>
