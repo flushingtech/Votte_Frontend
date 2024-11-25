@@ -5,7 +5,7 @@ const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'ad
 
 function Navbar({ userName, backToHome }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate(); // Use navigate for redirecting
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
 
@@ -14,30 +14,30 @@ function Navbar({ userName, backToHome }) {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('user'); // Clear user data from localStorage
-    setIsDropdownOpen(false); // Close dropdown
-    navigate('/'); // Redirect to landing page
+    localStorage.removeItem('user');
+    setIsDropdownOpen(false);
+    navigate('/');
   };
 
   const goToAdminPage = () => {
-    setIsDropdownOpen(false); // Close dropdown
-    navigate('/admin'); // Navigate to admin page
+    setIsDropdownOpen(false);
+    navigate('/admin');
   };
 
   const goToHome = () => {
-    navigate('/home'); // Navigate to Home.jsx
+    navigate('/home');
   };
 
   return (
     <nav className="flex items-center justify-between p-3" style={{ backgroundColor: '#FFE4CE' }}>
       <div className="flex items-center">
-        {backToHome ? ( // Conditionally render "Home" link
+        {backToHome ? (
           <button
             onClick={goToHome}
             className="flex items-center bg-black text-white py-2 px-4 rounded shadow hover:bg-gray-800 transition-all"
           >
             <span className="material-icons text-white text-xl font-bold">arrow_back</span>
-            <span className="ml-2 text-sm font-semibold">Home</span> {/* Smaller text */}
+            <span className="ml-2 text-sm font-semibold">Home</span>
           </button>
         ) : (
           <a href="https://flushingtech.org" className="flex items-center text-black text-sm">

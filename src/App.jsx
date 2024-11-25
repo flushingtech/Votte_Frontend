@@ -4,8 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Landing from './pages/Landing';
 import Home from './pages/Home';
 import AdminPage from './pages/Admin';
-import EventScreen from './pages/EventScreen';
-import EventsList from './components/EventsList';
+import IdeasForEvent from './components/admin/IdeasForEvent';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -42,16 +41,16 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/events" element={<EventsList />} />
-          <Route path="/event/:eventId" element={<EventScreen />} />
-          <Route
-            path="/admin"
-            element={
-              <RequireAdmin userEmail={userEmail}>
-                <AdminPage />
-              </RequireAdmin>
-            }
-          />
+          <Route path="/admin" element={
+            <RequireAdmin userEmail={userEmail}>
+              <AdminPage />
+            </RequireAdmin>
+          } />
+          <Route path="/admin/event/:eventId" element={
+            <RequireAdmin userEmail={userEmail}>
+              <IdeasForEvent />
+            </RequireAdmin>
+          } />
         </Routes>
       </Router>
     </GoogleOAuthProvider>
