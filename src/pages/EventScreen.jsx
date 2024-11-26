@@ -14,6 +14,15 @@ function EventScreen() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Disable scrolling on the body
+    document.body.style.overflow = 'hidden';
+    return () => {
+      // Re-enable scrolling on unmount
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  useEffect(() => {
     if (!email) {
       console.error('Error: Email not provided');
       setError('Email not provided.');
@@ -61,17 +70,22 @@ function EventScreen() {
     );
 
   return (
-    <div style={{ backgroundColor: '#030C18', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
       <Navbar userName={email} backToHome={true} />
-      <div className="p-10">
-        <h2 className="text-3xl font-bold text-center text-white mb-6">{event?.title}</h2>
-        <p className="text-center text-gray-400 mb-6">
-          {new Date(event?.event_date).toLocaleDateString()}
-        </p>
-        <div className="mb-10">
+      <div className="p-4">
+        {/* Event Information Container */}
+        <div className="max-w-3xl mx-auto p-6 border border-white">
+          <h2 className="text-3xl font-bold text-center text-white mb-4">{event?.title}</h2>
+          <p className="text-center text-gray-400 mb-4">
+            {new Date(event?.event_date).toLocaleDateString()}
+          </p>
           <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
         </div>
-        <IdeasList key={ideasRefreshKey} eventId={eventId} />
+
+        {/* Ideas List */}
+        <div className="max-w-3xl mx-auto mt-4">
+          <IdeasList key={ideasRefreshKey} eventId={eventId} />
+        </div>
       </div>
     </div>
   );

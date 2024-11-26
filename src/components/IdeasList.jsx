@@ -23,10 +23,10 @@ function IdeasList({ eventId, refreshIdeas }) {
           const likedIdeas = await getLikedIdeas(userEmail);
           setUserLikedIdeas(likedIdeas);
         }
-        setLoading(false);
       } catch (err) {
         console.error('Error fetching ideas by event:', err);
         setError('Failed to load ideas');
+      } finally {
         setLoading(false);
       }
     };
@@ -70,10 +70,14 @@ function IdeasList({ eventId, refreshIdeas }) {
 
   return (
     <div
-      className="ideas-list max-w-3xl mx-auto my-4 p-5 space-y-4"
-      style={{ backgroundColor: 'transparent' }}
+      className="ideas-list max-w-3xl mx-auto mt-3 p-5 space-y-4 border border-white"
+      style={{
+        backgroundColor: 'transparent',
+        maxHeight: '60vh', // Limit height to 60% of the viewport
+        overflowY: 'auto', // Enable vertical scrolling when necessary
+      }}
     >
-      <h2 className="text-2xl font-bold mb-2 text-white">Ideas</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">Ideas</h2>
       {ideas.length === 0 ? (
         <p className="text-center text-gray-500">
           No ideas have been submitted for this event yet.
@@ -83,7 +87,7 @@ function IdeasList({ eventId, refreshIdeas }) {
           {ideas.map((idea) => (
             <li
               key={idea.id}
-              className="relative p-4 shadow hover:shadow-md transition-shadow duration-300 border"
+              className="relative p-4 shadow hover:shadow-md transition-shadow duration-300 border border-gray-500"
               style={{ backgroundColor: '#1E2A3A' }}
             >
               {/* Like Button in Top Right */}
