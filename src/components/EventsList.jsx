@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { dateTimeFormatter } from '/src/utils/intlUtils';
 
 function EventsList() {
   const [events, setEvents] = useState([]);
@@ -11,7 +12,9 @@ function EventsList() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/all-events`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/api/events/all-events`,
+        );
         setEvents(response.data.events);
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -38,7 +41,9 @@ function EventsList() {
         maxWidth: '95%', // Allow the container to use more of the screen
       }}
     >
-      <h2 className="text-3xl font-bold text-center text-white mb-4">Upcoming Events</h2>
+      <h2 className="text-3xl font-bold text-center text-white mb-4">
+        Upcoming Events
+      </h2>
       <div
         className="events-list flex flex-col gap-3 mx-auto"
         style={{
@@ -66,7 +71,8 @@ function EventsList() {
                 {event.title}
               </h3>
               <p className="text-gray-500 text-xs mt-1">
-                {new Date(event.event_date).toLocaleDateString()}
+                {!isNaN(Date.parse(event.event_date)) &&
+                  dateTimeFormatter.format(new Date(event.event_date))}
               </p>
             </div>
 
