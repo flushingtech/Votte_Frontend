@@ -58,12 +58,24 @@ const IdeasForEvent = ({ userEmail }) => {
 
       <div className="p-5">
         {/* Button Container */}
-        <div className="max-w-3xl mx-auto p-4 border border-white mb-4">
+        <div className="max-w-3xl mx-auto p-4 border border-white mb-4 flex space-x-4">
           <button
             onClick={handleBackToAdmin}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all"
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition-all w-32"
           >
             &larr; Admin
+          </button>
+          <button
+            onClick={() => console.log('Votte Time clicked')}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-all w-32"
+          >
+            Votte Time
+          </button>
+          <button
+            onClick={() => console.log('Delete All clicked')}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all w-32"
+          >
+            Delete All
           </button>
         </div>
 
@@ -87,10 +99,10 @@ const IdeasForEvent = ({ userEmail }) => {
               {ideas.map((idea) => (
                 <li
                   key={idea.id}
-                  className="relative p-4 border border-gray-500 shadow"
+                  className="flex justify-between p-4 border border-gray-500 shadow"
                   style={{ backgroundColor: '#1E2A3A' }}
                 >
-                  {/* Content */}
+                  {/* Left Container (Text Content) */}
                   <div>
                     <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
                     <p className="text-gray-300 mt-1">{idea.description}</p>
@@ -100,19 +112,34 @@ const IdeasForEvent = ({ userEmail }) => {
                     <p className="text-sm text-gray-400 mt-1">By: {idea.email}</p>
                   </div>
 
-                  {/* Delete Button in Top-Right */}
-                  <button
-                    onClick={() => handleDelete(idea.id)}
-                    className="absolute top-2 right-2 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-all"
-                  >
-                    Delete
-                  </button>
+                  {/* Right Container (Buttons) */}
+                  <div className="flex flex-col items-end space-y-2">
+                    <button
+                      onClick={() => handleDelete(idea.id)}
+                      className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-all w-32"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => console.log(`Votte clicked for idea: ${idea.id}`)}
+                      className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-all w-32"
+                    >
+                      Votte
+                    </button>
+                    <button
+                      onClick={() => console.log(`Archive clicked for idea: ${idea.id}`)}
+                      className="px-3 py-1 text-sm bg-gray-300 text-black rounded hover:bg-gray-400 transition-all w-32"
+                    >
+                      Archive
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
       </div>
+
     </div>
   );
 };
