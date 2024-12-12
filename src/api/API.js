@@ -196,3 +196,27 @@ export const setIdeaStage = async (ideaId, stage) => {
     throw error;
   }
 };
+
+// Function to set the stage of an event
+export const setEventStage = async (eventId, stage) => {
+  try {
+      const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          stage,
+      });
+      return response.data.event; // Return the updated event
+  } catch (error) {
+      console.error('Error setting event stage:', error);
+      throw error;
+  }
+};
+
+// Function to get the stage of an event
+export const getEventStage = async (eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/get-stage/${eventId}`);
+    return response.data; // Returns { stage: <number> }
+  } catch (error) {
+    console.error('Error fetching event stage:', error);
+    throw error;
+  }
+};
