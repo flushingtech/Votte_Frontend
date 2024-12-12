@@ -73,8 +73,8 @@ function IdeasList({ eventId, refreshIdeas }) {
       className="ideas-list max-w-3xl mx-auto mt-3 p-5 space-y-4 border border-white"
       style={{
         backgroundColor: 'transparent',
-        maxHeight: '60vh', // Limit height to 60% of the viewport
-        overflowY: 'auto', // Enable vertical scrolling when necessary
+        maxHeight: '60vh',
+        overflowY: 'auto',
       }}
     >
       <h2 className="text-2xl font-bold mb-4 text-white">Ideas</h2>
@@ -87,7 +87,9 @@ function IdeasList({ eventId, refreshIdeas }) {
           {ideas.map((idea) => (
             <li
               key={idea.id}
-              className="relative p-4 shadow hover:shadow-md transition-shadow duration-300 border border-gray-500"
+              className={`relative p-4 shadow hover:shadow-md transition-shadow duration-300 border ${
+                idea.stage === 2 ? 'border-green-500 glowing-border' : 'border-gray-500'
+              }`}
               style={{ backgroundColor: '#1E2A3A' }}
             >
               {/* Like Button in Top Right */}
@@ -193,6 +195,25 @@ function IdeasList({ eventId, refreshIdeas }) {
           </div>
         </>
       )}
+
+      {/* Inline CSS for glowing border */}
+      <style jsx>{`
+        .glowing-border {
+          animation: glowing 1.5s infinite;
+        }
+
+        @keyframes glowing {
+          0% {
+            box-shadow: 0 0 5px #00ff00;
+          }
+          50% {
+            box-shadow: 0 0 20px #00ff00;
+          }
+          100% {
+            box-shadow: 0 0 5px #00ff00;
+          }
+        }
+      `}</style>
     </div>
   );
 }
