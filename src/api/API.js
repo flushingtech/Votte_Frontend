@@ -183,3 +183,16 @@ export const checkAdminStatus = async (email) => {
     throw error;
   }
 };
+
+// Function to set the stage of an idea
+export const setIdeaStage = async (ideaId, stage) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/set-stage/${ideaId}`, {
+      stage, // Pass the target stage
+    });
+    return response.data.idea; // Return the updated idea
+  } catch (error) {
+    console.error('Error setting idea stage:', error);
+    throw error;
+  }
+};
