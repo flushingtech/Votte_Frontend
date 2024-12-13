@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getIdeasByEvent, getLikedIdeas, deleteIdea, getEventStage } from '../api/API';
-import LikeButton from './LikeButton';
 import EditIdea from './EditIdea';
 
 function IdeasList({ eventId, refreshIdeas }) {
@@ -8,9 +7,11 @@ function IdeasList({ eventId, refreshIdeas }) {
   const [eventStage, setEventStage] = useState(1); // State to track the event stage
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [vottePromptVisible, setVottePromptVisible] = useState(false); // State for votte prompt visibility
+  const [votteRating, setVotteRating] = useState(1); // State for votte rating
+  const [currentIdeaId, setCurrentIdeaId] = useState(null); // State for tracking current idea ID
   const userEmail = localStorage.getItem('userEmail');
   const isAdmin = JSON.parse(localStorage.getItem('isAdmin')) || false;
-  const [userLikedIdeas, setUserLikedIdeas] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingIdea, setEditingIdea] = useState(null);
 
@@ -23,11 +24,6 @@ function IdeasList({ eventId, refreshIdeas }) {
         // Fetch the stage of the event
         const eventStageData = await getEventStage(eventId);
         setEventStage(eventStageData.stage);
-
-        if (userEmail) {
-          const likedIdeas = await getLikedIdeas(userEmail);
-          setUserLikedIdeas(likedIdeas);
-        }
       } catch (err) {
         console.error('Error fetching ideas or event stage:', err);
         setError('Failed to load ideas or event stage');
@@ -37,7 +33,7 @@ function IdeasList({ eventId, refreshIdeas }) {
     };
 
     fetchIdeasAndStage();
-  }, [eventId, userEmail]);
+  }, [eventId]);
 
   const handleDelete = async (ideaId) => {
     try {
@@ -63,6 +59,16 @@ function IdeasList({ eventId, refreshIdeas }) {
 
   const handleReport = (ideaId) => {
     alert(`Reported idea with ID: ${ideaId}`);
+  };
+
+  const handleVotteClick = (ideaId) => {
+    setCurrentIdeaId(ideaId);
+    setVottePromptVisible(true);
+  };
+
+  const handleSubmitVotte = () => {
+    alert(`You rated ${votteRating} for idea with ID: ${currentIdeaId}`);
+    setVottePromptVisible(false); // Close the prompt after submission
   };
 
   if (loading) {
@@ -100,21 +106,16 @@ function IdeasList({ eventId, refreshIdeas }) {
                 }`}
                 style={{ backgroundColor: '#1E2A3A' }}
               >
-                {/* Like Button in Top Right */}
-                <div className="absolute top-2 right-2">
-                  <LikeButton
-                    ideaId={idea.id}
-                    currentUserEmail={userEmail}
-                    initialLikes={idea.likes}
-                    hasLiked={userLikedIdeas.includes(idea.id)}
-                    onLikeChange={(updatedIdea) =>
-                      setIdeas((prevIdeas) =>
-                        prevIdeas.map((i) =>
-                          i.id === updatedIdea.id ? updatedIdea : i
-                        )
-                      )
-                    }
-                  />
+                {/* Votte Button in Top Right */}
+                <div className="absolute top-2 right-2 flex flex-col space-y-2">
+                  {eventStage === 2 && (
+                    <button
+                      onClick={() => handleVotteClick(idea.id)}
+                      className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-all w-32"
+                    >
+                      Votte
+                    </button>
+                  )}
                 </div>
 
                 {/* Menu Trigger in Bottom Right */}
@@ -181,6 +182,30 @@ function IdeasList({ eventId, refreshIdeas }) {
               </li>
             ))}
         </ul>
+      )}
+
+      {/* Votte Prompt */}
+      {vottePromptVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md mx-auto space-y-4">
+            <h3 className="text-lg font-bold text-white">Rate this idea (1 to 10)</h3>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={votteRating}
+              onChange={(e) => setVotteRating(e.target.value)}
+              className="w-full"
+            />
+            <p className="text-white text-center">Rating: {votteRating}</p>
+            <button
+              onClick={handleSubmitVotte}
+              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Edit Modal */}
