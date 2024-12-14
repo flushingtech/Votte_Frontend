@@ -220,3 +220,41 @@ export const getEventStage = async (eventId) => {
     throw error;
   }
 };
+
+// Function to submit a vote for an idea
+export const submitVote = async (ideaId, userEmail, rating) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/vote`, { // Updated endpoint
+      user_email: userEmail, // Match the backend parameter
+      idea_id: ideaId, // Match the backend parameter
+      rating, // Pass the user's rating
+    });
+    return response.data; // Return the response data for further use
+  } catch (error) {
+    console.error('Error submitting vote:', error);
+    throw error;
+  }
+};
+
+// Function to get all votes for a specific idea
+export const getVotesForIdea = async (ideaId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`);
+    return response.data.votes; // Return an array of votes for the idea
+  } catch (error) {
+    console.error('Error fetching votes for idea:', error);
+    throw error;
+  }
+};
+
+// Function to get all votes by a specific user
+export const getUserVotes = async (userEmail) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/user/${userEmail}`);
+    return response.data.votes; // Return an array of votes by the user
+  } catch (error) {
+    console.error('Error fetching user votes:', error);
+    throw error;
+  }
+};
+

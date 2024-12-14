@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getIdeasByEvent, getLikedIdeas, deleteIdea, getEventStage } from '../api/API';
+import {
+  getIdeasByEvent,
+  getLikedIdeas,
+  deleteIdea,
+  getEventStage,
+  submitVote,
+} from '../api/API'; // Ensure submitVote aligns with your backend route
+import LikeButton from './LikeButton';
 import EditIdea from './EditIdea';
 
 function IdeasList({ eventId, refreshIdeas }) {
@@ -8,12 +15,15 @@ function IdeasList({ eventId, refreshIdeas }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [vottePromptVisible, setVottePromptVisible] = useState(false); // State for votte prompt visibility
+  const [confirmationPromptVisible, setConfirmationPromptVisible] = useState(false); // State for confirmation card
   const [votteRating, setVotteRating] = useState(1); // State for votte rating
   const [currentIdeaId, setCurrentIdeaId] = useState(null); // State for tracking current idea ID
+  const [currentIdeaName, setCurrentIdeaName] = useState(''); // State for current idea name
   const userEmail = localStorage.getItem('userEmail');
   const isAdmin = JSON.parse(localStorage.getItem('isAdmin')) || false;
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingIdea, setEditingIdea] = useState(null);
+  const [userLikedIdeas, setUserLikedIdeas] = useState([]); // Track user liked ideas
 
   useEffect(() => {
     const fetchIdeasAndStage = async () => {
@@ -24,6 +34,11 @@ function IdeasList({ eventId, refreshIdeas }) {
         // Fetch the stage of the event
         const eventStageData = await getEventStage(eventId);
         setEventStage(eventStageData.stage);
+
+        if (userEmail) {
+          const likedIdeas = await getLikedIdeas(userEmail);
+          setUserLikedIdeas(likedIdeas);
+        }
       } catch (err) {
         console.error('Error fetching ideas or event stage:', err);
         setError('Failed to load ideas or event stage');
@@ -33,7 +48,7 @@ function IdeasList({ eventId, refreshIdeas }) {
     };
 
     fetchIdeasAndStage();
-  }, [eventId]);
+  }, [eventId, userEmail]);
 
   const handleDelete = async (ideaId) => {
     try {
@@ -61,14 +76,21 @@ function IdeasList({ eventId, refreshIdeas }) {
     alert(`Reported idea with ID: ${ideaId}`);
   };
 
-  const handleVotteClick = (ideaId) => {
+  const handleVotteClick = (ideaId, ideaName) => {
     setCurrentIdeaId(ideaId);
+    setCurrentIdeaName(ideaName);
     setVottePromptVisible(true);
   };
 
-  const handleSubmitVotte = () => {
-    alert(`You rated ${votteRating} for idea with ID: ${currentIdeaId}`);
-    setVottePromptVisible(false); // Close the prompt after submission
+  const handleSubmitVotte = async () => {
+    try {
+      await submitVote(currentIdeaId, userEmail, votteRating); // Pass parameters directly to match the backend
+      setVottePromptVisible(false); // Close the votte prompt
+      setConfirmationPromptVisible(true); // Show the confirmation card
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      alert('Failed to submit vote. Please try again.');
+    }
   };
 
   if (loading) {
@@ -106,66 +128,31 @@ function IdeasList({ eventId, refreshIdeas }) {
                 }`}
                 style={{ backgroundColor: '#1E2A3A' }}
               >
-                {/* Votte Button in Top Right */}
+                {/* Votte or Like Button in Top Right */}
                 <div className="absolute top-2 right-2 flex flex-col space-y-2">
-                  {eventStage === 2 && (
+                  {eventStage === 2 ? (
                     <button
-                      onClick={() => handleVotteClick(idea.id)}
+                      onClick={() => handleVotteClick(idea.id, idea.idea)}
                       className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-all w-32"
                     >
                       Votte
                     </button>
+                  ) : (
+                    <LikeButton
+                      ideaId={idea.id}
+                      currentUserEmail={userEmail}
+                      initialLikes={idea.likes}
+                      hasLiked={userLikedIdeas.includes(idea.id)}
+                      onLikeChange={(updatedIdea) =>
+                        setIdeas((prevIdeas) =>
+                          prevIdeas.map((i) =>
+                            i.id === updatedIdea.id ? updatedIdea : i
+                          )
+                        )
+                      }
+                    />
                   )}
                 </div>
-
-                {/* Menu Trigger in Bottom Right */}
-                {(idea.email === userEmail || isAdmin) && (
-                  <div className="absolute bottom-2 right-2">
-                    <button
-                      className="text-white text-xl hover:text-gray-300"
-                      onClick={() =>
-                        setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
-                      }
-                    >
-                      ...
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {menuOpenId === idea.id && (
-                      <div
-                        className="absolute bg-white shadow-lg rounded p-2 z-50 text-black"
-                        style={{
-                          bottom: '100%',
-                          right: '0',
-                          marginBottom: '-12px',
-                        }}
-                      >
-                        {idea.email === userEmail && (
-                          <button
-                            className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
-                            onClick={() => setEditingIdea(idea)}
-                          >
-                            Edit
-                          </button>
-                        )}
-                        {(isAdmin || idea.email === userEmail) && (
-                          <button
-                            className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
-                            onClick={() => handleDelete(idea.id)}
-                          >
-                            Delete
-                          </button>
-                        )}
-                        <button
-                          className="px-4 py-2 text-sm hover:bg-gray-200 text-left"
-                          onClick={() => handleReport(idea.id)}
-                        >
-                          Report
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* Content */}
                 <div className="pr-4">
@@ -208,25 +195,21 @@ function IdeasList({ eventId, refreshIdeas }) {
         </div>
       )}
 
-      {/* Edit Modal */}
-      {editingIdea && (
-        <>
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="bg-gray-800 p-8 max-w-2xl mx-auto rounded-lg space-y-4 w-11/12 md:w-1/2">
-              <h2 className="text-2xl font-bold text-white text-center">
-                Edit Idea
-              </h2>
-              <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
-              <button
-                className="mt-4 w-full bg-red-600 text-white py-2 px-4 font-semibold hover:bg-red-700 focus:outline-none"
-                onClick={closeEditModal}
-              >
-                Cancel
-              </button>
-            </div>
+      {/* Confirmation Prompt */}
+      {confirmationPromptVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md mx-auto space-y-4 text-center">
+            <h3 className="text-lg font-bold text-white">
+              You voted a {votteRating} for "{currentIdeaName}"
+            </h3>
+            <button
+              onClick={() => setConfirmationPromptVisible(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Close
+            </button>
           </div>
-        </>
+        </div>
       )}
 
       {/* Inline CSS for glowing border */}
