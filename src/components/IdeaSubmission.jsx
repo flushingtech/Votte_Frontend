@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { submitIdea } from '../api/API';
+import { useState, useEffect } from 'react';
+import { submitIdea, getEventStage } from '../api/API';
 
 function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [idea, setIdea] = useState('');
@@ -8,6 +8,23 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [isBuilt, setIsBuilt] = useState(false);
   const [message, setMessage] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [eventStage, setEventStage] = useState(1); // State for event stage
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEventStage = async () => {
+      try {
+        const eventStageData = await getEventStage(eventId);
+        setEventStage(eventStageData.stage);
+      } catch (error) {
+        console.error('Error fetching event stage:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventStage();
+  }, [eventId]);
 
   const handleIdeaSubmit = async (e) => {
     e.preventDefault();
@@ -40,14 +57,22 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
     }
   };
 
+  if (loading) {
+    return <p className="text-center text-gray-500">Loading...</p>;
+  }
+
   return (
     <div className="w-full text-center my-6">
-      <button
-        onClick={() => setIsFormVisible(true)}
-        className="bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
-      >
-        Add Idea
-      </button>
+      {eventStage === 2 ? (
+        <p className="text-yellow-500 font-bold text-lg">Votte Time - Submissions are closed.</p>
+      ) : (
+        <button
+          onClick={() => setIsFormVisible(true)}
+          className="bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
+        >
+          Add Idea
+        </button>
+      )}
 
       {isFormVisible && (
         <>
