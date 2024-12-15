@@ -258,3 +258,13 @@ export const getUserVotes = async (userEmail) => {
   }
 };
 
+// Function to transition the event to Results Time (stage 3)
+export const setEventToResultsTime = async (eventId) => {
+  try {
+      const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
+      return response.data.event; // Return the updated event
+  } catch (error) {
+      console.error('Error transitioning to Results Time:', error);
+      throw error;
+  }
+};

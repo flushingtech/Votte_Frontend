@@ -19,10 +19,10 @@ function IdeasList({ eventId, refreshIdeas }) {
   const [votteRating, setVotteRating] = useState(1); // State for votte rating
   const [currentIdeaId, setCurrentIdeaId] = useState(null); // State for tracking current idea ID
   const [currentIdeaName, setCurrentIdeaName] = useState(''); // State for current idea name
+  const [menuOpenId, setMenuOpenId] = useState(null); // State to track which menu is open
   const userEmail = localStorage.getItem('userEmail');
   const isAdmin = JSON.parse(localStorage.getItem('isAdmin')) || false;
-  const [menuOpenId, setMenuOpenId] = useState(null);
-  const [editingIdea, setEditingIdea] = useState(null);
+  const [editingIdea, setEditingIdea] = useState(null); // State for EditIdea modal
   const [userLikedIdeas, setUserLikedIdeas] = useState([]); // Track user liked ideas
 
   useEffect(() => {
@@ -65,11 +65,11 @@ function IdeasList({ eventId, refreshIdeas }) {
     setIdeas((prevIdeas) =>
       prevIdeas.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
     );
-    setEditingIdea(null);
+    setEditingIdea(null); // Close the edit modal
   };
 
   const closeEditModal = () => {
-    setEditingIdea(null);
+    setEditingIdea(null); // Close the edit modal
   };
 
   const handleReport = (ideaId) => {
@@ -154,6 +154,51 @@ function IdeasList({ eventId, refreshIdeas }) {
                   )}
                 </div>
 
+                {/* Menu Trigger in Bottom Right */}
+                {(idea.email === userEmail || isAdmin) && (
+                  <div className="absolute bottom-2 right-2">
+                    <button
+                      className="text-white text-xl hover:text-gray-300"
+                      onClick={() =>
+                        setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
+                      }
+                    >
+                      ...
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {menuOpenId === idea.id && (
+                      <div
+                        className="absolute bg-white shadow-lg rounded p-2 z-50 text-black"
+                        style={{
+                          bottom: '100%',
+                          right: '0',
+                          marginBottom: '-12px',
+                        }}
+                      >
+                        <button
+                          className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
+                          onClick={() => setEditingIdea(idea)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
+                          onClick={() => handleDelete(idea.id)}
+                        >
+                          Delete
+                        </button>
+                        <button
+                          className="px-4 py-2 text-sm hover:bg-gray-200 text-left"
+                          onClick={() => handleReport(idea.id)}
+                        >
+                          Report
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Content */}
                 <div className="pr-4">
                   <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
@@ -211,6 +256,22 @@ function IdeasList({ eventId, refreshIdeas }) {
           </div>
         </div>
       )}
+{/* EditIdea Prompt */}
+{editingIdea && (
+  <div
+    className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    style={{ margin: 0, padding: 0 }}
+  >
+    <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
+    <button
+      className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
+      onClick={closeEditModal}
+    >
+      Close
+    </button>
+  </div>
+)}
+
 
       {/* Inline CSS for glowing border */}
       <style jsx>{`

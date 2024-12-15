@@ -5,8 +5,9 @@ import {
   getIdeasForEvent,
   deleteIdea,
   setIdeaStage,
-  getEventStage, // Added function to fetch event stage
-  setEventStage, // Function to set event stage
+  getEventStage,
+  setEventStage,
+  setEventToResultsTime,
 } from '../../api/API';
 
 const IdeasForEvent = ({ userEmail }) => {
@@ -14,6 +15,8 @@ const IdeasForEvent = ({ userEmail }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [eventStage, setEventStageState] = useState(1); // State for event stage
+  const [deletePromptVisible, setDeletePromptVisible] = useState(false); // For delete confirmation prompt
+  const [ideaToDelete, setIdeaToDelete] = useState(null); // Idea being considered for deletion
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,14 +48,30 @@ const IdeasForEvent = ({ userEmail }) => {
     fetchData();
   }, [event?.id]);
 
-  const handleDelete = async (ideaId) => {
+  const handleDelete = async () => {
+    if (!ideaToDelete) return;
+
     try {
-      await deleteIdea(ideaId, userEmail);
-      setIdeas(ideas.filter((idea) => idea.id !== ideaId));
+      await deleteIdea(ideaToDelete.id, userEmail);
+      setIdeas((prevIdeas) =>
+        prevIdeas.filter((idea) => idea.id !== ideaToDelete.id)
+      );
+      setDeletePromptVisible(false);
+      setIdeaToDelete(null);
     } catch (error) {
       console.error('Error deleting idea:', error);
       alert('Failed to delete idea');
     }
+  };
+
+  const openDeletePrompt = (idea) => {
+    setIdeaToDelete(idea);
+    setDeletePromptVisible(true);
+  };
+
+  const closeDeletePrompt = () => {
+    setDeletePromptVisible(false);
+    setIdeaToDelete(null);
   };
 
   const handleToggleIdeaStage = async (ideaId, targetStage) => {
@@ -77,6 +96,18 @@ const IdeasForEvent = ({ userEmail }) => {
       alert('Failed to update event stage');
     }
   };
+
+  const handleResultsTime = async () => {
+    try {
+        const updatedEvent = await setEventToResultsTime(event.id);
+        setEventStageState(updatedEvent.stage); // Update the local state to stage 3
+        alert(`Event "${updatedEvent.title}" is now in Results Time (Stage 3)!`);
+    } catch (error) {
+        console.error('Error transitioning to Results Time:', error);
+        alert('Failed to transition to Results Time.');
+    }
+};
+
 
   const handleBackToAdmin = () => {
     navigate('/admin');
@@ -108,6 +139,14 @@ const IdeasForEvent = ({ userEmail }) => {
           >
             {eventStage === 2 ? 'UnVotte Time' : 'Votte Time'}
           </button>
+          {eventStage === 2 && (
+            <button
+              onClick={handleResultsTime}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-all w-32 text-sm"
+            >
+              Results Time
+            </button>
+          )}
           <button
             onClick={() => console.log('Delete All clicked')}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all w-32 text-sm"
@@ -149,7 +188,7 @@ const IdeasForEvent = ({ userEmail }) => {
                   </div>
                   <div className="flex flex-col items-end space-y-2">
                     <button
-                      onClick={() => handleDelete(idea.id)}
+                      onClick={() => openDeletePrompt(idea)}
                       className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-all w-32"
                     >
                       Delete
@@ -177,6 +216,31 @@ const IdeasForEvent = ({ userEmail }) => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletePromptVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md mx-auto space-y-4">
+            <h3 className="text-lg font-bold text-white">
+              Are you sure you want to delete "{ideaToDelete?.idea}"?
+            </h3>
+            <div className="flex space-x-4">
+              <button
+                onClick={handleDelete}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeletePrompt}
+                className="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Inline CSS for glowing effect */}
       <style jsx>{`
