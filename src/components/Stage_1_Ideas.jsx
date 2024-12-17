@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  getIdeasByEvent,
-  getLikedIdeas,
-  deleteIdea,
-} from '../api/API';
+import { getIdeasByEvent, getLikedIdeas, deleteIdea } from '../api/API';
 import LikeButton from './LikeButton';
 import EditIdea from './EditIdea';
 
@@ -21,8 +17,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     const fetchIdeas = async () => {
       try {
         const eventIdeas = await getIdeasByEvent(eventId);
-        const stage1Ideas = eventIdeas.filter((idea) => idea.stage === 1);
-        setIdeas(stage1Ideas);
+        setIdeas(eventIdeas); // Remove filtering to display all ideas
 
         if (userEmail) {
           const likedIdeas = await getLikedIdeas(userEmail);
@@ -69,9 +64,9 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
         overflowY: 'auto',
       }}
     >
-      <h2 className="text-2xl font-bold mb-4 text-white">Stage 1 Ideas</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">All Ideas</h2>
       {ideas.length === 0 ? (
-        <p className="text-center text-gray-500">No ideas in Stage 1 yet.</p>
+        <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
       ) : (
         <ul className="space-y-4">
           {ideas.map((idea) => (
@@ -143,6 +138,9 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                   Status: {idea.is_built ? 'Built' : 'Not Built'}
                 </p>
                 <p className="text-sm text-gray-400 mt-2">By: {idea.email}</p>
+                <p className="text-sm text-gray-300 mt-2">
+                  Stage: {idea.stage}
+                </p>
               </div>
             </li>
           ))}

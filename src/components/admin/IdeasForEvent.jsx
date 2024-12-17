@@ -86,6 +86,22 @@ const IdeasForEvent = ({ userEmail }) => {
     }
   };
 
+  const handleToggleEventStage = async () => {
+    try {
+      const targetStage = eventStage === 2 ? 1 : 2; // Toggle between Stage 1 and 2
+      const updatedEvent = await setEventStage(event.id, targetStage);
+      setEventStageState(updatedEvent.stage);
+      alert(
+        `Event "${updatedEvent.title}" is now in ${
+          targetStage === 1 ? 'Stage 1' : 'Votte Time (Stage 2)'
+        }!`
+      );
+    } catch (error) {
+      console.error('Error toggling event stage:', error);
+      alert('Failed to toggle event stage.');
+    }
+  };
+
   const handleToggleIdeaStage = async (ideaId, targetStage) => {
     try {
       const updatedIdea = await setIdeaStage(ideaId, targetStage);
@@ -136,7 +152,7 @@ const IdeasForEvent = ({ userEmail }) => {
           </button>
           {eventStage !== 3 && (
             <button
-              onClick={() => handleToggleIdeaStage(event.id, 2)}
+              onClick={handleToggleEventStage}
               className={`px-4 py-2 rounded transition-all w-32 text-sm ${
                 eventStage === 2
                   ? 'bg-yellow-500 hover:bg-yellow-600 text-black'
