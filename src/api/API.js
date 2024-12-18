@@ -268,3 +268,16 @@ export const setEventToResultsTime = async (eventId) => {
       throw error;
   }
 };
+
+// Function to update latest scores for all ideas
+export const updateAverageScores = async () => {
+  try {
+    const response = await axios.put(
+      `${import.meta.env.VITE_BASE_URL}/api/votes/update-average-scores`
+    );
+    return response.data; // Returns success message
+  } catch (error) {
+    console.error('Error updating average scores:', error);
+    throw error;
+  }
+};

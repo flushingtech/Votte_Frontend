@@ -8,6 +8,7 @@ import {
   getEventStage,
   setEventStage,
   setEventToResultsTime,
+  updateAverageScores,
 } from '../../api/API';
 
 const IdeasForEvent = ({ userEmail }) => {
@@ -66,14 +67,25 @@ const IdeasForEvent = ({ userEmail }) => {
 
   const handleResultsTime = async () => {
     try {
+      // Transition the event to Results Time (Stage 3)
       const updatedEvent = await setEventToResultsTime(event.id);
       setEventStageState(updatedEvent.stage);
-      alert(`Event "${updatedEvent.title}" is now in Results Time (Stage 3)!`);
+  
+      // Call the backend to update average scores for all ideas
+      await updateAverageScores(); // Updated function for average scores
+  
+      // Refetch the updated ideas to reflect average scores
+      const updatedIdeas = await getIdeasForEvent(event.id);
+      setIdeas(updatedIdeas);
+  
+      alert(`Event "${updatedEvent.title}" is now in Results Time (Stage 3)! Average scores updated.`);
     } catch (error) {
-      console.error('Error transitioning to Results Time:', error);
-      alert('Failed to transition to Results Time.');
+      console.error('Error transitioning to Results Time or updating scores:', error);
+      alert('Failed to transition to Results Time or update average scores.');
     }
   };
+  
+  
 
   const handleBackToVotteTime = async () => {
     try {
