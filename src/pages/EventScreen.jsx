@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
 import Stage_2_Ideas from '../components/Stage_2_Ideas';
+import Stage_3_Ideas from '../components/Stage_3_Ideas';
 
 function EventScreen() {
   const { eventId } = useParams();
@@ -70,22 +71,53 @@ function EventScreen() {
   return (
     <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
       <Navbar userName={email} backToHome={true} />
-      <div className="p-4">
+      <div className="p-3">
         {/* Event Information */}
-        <div className="max-w-3xl mx-auto p-6 border border-white">
-          <h2 className="text-3xl font-bold text-center text-white mb-4">{event?.title}</h2>
-          <p className="text-center text-gray-400 mb-4">
+        <div className="max-w-3xl mx-auto p-4 border border-white shadow-md"
+          style={{ backgroundColor: '#1E2A3A' }}>
+          {/* Event Title */}
+          <h1 className="text-4xl font-extrabold text-center mb-1"
+            style={{
+              backgroundImage: 'linear-gradient(to right, #ffdd00, #ffa500)',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}>
+            {event?.title}
+          </h1>
+
+          {/* Event Date */}
+          <p className="text-lg text-center text-gray-400 mb-2">
             {new Date(event?.event_date).toLocaleDateString()}
           </p>
-          <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
+
+          {/* Stage-Specific Message */}
+          {eventStage === 3 ? (
+            <p className="text-center text-yellow-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
+              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
+              Results
+            </p>
+          ) : eventStage === 2 ? (
+            <p className="text-center text-green-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
+              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
+              Votte Time - Submissions are closed.
+            </p>
+          ) : (
+            <p className="text-center text-blue-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
+              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
+              Submissions Open
+            </p>
+          )}
         </div>
 
+
         {/* Conditionally Render Ideas */}
-        <div className="max-w-3xl mx-auto mt-4">
+        <div className="max-w-3xl mx-auto mt-3">
           {eventStage === 1 ? (
             <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
-          ) : (
+          ) : eventStage === 2 ? (
             <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
+          ) : (
+            <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
           )}
         </div>
       </div>

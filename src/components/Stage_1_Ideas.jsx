@@ -17,7 +17,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     const fetchIdeas = async () => {
       try {
         const eventIdeas = await getIdeasByEvent(eventId);
-        setIdeas(eventIdeas); // Remove filtering to display all ideas
+        setIdeas(eventIdeas);
 
         if (userEmail) {
           const likedIdeas = await getLikedIdeas(userEmail);
@@ -57,22 +57,21 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
 
   return (
     <div
-      className="ideas-list max-w-3xl mx-auto mt-3 p-5 space-y-4 border border-white"
+      className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
       style={{
         backgroundColor: 'transparent',
-        maxHeight: '60vh',
+        maxHeight: '68vh',
         overflowY: 'auto',
       }}
     >
-      <h2 className="text-2xl font-bold mb-4 text-white">All Ideas</h2>
       {ideas.length === 0 ? (
         <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-2">
           {ideas.map((idea) => (
             <li
               key={idea.id}
-              className="relative p-4 shadow hover:shadow-md transition-shadow duration-300 border border-gray-500"
+              className="relative p-2 shadow border border-gray-500"
               style={{ backgroundColor: '#1E2A3A' }}
             >
               {/* Like Button */}
@@ -94,7 +93,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
               {(idea.email === userEmail || isAdmin) && (
                 <div className="absolute bottom-2 right-2">
                   <button
-                    className="text-white text-xl hover:text-gray-300"
+                    className="text-white text-sm hover:text-gray-300"
                     onClick={() =>
                       setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
                     }
@@ -103,21 +102,21 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                   </button>
                   {menuOpenId === idea.id && (
                     <div
-                      className="absolute bg-white shadow-lg rounded p-2 z-50 text-black"
+                      className="absolute bg-white shadow-lg p-1 z-50 text-black"
                       style={{
                         bottom: '100%',
                         right: '0',
-                        marginBottom: '-12px',
+                        marginBottom: '-8px',
                       }}
                     >
                       <button
-                        className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
+                        className="px-3 py-1 text-xs hover:bg-gray-200 text-left border-b"
                         onClick={() => setEditingIdea(idea)}
                       >
                         Edit
                       </button>
                       <button
-                        className="px-4 py-2 text-sm hover:bg-gray-200 text-left border-b"
+                        className="px-3 py-1 text-xs hover:bg-gray-200 text-left"
                         onClick={() => handleDelete(idea.id)}
                       >
                         Delete
@@ -129,18 +128,10 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
 
               {/* Idea Content */}
               <div>
-                <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
-                <p className="text-gray-100 mt-1">{idea.description}</p>
-                <p className="text-sm text-gray-300">
-                  Tech Magic: {idea.technologies}
-                </p>
-                <p className="text-sm text-gray-300 mt-1">
-                  Status: {idea.is_built ? 'Built' : 'Not Built'}
-                </p>
-                <p className="text-sm text-gray-400 mt-2">By: {idea.email}</p>
-                <p className="text-sm text-gray-300 mt-2">
-                  Stage: {idea.stage}
-                </p>
+                <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
+                <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
+                <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
+                <p className="text-xs text-gray-400 mt-1">By: {idea.email}</p>
               </div>
             </li>
           ))}
@@ -149,10 +140,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
 
       {/* EditIdea Modal */}
       {editingIdea && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-          style={{ margin: 0, padding: 0 }}
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
           <button
             className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
