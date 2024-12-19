@@ -17,17 +17,19 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     const fetchIdeas = async () => {
       try {
         const eventIdeas = await getIdeasByEvent(eventId);
+
         if (userEmail) {
           const likedIdeas = await getLikedIdeas(userEmail);
           setUserLikedIdeas(likedIdeas);
         }
 
-        // Sort user's ideas to the top
+        // Sort ideas: User's ideas at the top, then by likes
         const sortedIdeas = eventIdeas.sort((a, b) => {
           if (a.email === userEmail && b.email !== userEmail) return -1;
           if (a.email !== userEmail && b.email === userEmail) return 1;
-          return 0;
+          return b.likes - a.likes; // Sort by likes for the rest
         });
+
         setIdeas(sortedIdeas);
       } catch (err) {
         console.error('Error fetching ideas:', err);
@@ -63,38 +65,74 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
 
   return (
     <>
-<style>
-  {`
-    .glowing-border {
-      border: 2px solid white;
-      box-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white;
-      animation: glowing 1.5s infinite;
-    }
+      <style>
+        {`
+          .glowing-border {
+            border: 2px solid white;
+            box-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white;
+            animation: glowing 1.5s infinite;
+          }
 
-    .your-idea-container {
-      background-color: white;
-      color: black;
-      padding: 2px 5px; /* Smaller padding */
-      border-radius: 1px;
-      font-weight: bold; /* No bold text */
-      font-size: 10px; /* Smaller font size */
-      display: inline-block;
-    }
+          .blue-yellow-glow {
+            border: 2px solid blue;
+            box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
+            animation: blue-yellow-glow 2s infinite;
+          }
 
-    @keyframes glowing {
-      0% {
-        box-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white;
-      }
-      50% {
-        box-shadow: 0 0 3px white, 0 0 5px white, 0 0 7px white;
-      }
-      100% {
-        box-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white;
-      }
-    }
-  `}
-</style>
+          @keyframes blue-yellow-glow {
+            0% {
+              border-color: blue;
+              box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
+            }
+            50% {
+              border-color: yellow;
+              box-shadow: 0 0 10px yellow, 0 0 20px blue, 0 0 30px yellow;
+            }
+            100% {
+              border-color: blue;
+              box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
+            }
+          }
 
+          .pulsing-container {
+            background: linear-gradient(90deg, red, yellow, green, blue, purple);
+            background-size: 400% 400%;
+            animation: pulse-colors 3s ease infinite;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px; /* Smaller font size */
+            border-radius: 3px; /* Smaller rounded corners */
+            padding: 3px; /* Smaller padding */
+            position: absolute;
+            bottom: 8px;
+            right: 8px; /* Bottom-right corner */
+            width: fit-content; /* Fit text size */
+          }
+
+          @keyframes pulse-colors {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+
+          .your-idea-container {
+            background-color: white;
+            color: black;
+            padding: 2px 5px;
+            border-radius: 1px;
+            font-weight: bold;
+            font-size: 10px;
+            display: inline-block;
+          }
+        `}
+      </style>
 
       <div
         className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
@@ -108,89 +146,66 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
           <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
         ) : (
           <ul className="space-y-2">
-            {ideas.map((idea) => (
-              <li
-                key={idea.id}
-                className={`relative p-2 shadow ${
-                  idea.email === userEmail ? 'glowing-border' : 'border-gray-500'
-                }`}
-                style={{
-                  backgroundColor: '#1E2A3A',
-                  border: idea.email === userEmail
-                    ? '2px solid white'
-                    : '2px solid #6B7280',
-                }}
-              >
-                {/* Display "Your Idea" for user's ideas */}
-                {idea.email === userEmail ? (
-                  <div className="your-idea-container absolute top-2 right-2">
-                    Your Idea
-                  </div>
-                ) : (
-                  /* Like Button for others' ideas */
-                  <div className="absolute top-2 right-2">
-                    <LikeButton
-                      ideaId={idea.id}
-                      currentUserEmail={userEmail}
-                      initialLikes={idea.likes}
-                      hasLiked={userLikedIdeas.includes(idea.id)}
-                      onLikeChange={(updatedIdea) =>
-                        setIdeas((prevIdeas) =>
-                          prevIdeas.map((i) =>
-                            i.id === updatedIdea.id ? updatedIdea : i
+            {ideas.map((idea) => {
+              const isMostPopular =
+                idea.likes === Math.max(...ideas.map((i) => i.likes)) &&
+                idea.email !== userEmail;
+
+              return (
+                <li
+                  key={idea.id}
+                  className={`relative p-2 shadow ${
+                    idea.email === userEmail
+                      ? 'glowing-border'
+                      : isMostPopular
+                      ? 'blue-yellow-glow'
+                      : 'border-gray-500'
+                  }`}
+                  style={{
+                    backgroundColor: '#1E2A3A',
+                  }}
+                >
+                  {/* Display "Your Idea" for user's ideas */}
+                  {idea.email === userEmail ? (
+                    <div className="your-idea-container absolute top-2 right-2">
+                      Your Idea
+                    </div>
+                  ) : (
+                    /* Like Button for others' ideas */
+                    <div className="absolute top-2 right-2">
+                      <LikeButton
+                        ideaId={idea.id}
+                        currentUserEmail={userEmail}
+                        initialLikes={idea.likes}
+                        hasLiked={userLikedIdeas.includes(idea.id)}
+                        onLikeChange={(updatedIdea) =>
+                          setIdeas((prevIdeas) =>
+                            prevIdeas.map((i) =>
+                              i.id === updatedIdea.id ? updatedIdea : i
+                            )
                           )
-                        )
-                      }
-                    />
-                  </div>
-                )}
+                        }
+                      />
+                    </div>
+                  )}
 
-                {/* Menu Options */}
-                {(idea.email === userEmail || isAdmin) && (
-                  <div className="absolute bottom-2 right-2">
-                    <button
-                      className="text-white text-sm hover:text-gray-300"
-                      onClick={() =>
-                        setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
-                      }
-                    >
-                      ...
-                    </button>
-                    {menuOpenId === idea.id && (
-                      <div
-                        className="absolute bg-white shadow-lg p-1 z-50 text-black"
-                        style={{
-                          bottom: '100%',
-                          right: '0',
-                          marginBottom: '-8px',
-                        }}
-                      >
-                        <button
-                          className="px-3 py-1 text-xs hover:bg-gray-200 text-left border-b"
-                          onClick={() => setEditingIdea(idea)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="px-3 py-1 text-xs hover:bg-gray-200 text-left"
-                          onClick={() => handleDelete(idea.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {/* Most Popular Label in Bottom Right Corner */}
+                  {isMostPopular && (
+                    <div className="pulsing-container">
+                      Most Popular
+                    </div>
+                  )}
 
-                {/* Idea Content */}
-                <div>
-                  <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
-                  <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
-                  <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
-                  <p className="text-xs text-gray-400 mt-1">By: {idea.email}</p>
-                </div>
-              </li>
-            ))}
+                  {/* Idea Content */}
+                  <div>
+                    <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
+                    <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
+                    <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
+                    <p className="text-xs text-gray-400 mt-1">By: {idea.email}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
 
