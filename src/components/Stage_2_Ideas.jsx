@@ -62,9 +62,6 @@ function Stage_2_Ideas({ eventId }) {
       className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
       style={{ backgroundColor: 'transparent', maxHeight: '60vh', overflowY: 'auto' }}
     >
-      {/* Header */}
-      <h2 className="text-lg font-bold text-center text-white mb-2">Stage 2: Voting</h2>
-
       {ideas.length === 0 ? (
         <p className="text-center text-gray-500">No ideas are currently in Stage 2.</p>
       ) : (

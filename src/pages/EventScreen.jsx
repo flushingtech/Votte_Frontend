@@ -74,7 +74,7 @@ function EventScreen() {
       <div className="p-3">
         {/* Event Information */}
         <div className="max-w-3xl mx-auto p-4 border border-white shadow-md"
-          style={{ backgroundColor: '#1E2A3A' }}>
+          style={{ backgroundColor: '#1E2A3A', position: 'relative' }}>
           {/* Event Title */}
           <h1 className="text-4xl font-extrabold text-center mb-1"
             style={{
@@ -102,13 +102,24 @@ function EventScreen() {
               Votte Time - Submissions are closed.
             </p>
           ) : (
-            <p className="text-center text-blue-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Submissions Open
-            </p>
+            <div className="relative">
+              <p className="absolute left-0 top-0 text-blue-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
+                style={{ backgroundColor: '#2A2F3C' }}>
+                Submissions Open
+              </p>
+              <div className="flex justify-center">
+                <button
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
+                  onClick={() => {
+                    // Logic to open the IdeaSubmission modal or navigate to the Idea submission screen
+                  }}
+                >
+                  Add Idea
+                </button>
+              </div>
+            </div>
           )}
         </div>
-
 
         {/* Conditionally Render Ideas */}
         <div className="max-w-3xl mx-auto mt-3">
