@@ -94,20 +94,28 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             }
           }
 
-          .pulsing-container {
+          .your-idea-container {
+            background-color: white;
+            color: black;
+            padding: 2px 5px;
+            border-radius: 1px;
+            font-weight: bold;
+            font-size: 10px;
+            display: inline-block;
+          }
+
+          .most-popular-container {
             background: linear-gradient(90deg, red, yellow, green, blue, purple);
             background-size: 400% 400%;
-            animation: pulse-colors 3s ease infinite;
             color: white;
-            text-align: center;
+            font-size: 10px;
             font-weight: bold;
-            font-size: 10px; /* Smaller font size */
-            border-radius: 3px; /* Smaller rounded corners */
-            padding: 3px; /* Smaller padding */
+            padding: 3px;
+            border-radius: 1px;
             position: absolute;
-            bottom: 8px;
-            right: 8px; /* Bottom-right corner */
-            width: fit-content; /* Fit text size */
+            bottom: 7px;
+            right: 7px;
+            animation: pulse-colors 3s ease infinite;
           }
 
           @keyframes pulse-colors {
@@ -120,16 +128,6 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             100% {
               background-position: 0% 50%;
             }
-          }
-
-          .your-idea-container {
-            background-color: white;
-            color: black;
-            padding: 2px 5px;
-            border-radius: 1px;
-            font-weight: bold;
-            font-size: 10px;
-            display: inline-block;
           }
         `}
       </style>
@@ -166,12 +164,14 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                   }}
                 >
                   {/* Display "Your Idea" for user's ideas */}
-                  {idea.email === userEmail ? (
+                  {idea.email === userEmail && (
                     <div className="your-idea-container absolute top-2 right-2">
                       Your Idea
                     </div>
-                  ) : (
-                    /* Like Button for others' ideas */
+                  )}
+
+                  {/* Like Button for others' ideas */}
+                  {idea.email !== userEmail && (
                     <div className="absolute top-2 right-2">
                       <LikeButton
                         ideaId={idea.id}
@@ -191,8 +191,45 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
 
                   {/* Most Popular Label in Bottom Right Corner */}
                   {isMostPopular && (
-                    <div className="pulsing-container">
+                    <div className="most-popular-container">
                       Most Popular
+                    </div>
+                  )}
+
+                  {/* Menu Options for User's Ideas */}
+                  {idea.email === userEmail && (
+                    <div className="absolute bottom-2 right-2">
+                      <button
+                        className="text-white text-sm hover:text-gray-300"
+                        onClick={() =>
+                          setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
+                        }
+                      >
+                        ...
+                      </button>
+                      {menuOpenId === idea.id && (
+                        <div
+                          className="absolute bg-white shadow-lg p-1 z-50 text-black"
+                          style={{
+                            bottom: '100%',
+                            right: '0',
+                            marginBottom: '-8px',
+                          }}
+                        >
+                          <button
+                            className="px-3 py-1 text-xs hover:bg-gray-200 text-left border-b"
+                            onClick={() => setEditingIdea(idea)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="px-3 py-1 text-xs hover:bg-gray-200 text-left"
+                            onClick={() => handleDelete(idea.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
