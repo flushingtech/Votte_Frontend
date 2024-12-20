@@ -63,6 +63,9 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
 
+    // Calculate the maximum likes among all ideas
+    const maxLikes = Math.max(...ideas.map((idea) => idea.likes), 0);
+
     return (
         <>
             <style>
@@ -77,21 +80,6 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             border: 2px solid blue;
             box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
             animation: blue-yellow-glow 2s infinite;
-          }
-
-          @keyframes blue-yellow-glow {
-            0% {
-              border-color: blue;
-              box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
-            }
-            50% {
-              border-color: yellow;
-              box-shadow: 0 0 10px yellow, 0 0 20px blue, 0 0 30px yellow;
-            }
-            100% {
-              border-color: blue;
-              box-shadow: 0 0 10px blue, 0 0 20px yellow, 0 0 30px blue;
-            }
           }
 
           .idea-container {
@@ -140,9 +128,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             font-weight: bold;
             padding: 3px;
             border-radius: 1px;
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
+            margin-bottom: 5px;
             animation: pulse-colors 3s ease infinite;
           }
 
@@ -158,58 +144,66 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             }
           }
 
-.menu-button {
-  position: absolute;
-  top: 55px;
-  right: 5px;
-  font-size: 18px;
-  cursor: pointer;
-  color: white;
-  background: none;
-  border: none;
-  z-index: 10;
-}
+          .menu-button {
+            position: absolute;
+            top: 55px;
+            right: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+            background: none;
+            border: none;
+            z-index: 10;
+          }
 
-.menu-button:hover {
-  color: #ccc;
-}
+          .menu-button:hover {
+            color: #ccc;
+          }
 
-.dropdown-menu {
-  position: absolute;
-  top: -5px;
-  right: 5px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 20;
-  width: 70px; /* Adjusted width for a smaller menu */
-  padding: 5px 0; /* Slight padding for menu edges */
-  text-align: center; /* Center the text */
-}
+          .dropdown-menu {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            width: 70px;
+            padding: 5px 0;
+            text-align: center;
+          }
 
-.dropdown-menu button {
-  width: 100%;
-  padding: 6px 0; /* Smaller padding for buttons */
-  text-align: center; /* Center the button text */
-  border: none;
-  background: none;
-  font-size: 12px; /* Smaller font size */
-  color: #333;
-  cursor: pointer;
-}
+          .dropdown-menu button {
+            width: 100%;
+            padding: 6px 0;
+            text-align: center;
+            border: none;
+            background: none;
+            font-size: 12px;
+            color: #333;
+            cursor: pointer;
+          }
 
-.dropdown-menu button:hover {
-  background-color: #f5f5f5;
-  color: #000;
-}
+          .dropdown-menu button:hover {
+            background-color: #f5f5f5;
+            color: #000;
+          }
 
-.ideas-list {
-  overflow: visible;
-}
+          .most-popular-like-wrapper {
+            position: relative;
+          }
 
+          .most-popular-container {
+            text-align: center;
+            margin-bottom: 5px;
+          }
 
-
+          .like-button-wrapper {
+            position: absolute;
+            right: 5px;
+            bottom: -30px;
+          }
         `}
             </style>
 
@@ -226,19 +220,19 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                 ) : (
                     <ul className="space-y-2">
                         {ideas.map((idea) => {
-                            const isMostPopular =
-                                idea.likes === Math.max(...ideas.map((i) => i.likes)) &&
-                                idea.email !== userEmail;
+                            const isMostPopular = idea.likes === maxLikes;
+                            const isYourIdea = idea.email === userEmail;
 
                             return (
                                 <li
                                     key={idea.id}
-                                    className={`relative p-2 shadow ${idea.email === userEmail
-                                        ? 'glowing-border'
-                                        : isMostPopular
+                                    className={`relative p-2 shadow ${
+                                        isYourIdea
+                                            ? 'glowing-border'
+                                            : isMostPopular
                                             ? 'blue-yellow-glow'
                                             : 'border-gray-500'
-                                        }`}
+                                    }`}
                                     style={{
                                         backgroundColor: '#1E2A3A',
                                     }}
@@ -251,12 +245,21 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                             <p className="text-xs text-gray-400 mt-1">By: {idea.email}</p>
                                         </div>
 
-                                        {idea.email === userEmail && (
+                                        {isYourIdea && (
                                             <div className="your-idea-section">
                                                 <div className="your-idea-container">Your Idea</div>
+                                                {isMostPopular && (
+                                                    <div className="most-popular-container">
+                                                        Most Popular
+                                                    </div>
+                                                )}
                                                 <div className="likes-count">{idea.likes} Likes</div>
-
-                                                <div className="menu-button" onClick={() => setMenuOpenId(menuOpenId === idea.id ? null : idea.id)}>
+                                                <div
+                                                    className="menu-button"
+                                                    onClick={() =>
+                                                        setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
+                                                    }
+                                                >
                                                     ...
                                                 </div>
                                                 {menuOpenId === idea.id && (
@@ -265,35 +268,34 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                                         <button onClick={() => handleDelete(idea.id)}>Delete</button>
                                                     </div>
                                                 )}
-
-
-
                                             </div>
-
                                         )}
 
-                                        {idea.email !== userEmail && (
-                                            <div className="absolute top-2 right-2">
-                                                <LikeButton
-                                                    ideaId={idea.id}
-                                                    currentUserEmail={userEmail}
-                                                    initialLikes={idea.likes}
-                                                    hasLiked={userLikedIdeas.includes(idea.id)}
-                                                    onLikeChange={(updatedIdea) =>
-                                                        setIdeas((prevIdeas) =>
-                                                            prevIdeas.map((i) =>
-                                                                i.id === updatedIdea.id ? updatedIdea : i
+                                        {!isYourIdea && (
+                                            <div className="most-popular-like-wrapper">
+                                                {isMostPopular && (
+                                                    <div className="most-popular-container">
+                                                        Most Popular
+                                                    </div>
+                                                )}
+                                                <div className="like-button-wrapper">
+                                                    <LikeButton
+                                                        ideaId={idea.id}
+                                                        currentUserEmail={userEmail}
+                                                        initialLikes={idea.likes}
+                                                        hasLiked={userLikedIdeas.includes(idea.id)}
+                                                        onLikeChange={(updatedIdea) =>
+                                                            setIdeas((prevIdeas) =>
+                                                                prevIdeas.map((i) =>
+                                                                    i.id === updatedIdea.id ? updatedIdea : i
+                                                                )
                                                             )
-                                                        )
-                                                    }
-                                                />
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
                                         )}
                                     </div>
-
-                                    {isMostPopular && (
-                                        <div className="most-popular-container">Most Popular</div>
-                                    )}
                                 </li>
                             );
                         })}
