@@ -81,7 +81,7 @@ function EventsList() {
           return (
             <div
               key={event.id}
-              className="shadow-lg p-4 flex justify-between items-center"
+              className="shadow-lg p-4 flex justify-between items-center relative"
               style={{
                 backgroundColor: isNextUpcoming ? '#FFE4CE' : '#FFE4CE',
                 height: '120px',
@@ -89,10 +89,25 @@ function EventsList() {
                   ? '2px solid white'
                   : '2px solid transparent',
                 boxShadow: isNextUpcoming
-                  ? '0 0 15px 5px rgba(255, 255, 255, 0.7)'
+                  ? '0 0 10px 5px rgba(255, 255, 255, 0.9)'
                   : 'none',
               }}
             >
+              {/* "NEXT EVENT!" Tag */}
+              {isNextUpcoming && (
+                <div
+                  className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
+                  style={{
+                    background: 'linear-gradient(90deg, blue, white)',
+                    backgroundSize: '200% 200%',
+                    borderRadius: '0px',
+                    animation: 'pulseBlueWhite 2s infinite',
+                  }}
+                >
+                  NEXT EVENT!
+                </div>
+              )}
+
               {/* Event Title and Date */}
               <div>
                 <h3
@@ -123,6 +138,7 @@ function EventsList() {
                   border: 'none',
                   width: '200px',
                   height: '50px',
+                  borderRadius: '3px',
                 }}
               >
                 {buttonText}
@@ -131,6 +147,22 @@ function EventsList() {
           );
         })}
       </div>
+
+      <style>
+        {`
+          @keyframes pulseBlueWhite {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
