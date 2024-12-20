@@ -72,59 +72,127 @@ function EventScreen() {
     <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
       <Navbar userName={email} backToHome={true} />
       <div className="p-3">
+        <style>
+          {`
+            .event-title {
+              position: relative;
+              display: inline-block;
+              padding: px;
+              text-align: center;
+              font-size: 2.5rem; /* Adjust the font size */
+              font-weight: bold; /* Make the font bold */
+              color: white;
+            }
+
+            .event-title::before {
+              content: '';
+              position: absolute;
+              top: -4px;
+              left: -4px;
+              right: -4px;
+              bottom: -4px;
+              z-index: -1;
+              border: 2px solid #fff;
+              border-radius: 10px;
+              box-shadow: 0 0 10px #ffdd00, 0 0 20px #ffa500, 0 0 30px #ffdd00;
+            }
+
+            .submissions-container {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 10px;
+            }
+
+            .submissions-open {
+              color: #00bfff;
+              background-color: #2A2F3C;
+              padding: 8px 12px;
+              border-radius: 5px;
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              box-shadow: 0 0 10px white, 0 0 20px white, 0 0 30px white;
+              animation: glowing-white 1.5s infinite alternate;
+            }
+
+            .add-idea-button {
+              padding: 8px 12px;
+              font-size: 14px;
+              font-weight: bold;
+              color: white;
+              background-color: #1E90FF;
+              border-radius: 3px;
+              cursor: pointer;
+              text-transform: uppercase;
+              animation: pulse 5s infinite;
+              transition: background-color 0.3s;
+            }
+
+            .add-idea-button:hover {
+              background-color: #1C86EE;
+            }
+
+            @keyframes glowing-white {
+              0% {
+                box-shadow: 0 0 3px white, 0 0 2px white, 0 0 3px white;
+              }
+              100% {
+                box-shadow: 0 0 9px white, 0 0 7px white, 0 0 5px white;
+              }
+            }
+
+            @keyframes pulse {
+              0% {
+                transform: scale(1);
+              }
+              50% {
+                transform: scale(1.05);
+              }
+              100% {
+                transform: scale(1);
+              }
+            }
+          `}
+        </style>
+
         {/* Event Information */}
-        <div className="max-w-3xl mx-auto p-4 border border-white shadow-md"
-          style={{ backgroundColor: '#1E2A3A', position: 'relative' }}>
+        <div
+          className="max-w-3xl mx-auto p-4 border border-white shadow-md"
+          style={{ backgroundColor: '#1E2A3A', position: 'relative' }}
+        >
           {/* Event Title */}
-          <h1 className="text-4xl font-extrabold text-center mb-1"
-            style={{
-              backgroundImage: 'linear-gradient(to right, #ffdd00, #ffa500)',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-            }}>
+          <h1 className="text-4xl font-normal text-center mb-1 event-title">
             {event?.title}
           </h1>
 
           {/* Event Date */}
-          <p className="text-lg text-center text-gray-400 mb-2">
+          <p className="text-lg font-bold text-left text-gray-400 mb-2">
             {new Date(event?.event_date).toLocaleDateString()}
           </p>
 
-          {/* Stage-Specific Message */}
-          {eventStage === 3 ? (
-            <p className="text-center text-yellow-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Results
-            </p>
-          ) : eventStage === 2 ? (
-            <p className="text-center text-green-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Votte Time - Submissions are closed.
-            </p>
-          ) : (
-            <div className="relative">
-              <p className="absolute left-0 top-0 text-blue-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-                style={{ backgroundColor: '#2A2F3C' }}>
-                Submissions Open
-              </p>
-              <div className="flex justify-center">
-                <button
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-                  onClick={() => {
-                    // Logic to open the IdeaSubmission modal or navigate to the Idea submission screen
-                  }}
-                >
-                  Add Idea
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Submissions Open and Add Idea */}
+          <div className="submissions-container">
+            <p className="submissions-open">Submissions Open</p>
+            <button
+              className="add-idea-button"
+              onClick={() => {
+                // Logic to open the IdeaSubmission modal or navigate to the Idea submission screen
+              }}
+            >
+              Add Idea
+            </button>
+          </div>
         </div>
 
         {/* Conditionally Render Ideas */}
         <div className="max-w-3xl mx-auto mt-3">
           {eventStage === 1 ? (
-            <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
+            <Stage_1_Ideas
+              key={ideasRefreshKey}
+              eventId={eventId}
+              refreshIdeas={refreshIdeas}
+            />
           ) : eventStage === 2 ? (
             <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : (
