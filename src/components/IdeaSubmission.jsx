@@ -62,13 +62,13 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   }
 
   return (
-    <div className="w-full text-center my-6">
+    <div className="w-full text-center">
       {eventStage === 2 ? (
         <p className="text-yellow-500 font-bold text-lg">Votte Time - Submissions are closed.</p>
       ) : (
         <button
           onClick={() => setIsFormVisible(true)}
-          className="bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
+          className="bg-blue-600 text-white py-2 px-4 font-bold hover:bg-blue-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
         >
           Add Idea
         </button>
