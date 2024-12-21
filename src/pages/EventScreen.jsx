@@ -72,48 +72,99 @@ function EventScreen() {
     <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
       <Navbar userName={email} backToHome={true} />
       <div className="p-3">
+        <style>
+          {`
+            .event-title {
+              position: relative;
+              display: inline-block;
+              text-align: center;
+              font-size: 2.5rem;
+              font-weight: bold;
+              color: white;
+            }
+
+            .submissions-container {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+
+            .submissions-open {
+              color: #00bfff;
+              background-color: #2A2F3C;
+              padding: 8px 12px;
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              box-shadow: 0 0 5px white, 0 0 5px white, 0 0 10px white;
+              border-radius: 5px;
+            }
+
+            .votte-time {
+              color: #28A745; /* Green for Stage 2 */
+              background-color: #2A2F3C;
+              padding: 8px 12px;
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              box-shadow: 0 0 10px #28A745, 0 0 20px #28A745, 0 0 30px #28A745;
+              border-radius: 5px;
+            }
+
+            .our-winners {
+              color: #FFA500; /* Orange for Stage 3 */
+              background-color: #2A2F3C;
+              padding: 8px 12px;
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              box-shadow: 0 0 10px #FFA500, 0 0 20px #FFA500, 0 0 30px #FFA500;
+              border-radius: 5px;
+            }
+
+            .add-idea-button-container {
+              display: flex;
+              justify-content: flex-end;
+            }
+          `}
+        </style>
+
         {/* Event Information */}
-        <div className="max-w-3xl mx-auto p-4 border border-white shadow-md"
-          style={{ backgroundColor: '#1E2A3A' }}>
+        <div
+          className="max-w-3xl mx-auto p-4 border border-white shadow-md"
+          style={{ backgroundColor: '#1E2A3A', position: 'relative' }}
+        >
           {/* Event Title */}
-          <h1 className="text-4xl font-extrabold text-center mb-1"
-            style={{
-              backgroundImage: 'linear-gradient(to right, #ffdd00, #ffa500)',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-            }}>
-            {event?.title}
-          </h1>
+          <h1 className="text-4xl font-normal text-center mb-1 event-title">{event?.title}</h1>
 
           {/* Event Date */}
-          <p className="text-lg text-center text-gray-400 mb-2">
+          <p className="text-lg font-bold text-left text-gray-400 mb-2">
             {new Date(event?.event_date).toLocaleDateString()}
           </p>
 
-          {/* Stage-Specific Message */}
-          {eventStage === 3 ? (
-            <p className="text-center text-yellow-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Results
-            </p>
-          ) : eventStage === 2 ? (
-            <p className="text-center text-green-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Votte Time - Submissions are closed.
-            </p>
-          ) : (
-            <p className="text-center text-blue-400 text-sm font-semibold uppercase tracking-wide px-2 py-1"
-              style={{ backgroundColor: '#2A2F3C', display: 'inline-block', margin: '0 auto' }}>
-              Submissions Open
-            </p>
-          )}
+          {/* Stage-Specific Content */}
+          <div className="submissions-container">
+            {eventStage === 1 && (
+              <>
+                <p className="submissions-open">Submissions Open</p>
+                <div className="add-idea-button-container">
+                  <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
+                </div>
+              </>
+            )}
+            {eventStage === 2 && <p className="votte-time">Votte Time - Submissions Closed</p>}
+            {eventStage === 3 && <p className="our-winners">Our Winners!</p>}
+          </div>
         </div>
-
 
         {/* Conditionally Render Ideas */}
         <div className="max-w-3xl mx-auto mt-3">
           {eventStage === 1 ? (
-            <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
+            <Stage_1_Ideas
+              key={ideasRefreshKey}
+              eventId={eventId}
+              refreshIdeas={refreshIdeas}
+            />
           ) : eventStage === 2 ? (
             <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : (

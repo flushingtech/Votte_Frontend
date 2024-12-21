@@ -33,68 +33,136 @@ function EventsList() {
     navigate(`/event/${eventId}`);
   };
 
+  // Find the next upcoming event
+  const currentDate = new Date();
+  const nextUpcomingEvent = events.reduce((closestEvent, event) => {
+    const eventDate = new Date(event.event_date);
+    if (
+      eventDate >= currentDate &&
+      (!closestEvent || eventDate < new Date(closestEvent.event_date))
+    ) {
+      return event;
+    }
+    return closestEvent;
+  }, null);
+
   return (
     <div
       className="p-6 mx-auto"
       style={{
         backgroundColor: '#030C18',
-        maxWidth: '95%', // Allow the container to use more of the screen
+        maxWidth: '95%',
       }}
     >
       <h2 className="text-3xl font-bold text-center text-white mb-4">
         Upcoming Events
       </h2>
       <div
-        className="events-list flex flex-col gap-3 mx-auto"
+        className="events-list flex flex-col gap-4 mx-auto"
         style={{
-          maxWidth: '100%', // Allow events to use the full width of the container
+          maxWidth: '100%',
         }}
       >
-        {events.map((event) => (
-          <div
-            key={event.id}
-            className="shadow-lg p-3 flex justify-between items-center"
-            style={{
-              backgroundColor: '#FFE4CE',
-            }}
-          >
-            {/* Event Title and Date */}
-            <div>
-              <h3
-                className="text-sm font-bold text-black truncate"
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {event.title}
-              </h3>
-              <p className="text-gray-500 text-xs mt-1">
-                {!isNaN(Date.parse(event.event_date)) &&
-                  dateTimeFormatter.format(new Date(event.event_date))}
-              </p>
-            </div>
+        {events.map((event) => {
+          const isNextUpcoming =
+            nextUpcomingEvent && event.id === nextUpcomingEvent.id;
 
-            {/* View Event Button */}
-            <button
-              className="text-sm font-semibold bg-[#1E2A3A] text-white px-5 py-2 hover:bg-[#16202B] transition-all"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the parent onClick
-                handleEventClick(event.id);
-              }}
+          // Determine button text and color based on stage
+          let buttonText = 'Add An Idea';
+          let buttonColor = '#1E2A3A';
+          if (event.stage === 2) {
+            buttonText = 'Votte for a Winner';
+            buttonColor = '#28A745'; // Green
+          } else if (event.stage === 3) {
+            buttonText = 'View Winners';
+            buttonColor = '#FF5722'; // Orange
+          }
+
+          return (
+            <div
+              key={event.id}
+              className="shadow-lg p-4 flex justify-between items-center relative"
               style={{
-                border: 'none',
-                width: '150px',
-                height: '40px',
-                borderRadius: '4px',
+                backgroundColor: isNextUpcoming ? '#FFE4CE' : '#FFE4CE',
+                height: '120px',
+                border: isNextUpcoming
+                  ? '2px solid white'
+                  : '2px solid transparent',
+                boxShadow: isNextUpcoming
+                  ? '0 0 10px 5px rgba(255, 255, 255, 0.9)'
+                  : 'none',
               }}
             >
-              View Event
-            </button>
-          </div>
-        ))}
+              {/* "NEXT EVENT!" Tag */}
+              {isNextUpcoming && (
+                <div
+                  className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
+                  style={{
+                    background: 'linear-gradient(90deg, blue, white)',
+                    backgroundSize: '200% 200%',
+                    borderRadius: '0px',
+                    animation: 'pulseBlueWhite 2s infinite',
+                  }}
+                >
+                  NEXT EVENT!
+                </div>
+              )}
+
+              {/* Event Title and Date */}
+              <div>
+                <h3
+                  className="text-lg font-bold text-black truncate"
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {event.title}
+                </h3>
+                <p className="text-gray-500 text-sm mt-2">
+                  {!isNaN(Date.parse(event.event_date)) &&
+                    dateTimeFormatter.format(new Date(event.event_date))}
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <button
+                className="text-base font-semibold text-white px-6 py-3 hover:opacity-90 transition-all"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleEventClick(event.id);
+                }}
+                style={{
+                  backgroundColor: buttonColor,
+                  border: 'none',
+                  width: '200px',
+                  height: '50px',
+                  borderRadius: '3px',
+                }}
+              >
+                {buttonText}
+              </button>
+            </div>
+          );
+        })}
       </div>
+
+      <style>
+        {`
+          @keyframes pulseBlueWhite {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
