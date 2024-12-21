@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com'];
+const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com', 'william@flushingtech.org'];
 
 function Navbar({ userName, backToHome }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
