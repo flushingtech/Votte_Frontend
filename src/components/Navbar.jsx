@@ -43,7 +43,7 @@ function Navbar({ userName, backToHome }) {
           <a href="https://flushingtech.org" className="flex items-center text-black text-sm">
             <span className="mt-1.5 ml-4 material-icons text-black text-2xl font-bold">arrow_back</span>
             <span className="ml-3 lowercase text-black text-2xl">
-              c.tech<span style={{ color: '#CA2828' }}>(flushing)</span>
+              flushing<span style={{ color: '#CA2828' }}>(tech)</span>
             </span>
           </a>
         )}
