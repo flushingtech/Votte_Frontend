@@ -33,18 +33,31 @@ function EventsList() {
     navigate(`/event/${eventId}`);
   };
 
-  // Find the next upcoming event
   const currentDate = new Date();
-  const nextUpcomingEvent = events.reduce((closestEvent, event) => {
-    const eventDate = new Date(event.event_date);
-    if (
-      eventDate >= currentDate &&
-      (!closestEvent || eventDate < new Date(closestEvent.event_date))
-    ) {
-      return event;
-    }
-    return closestEvent;
-  }, null);
+
+  // Find the most recent past event
+  const recentPastEvent = events
+    .filter((event) => new Date(event.event_date) < currentDate)
+    .reduce((latest, event) => {
+      const eventDate = new Date(event.event_date);
+      if (!latest || eventDate > new Date(latest.event_date)) {
+        return event;
+      }
+      return latest;
+    }, null);
+
+  // Find the next upcoming event
+  const nextUpcomingEvent = events
+    .filter((event) => new Date(event.event_date) >= currentDate)
+    .reduce((closest, event) => {
+      const eventDate = new Date(event.event_date);
+      if (!closest || eventDate < new Date(closest.event_date)) {
+        return event;
+      }
+      return closest;
+    }, null);
+
+  const filteredEvents = [recentPastEvent, nextUpcomingEvent].filter(Boolean);
 
   return (
     <div
@@ -55,7 +68,7 @@ function EventsList() {
       }}
     >
       <h2 className="text-3xl font-bold text-center text-white mb-4">
-        Upcoming Events
+        Events
       </h2>
       <div
         className="events-list flex flex-col gap-4 mx-auto"
@@ -63,7 +76,7 @@ function EventsList() {
           maxWidth: '100%',
         }}
       >
-        {events.map((event) => {
+        {filteredEvents.map((event) => {
           const isNextUpcoming =
             nextUpcomingEvent && event.id === nextUpcomingEvent.id;
 
@@ -71,7 +84,7 @@ function EventsList() {
           let buttonText = 'Add An Idea';
           let buttonColor = '#1E2A3A';
           if (event.stage === 2) {
-            buttonText = 'Votte for a Winner';
+            buttonText = 'Vote for a Winner';
             buttonColor = '#28A745'; // Green
           } else if (event.stage === 3) {
             buttonText = 'View Winners';
@@ -83,7 +96,7 @@ function EventsList() {
               key={event.id}
               className="shadow-lg p-4 flex justify-between items-center relative"
               style={{
-                backgroundColor: isNextUpcoming ? '#FFE4CE' : '#FFE4CE',
+                backgroundColor: '#FFE4CE',
                 height: '120px',
                 border: isNextUpcoming
                   ? '2px solid white'
