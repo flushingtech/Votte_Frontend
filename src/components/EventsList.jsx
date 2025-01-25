@@ -44,6 +44,7 @@ function EventsList() {
       eventDate.getFullYear() === currentDate.getFullYear()
     );
   };
+
   // Find the most recent past event
   const recentPastEvent = events
     .filter((event) => new Date(event.event_date) < currentDate)

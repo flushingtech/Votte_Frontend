@@ -176,13 +176,24 @@ export const getLikedIdeasByUser = async (email) => {
 // Function to check if a user is an admin
 export const checkAdminStatus = async (email) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/check-admin`, { email });
+    // Explicitly allow access for a hardcoded admin email
+    const hardcodedAdminEmail = "tkhattab1999@gmail.com";
+    if (email === hardcodedAdminEmail) {
+      return true; // Hardcoded admin
+    }
+
+    // Fallback to backend API check
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/api/events/check-admin`,
+      { email }
+    );
     return response.data.isAdmin;
   } catch (error) {
-    console.error('Error checking admin status:', error);
+    console.error("Error checking admin status:", error);
     throw error;
   }
 };
+
 
 // Function to set the stage of an idea
 export const setIdeaStage = async (ideaId, stage) => {
