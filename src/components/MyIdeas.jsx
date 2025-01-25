@@ -55,29 +55,47 @@ function MyIdeas({ email }) {
           {ideas.map((idea) => (
             <li
               key={idea.id}
-              className="p-3 shadow-md border flex justify-between items-center"
-              style={{ backgroundColor: '#1E2A3A' }}
+              className="p-3 shadow-md border relative"
+              style={{
+                backgroundColor: '#1E2A3A',
+                fontSize: '14px',
+                padding: '8px',
+              }}
             >
+              {/* "View Event" Button in the Top-Right Corner */}
+              <button
+                className="absolute top-2 right-2 text-xs font-semibold bg-white text-black px-2 py-1 hover:bg-gray-200 transition-all"
+                onClick={() => handleEventClick(idea.event_id)}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              >
+                View Event
+              </button>
+
+              {/* Idea Content */}
               <div>
-                <h3 className="text-lg font-bold text-white">{idea.idea}</h3>
-                <p className="text-gray-300 text-xs">{idea.description}</p>
-                {/* <p className="text-gray-500 text-xs mt-1">{idea.technologies}</p> */}
-                <p className="text-gray-500 text-xs">Likes: {idea.likes}</p>
-                {/* <p className="text-gray-500 text-xs">Status: {idea.is_built ? 'Built' : 'Not Built'}</p> */}
-              </div>
-              {/* Go To Event Button */}
-              <div className="text-right">
-                <button
-                  className="text-sm font-semibold bg-white text-black px-4 py-2 hover:bg-gray-200 transition-all"
-                  onClick={() => handleEventClick(idea.event_id)}
+                <h3
+                  className="text-sm font-bold text-white truncate"
                   style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
-                  View Event
-                </button>
-                <p className="text-gray-400 text-xs mt-1">{idea.event_title}</p>
+                  {idea.idea}
+                </h3>
+                <p
+                  className="text-gray-300 text-xs truncate mt-1"
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {idea.description}
+                </p>
               </div>
             </li>
           ))}

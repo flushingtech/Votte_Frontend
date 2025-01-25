@@ -35,6 +35,15 @@ function EventsList() {
 
   const currentDate = new Date();
 
+  // Helper function to check if an event is today
+  const isToday = (date) => {
+    const eventDate = new Date(date);
+    return (
+      eventDate.getDate() === currentDate.getDate() &&
+      eventDate.getMonth() === currentDate.getMonth() &&
+      eventDate.getFullYear() === currentDate.getFullYear()
+    );
+  };
   // Find the most recent past event
   const recentPastEvent = events
     .filter((event) => new Date(event.event_date) < currentDate)
@@ -80,6 +89,8 @@ function EventsList() {
           const isNextUpcoming =
             nextUpcomingEvent && event.id === nextUpcomingEvent.id;
 
+          const isEventToday = isToday(event.event_date);
+
           // Determine button text and color based on stage
           let buttonText = 'Add An Idea';
           let buttonColor = '#1E2A3A';
@@ -98,16 +109,34 @@ function EventsList() {
               style={{
                 backgroundColor: '#FFE4CE',
                 height: '120px',
-                border: isNextUpcoming
+                border: isEventToday
+                  ? '2px solid green'
+                  : isNextUpcoming
                   ? '2px solid white'
                   : '2px solid transparent',
-                boxShadow: isNextUpcoming
+                boxShadow: isEventToday
+                  ? '0 0 15px 3px green'
+                  : isNextUpcoming
                   ? '0 0 10px 5px rgba(255, 255, 255, 0.9)'
                   : 'none',
               }}
             >
+              {/* "TODAY!" Tag */}
+              {isEventToday && (
+                <div
+                  className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
+                  style={{
+                    backgroundColor: 'green',
+                    color: 'white',
+                    
+                  }}
+                >
+                  TODAY!
+                </div>
+              )}
+
               {/* "NEXT EVENT!" Tag */}
-              {isNextUpcoming && (
+              {isNextUpcoming && !isEventToday && (
                 <div
                   className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
                   style={{
