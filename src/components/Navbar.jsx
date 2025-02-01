@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com', 'william@flushingtech.org'];
 
-function Navbar({ userName, backToHome }) {
+function Navbar({ userName }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -30,46 +30,34 @@ function Navbar({ userName, backToHome }) {
 
   return (
     <nav className="flex items-center justify-between p-3" style={{ backgroundColor: '#FFE4CE' }}>
-      <div className="flex items-center">
-        {backToHome ? (
-          <button
-            onClick={goToHome}
-            className="flex items-center bg-black text-white py-2 px-4 rounded shadow hover:bg-gray-800 transition-all"
-          >
-            <span className="material-icons text-white text-xl font-bold">arrow_back</span>
-            <span className="ml-2 text-sm font-semibold">Home</span>
-          </button>
-        ) : (
-          <a href="https://flushingtech.org" className="flex items-center text-black text-sm">
-            <span className="mt-1.5 ml-4 material-icons text-black text-2xl font-bold">arrow_back</span>
-            <span className="ml-3 lowercase text-black text-2xl">
-              flushing<span style={{ color: '#CA2828' }}>(tech)</span>
-            </span>
-          </a>
-        )}
-      </div>
-      <div className="relative text-black text-xl mr-4 flex items-center">
-        Hello, <span className="font-bold ml-1" style={{ color: '#CA2828' }}>{userName}</span>
+      {/* Logo in the top left - Clicking it navigates to /home */}
+      <button onClick={goToHome} className="flex items-center">
+        <img src="../src/assets/votte_favicon.png" alt="Votte Logo" className="h-10 w-10 ml-2 cursor-pointer" />
+      </button>
+
+      {/* User Info & Dropdown */}
+      <div className="relative flex items-center text-black text-lg font-medium mr-4">
+        <span className="mr-2 text-gray-800">{userName || userEmail}</span>
         <span
-          className="material-icons ml-2 cursor-pointer"
+          className="material-icons text-gray-600 text-md cursor-pointer hover:text-gray-900 transition"
           onClick={toggleDropdown}
         >
-          arrow_drop_down
+          expand_more
         </span>
 
         {isDropdownOpen && (
-          <div className="absolute right-0 top-full mt-1 w-24 bg-white rounded shadow-lg text-center z-10">
+          <div className="absolute right-0 top-full mt-1 w-32 bg-white shadow-lg text-center z-10">
             {adminEmails.includes(userEmail) && (
               <button
                 onClick={goToAdminPage}
-                className="w-full text-sm px-4 py-2 text-black hover:bg-gray-200"
+                className="w-full text-sm px-4 py-2 text-gray-700 hover:bg-gray-200"
               >
                 Admin
               </button>
             )}
             <button
               onClick={handleSignOut}
-              className="w-full text-sm px-4 py-2 text-black hover:bg-gray-200"
+              className="w-full text-sm px-4 py-2 text-gray-700 hover:bg-gray-200"
             >
               Sign Out
             </button>

@@ -292,3 +292,14 @@ export const updateAverageScores = async () => {
     throw error;
   }
 };
+
+// Function to get a single idea by its ID
+export const getIdeaById = async (ideaId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/idea/${ideaId}`);
+    return response.data.idea;
+  } catch (error) {
+    console.error('Error fetching idea details:', error);
+    throw error;
+  }
+};
