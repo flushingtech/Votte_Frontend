@@ -39,11 +39,11 @@ function MyIdeas({ email }) {
 
   return (
     <div className="my-ideas-section bg-transparent relative flex flex-col h-full">
-      {/* Sticky Header */}
+      {/* Sticky Header (Dark Blue) */}
       <div
-        className="p-4 border shadow-md"
+        className="p-2 border shadow-md"
         style={{
-          backgroundColor: '#2A2F3C',
+          backgroundColor: '#1E2A3A',
           border: '2px solid white',
           position: 'sticky',
           top: 0,
@@ -53,35 +53,36 @@ function MyIdeas({ email }) {
         <h2 className="text-xl font-bold text-white">My Ideas</h2>
       </div>
 
-      {/* Scrollable Ideas List with Shorter Height */}
-      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '10px' }}>
+      {/* Scrollable Ideas List with White Background */}
+      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '8px' }}>
         {ideas.length === 0 ? (
           <div
-            className="p-4 shadow-md border"
-            style={{ backgroundColor: '#2A2F3C', textAlign: 'left' }}
+            className="p-3 shadow-md border"
+            style={{ backgroundColor: 'white', textAlign: 'left' }}
           >
-            <h3 className="text-lg font-bold text-white">You haven’t submitted any ideas yet.</h3>
-            <p className="text-gray-400 text-sm mt-2">Click on an event and add your ideas there.</p>
+            <h3 className="text-lg font-bold text-black">You haven’t submitted any ideas yet.</h3>
+            <p className="text-gray-700 text-sm mt-2">Click on an event and add your ideas there.</p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-1"> {/* Reduced spacing between ideas */}
             {ideas.map((idea) => (
               <li
                 key={idea.id}
-                className="p-3 shadow-md border relative"
+                className="p-2 shadow-md border relative"
                 style={{
-                  backgroundColor: '#2A2F3C',
+                  backgroundColor: 'white', // White Background for Ideas
                   fontSize: '14px',
-                  padding: '8px',
-                  border: '2px solid white',
+                  border: '2px solid #1E2A3A', // Dark Blue Border
+                  marginBottom: '3px', // Reduce spacing between ideas
+                  padding: '6px', // Reduce padding inside each idea box
                 }}
               >
                 {/* "View Event" Button in the Top-Right Corner */}
                 <button
-                  className="absolute top-2 right-2 text-xs font-semibold bg-white text-black px-2 py-1 hover:bg-gray-200 transition-all"
+                  className="absolute top-2 right-2 text-xs font-semibold bg-black text-white px-2 py-1 hover:bg-gray-800 transition-all"
                   onClick={() => handleEventClick(idea.event_id)}
                   style={{
-                    border: '1px solid #ccc',
+                    border: '1px solid #666',
                     borderRadius: '4px',
                   }}
                 >
@@ -91,7 +92,7 @@ function MyIdeas({ email }) {
                 {/* Idea Content */}
                 <div>
                   <h3
-                    className="text-sm font-bold text-white truncate"
+                    className="text-sm font-bold text-black truncate"
                     style={{
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -101,7 +102,7 @@ function MyIdeas({ email }) {
                     {idea.idea}
                   </h3>
                   <p
-                    className="text-gray-300 text-xs truncate mt-1"
+                    className="text-gray-700 text-xs truncate mt-1"
                     style={{
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
