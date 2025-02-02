@@ -55,7 +55,7 @@ function Home() {
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
             style={{
-              padding: '1.5rem',
+              padding: '0.5rem',
               width: '100%',
             }}
           >
@@ -66,7 +66,7 @@ function Home() {
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
             style={{
-              padding: '1.5rem',
+              padding: '0.5rem',
               width: '100%',
             }}
           >
@@ -78,7 +78,7 @@ function Home() {
         <div
           className="w-full md:w-[2%] border border-white shadow-sm"
           style={{
-            padding: '0.25rem',
+            padding: '0.5rem',
             width: '100%',
           }}
         >

@@ -39,43 +39,42 @@ function LikedIdeas({ email }) {
 
   return (
     <div className="liked-ideas-section bg-transparent relative flex flex-col h-full">
-      {/* Sticky Header */}
+      {/* Sticky Header (Dark Blue) */}
       <div
-        className="p-4 border shadow-md"
+        className="p-2 border shadow-md"
         style={{
-          backgroundColor: '#D6D6D6',
+          backgroundColor: '#1E2A3A',
           border: '2px solid white',
           position: 'sticky',
           top: 0,
           zIndex: 10,
         }}
       >
-        <h2 className="text-xl font-bold text-black">Ideas I Liked</h2>
+        <h2 className="text-xl font-bold text-white">Ideas I Liked</h2>
       </div>
 
-      {/* Scrollable Ideas List with Shorter Height */}
-      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '10px' }}>
+      {/* Scrollable Ideas List with White Background */}
+      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '8px' }}>
         {ideas.length === 0 ? (
           <div
-            className="p-4 shadow-md border"
-            style={{ backgroundColor: '#E0E0E0', textAlign: 'left' }}
+            className="p-3 shadow-md border"
+            style={{ backgroundColor: 'white', textAlign: 'left' }}
           >
             <h3 className="text-lg font-bold text-black">You haven’t liked any ideas yet.</h3>
-            <p className="text-gray-700 text-sm mt-2">
-              Explore events and like ideas that inspire you!
-            </p>
+            <p className="text-gray-700 text-sm mt-2">Explore events and like ideas that inspire you!</p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-1"> {/* Reduced spacing between ideas */}
             {ideas.map((idea) => (
               <li
                 key={idea.id}
-                className="p-3 shadow-md border relative"
+                className="p-2 shadow-md border relative"
                 style={{
-                  backgroundColor: '#D6D6D6',
+                  backgroundColor: 'white', // White Background for Ideas
                   fontSize: '14px',
-                  padding: '8px',
-                  border: '2px solid white',
+                  border: '2px solid #1E2A3A', // Dark Blue Border
+                  marginBottom: '3px', // Reduce spacing between ideas
+                  padding: '6px', // Reduce padding inside each idea box
                 }}
               >
                 {/* "View Idea" Button in the Top-Right Corner */}
@@ -90,7 +89,7 @@ function LikedIdeas({ email }) {
                   View Idea
                 </button>
 
-                {/* Truncated Title and Description */}
+                {/* Idea Content */}
                 <div>
                   <h3
                     className="text-sm font-bold text-black truncate"
@@ -103,7 +102,7 @@ function LikedIdeas({ email }) {
                     {idea.idea}
                   </h3>
                   <p
-                    className="text-gray-800 text-xs truncate mt-1"
+                    className="text-gray-700 text-xs truncate mt-1"
                     style={{
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
