@@ -70,26 +70,26 @@ function EventsList() {
   const filteredEvents = [recentPastEvent, nextUpcomingEvent].filter(Boolean);
 
   return (
-    <div
-      className="p-6 mx-auto"
-      style={{
-        backgroundColor: '#030C18',
-        maxWidth: '95%',
-      }}
-    >
-      <h2 className="text-3xl font-bold text-center text-white mb-4">
-        Events
-      </h2>
+    <div className="events-container relative flex flex-col h-full">
+      {/* Sticky Header Container */}
       <div
-        className="events-list flex flex-col gap-4 mx-auto"
+        className="p-4 border shadow-md"
         style={{
-          maxWidth: '100%',
+          backgroundColor: '#D6D6D6',
+          border: '2px solid white',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
         }}
       >
-        {filteredEvents.map((event) => {
+        <h2 className="text-xl font-bold text-black text-center">Events</h2>
+      </div>
+
+      {/* Scrollable Events List with Matching Background */}
+      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '10px' }}>
+        {filteredEvents.map((event, index) => {
           const isNextUpcoming =
             nextUpcomingEvent && event.id === nextUpcomingEvent.id;
-
           const isEventToday = isToday(event.event_date);
 
           // Determine button text and color based on stage
@@ -108,8 +108,9 @@ function EventsList() {
               key={event.id}
               className="shadow-lg p-4 flex justify-between items-center relative"
               style={{
-                backgroundColor: '#FFE4CE',
-                height: '120px',
+                backgroundColor: '#D6D6D6', // Matches Liked Ideas background
+                height: '100px',
+                marginBottom: index !== filteredEvents.length - 1 ? '15px' : '0px', // Adds space between events
                 border: isEventToday
                   ? '2px solid green'
                   : isNextUpcoming
@@ -129,7 +130,6 @@ function EventsList() {
                   style={{
                     backgroundColor: 'green',
                     color: 'white',
-                    
                   }}
                 >
                   TODAY!
@@ -163,7 +163,7 @@ function EventsList() {
                 >
                   {event.title}
                 </h3>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-700 text-sm mt-2">
                   {!isNaN(Date.parse(event.event_date)) &&
                     dateTimeFormatter.format(new Date(event.event_date))}
                 </p>
@@ -173,14 +173,14 @@ function EventsList() {
               <button
                 className="text-base font-semibold text-white px-6 py-3 hover:opacity-90 transition-all"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  e.stopPropagation();
                   handleEventClick(event.id);
                 }}
                 style={{
                   backgroundColor: buttonColor,
                   border: 'none',
-                  width: '200px',
-                  height: '50px',
+                  width: '180px',
+                  height: '45px',
                   borderRadius: '3px',
                 }}
               >
