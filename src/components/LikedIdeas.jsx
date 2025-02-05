@@ -90,28 +90,37 @@ function LikedIdeas({ email }) {
                 </button>
 
                 {/* Idea Content */}
-                <div>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                   <h3
-                    className="text-sm font-bold text-black truncate"
+                    className="text-sm font-bold text-black"
                     style={{
-                      whiteSpace: 'nowrap',
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: 1, // Ensures the title is max 1 line
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
+                      wordBreak: 'break-word', // Prevents long words from overflowing
+                      maxWidth: '100%', // Keeps text within container
                     }}
                   >
                     {idea.idea}
                   </h3>
                   <p
-                    className="text-gray-700 text-xs truncate mt-1"
+                    className="text-gray-700 text-xs mt-1"
                     style={{
-                      whiteSpace: 'nowrap',
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: 2, // Ensures descriptions are max 2 lines
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
+                      wordBreak: 'break-word', // Ensures long words wrap properly
+                      maxWidth: '100%', // Prevents text from exceeding container width
                     }}
                   >
                     {idea.description}
                   </p>
                 </div>
+
               </li>
             ))}
           </ul>
