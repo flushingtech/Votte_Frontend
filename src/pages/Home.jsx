@@ -46,11 +46,22 @@ function Home() {
 
       {/* Flex container for the main content */}
       <div
-        className="flex flex-wrap md:flex-nowrap flex-grow mx-auto p-4 gap-4"
+        className="flex flex-col md:flex-row flex-grow mx-auto p-4 gap-4"
         style={{ maxWidth: '100%', width: '100%' }}
       >
+        {/* Events Section (Appears first on mobile, right on desktop) */}
+        <div
+          className="w-full md:w-[30%] border border-white shadow-sm"
+          style={{
+            padding: '0.5rem',
+            width: '100%',
+          }}
+        >
+          <EventsList />
+        </div>
+
         {/* Left Section: MyIdeas and LikedIdeas */}
-        <div className="w-full md:w-[98%] flex flex-col gap-6">
+        <div className="w-full md:w-[70%] flex flex-col gap-6">
           {/* MyIdeas */}
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
@@ -72,17 +83,6 @@ function Home() {
           >
             <LikedIdeas email={userEmail} />
           </div>
-        </div>
-
-        {/* Right Section: EventsList */}
-        <div
-          className="w-full md:w-[2%] border border-white shadow-sm"
-          style={{
-            padding: '0.5rem',
-            width: '100%',
-          }}
-        >
-          <EventsList />
         </div>
       </div>
     </div>
