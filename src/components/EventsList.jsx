@@ -26,8 +26,8 @@ function EventsList() {
     fetchEvents();
   }, []);
 
-  if (loading) return <p>Loading events...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p className="text-center text-sm">Loading events...</p>;
+  if (error) return <p className="text-center text-sm text-red-500">{error}</p>;
 
   const handleEventClick = (eventId) => {
     navigate(`/event/${eventId}`);
@@ -47,71 +47,54 @@ function EventsList() {
   const recentPastEvent = events
     .filter((event) => new Date(event.event_date) < currentDate)
     .reduce((latest, event) => {
-      const eventDate = new Date(event.event_date);
-      if (!latest || eventDate > new Date(latest.event_date)) {
-        return event;
-      }
-      return latest;
+      return !latest || new Date(event.event_date) > new Date(latest.event_date)
+        ? event
+        : latest;
     }, null);
 
   const nextUpcomingEvent = events
     .filter((event) => new Date(event.event_date) >= currentDate)
     .reduce((closest, event) => {
-      const eventDate = new Date(event.event_date);
-      if (!closest || eventDate < new Date(closest.event_date)) {
-        return event;
-      }
-      return closest;
+      return !closest || new Date(event.event_date) < new Date(closest.event_date)
+        ? event
+        : closest;
     }, null);
 
   const filteredEvents = [recentPastEvent, nextUpcomingEvent].filter(Boolean);
 
   return (
     <div className="events-container relative flex flex-col h-full">
-      {/* Sticky Header (Dark Blue) */}
-      <div
-        className="p-2 border shadow-md"
-        style={{
-          backgroundColor: '#1E2A3A',
-          border: '2px solid white',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <h2 className="text-xl font-bold text-white text-center">Events</h2>
+      {/* Sticky Header */}
+      <div className="p-2 border shadow-md bg-[#1E2A3A] border-white sticky top-0 z-10">
+        <h2 className="text-xl sm:text-lg font-bold text-white text-center">Events</h2>
       </div>
 
-      {/* Scrollable Events List with More Spacing */}
-      <div className="overflow-y-auto" style={{ maxHeight: '30vh', paddingTop: '8px' }}>
+      {/* Scrollable Events List */}
+      <div className="overflow-y-auto max-h-[30vh] pt-2">
         {filteredEvents.map((event, index) => {
-          const isNextUpcoming =
-            nextUpcomingEvent && event.id === nextUpcomingEvent.id;
+          const isNextUpcoming = nextUpcomingEvent && event.id === nextUpcomingEvent.id;
           const isEventToday = isToday(event.event_date);
 
           let buttonText = 'Add An Idea';
           let buttonColor = '#1E2A3A';
           if (event.stage === 2) {
             buttonText = 'Vote for a Winner';
-            buttonColor = '#28A745'; // Green
+            buttonColor = '#28A745';
           } else if (event.stage === 3) {
             buttonText = 'View Winners';
-            buttonColor = '#FF5722'; // Orange
+            buttonColor = '#FF5722';
           }
 
           return (
             <div
               key={event.id}
-              className="shadow-lg p-3 flex justify-between items-center relative"
+              className="shadow-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between relative bg-white rounded-lg border-2 mb-4"
               style={{
-                backgroundColor: '#FFFFFF',
-                height: '100px', // Adjusted height for spacing
-                marginBottom: index !== filteredEvents.length - 1 ? '15px' : '0px', // Increased space between events
-                border: isEventToday
-                  ? '2px solid green'
+                borderColor: isEventToday
+                  ? 'green'
                   : isNextUpcoming
-                  ? '2px solid white'
-                  : '2px solid #1E2A3A',
+                  ? 'white'
+                  : '#1E2A3A',
                 boxShadow: isEventToday
                   ? '0 0 15px 3px green'
                   : isNextUpcoming
@@ -119,85 +102,49 @@ function EventsList() {
                   : 'none',
               }}
             >
+              {/* Labels: Bigger on mobile, smaller on desktop */}
               {isEventToday && (
-                <div
-                  className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
-                  style={{
-                    backgroundColor: 'green',
-                    color: 'white',
-                  }}
-                >
+                <div className="absolute top-0 left-0 bg-green-500 text-white text-sm sm:text-xs font-bold px-5 sm:px-3 py-2 sm:py-1 rounded-none">
                   TODAY!
                 </div>
               )}
-
               {isNextUpcoming && !isEventToday && (
-                <div
-                  className="absolute top-0 left-0 text-white text-xs font-bold py-1 px-3"
-                  style={{
-                    background: 'linear-gradient(90deg, blue, white)',
-                    backgroundSize: '200% 200%',
-                    borderRadius: '0px',
-                    animation: 'pulseBlueWhite 2s infinite',
-                  }}
-                >
+                <div className="absolute top-0 left-0 bg-blue-500 text-white text-sm sm:text-xs font-bold px-5 sm:px-3 py-2 sm:py-1 rounded-none">
                   NEXT EVENT!
                 </div>
               )}
 
-              <div>
-                <h3
-                  className="text-lg font-bold text-black truncate"
-                  style={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
+              {/* Event Info */}
+              <div className="flex-1 pt-8 sm:pt-2 min-w-[60%]">
+                <h3 className="text-lg sm:text-sm font-bold text-black truncate">
                   {event.title}
                 </h3>
-                <p className="text-gray-700 text-sm mt-1">
+                <p className="text-gray-700 text-sm sm:text-xs mt-1">
                   {!isNaN(Date.parse(event.event_date)) &&
                     dateTimeFormatter.format(new Date(event.event_date))}
                 </p>
               </div>
 
-              <button
-                className="text-base font-semibold text-white px-6 py-3 hover:opacity-90 transition-all"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEventClick(event.id);
-                }}
-                style={{
-                  backgroundColor: buttonColor,
-                  border: 'none',
-                  width: '170px',
-                  height: '40px',
-                  borderRadius: '3px',
-                }}
-              >
-                {buttonText}
-              </button>
+              {/* Buttons Row */}
+              <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
+                <button
+                  className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEventClick(event.id);
+                  }}
+                  style={{
+                    backgroundColor: buttonColor,
+                    borderRadius: '3px',
+                  }}
+                >
+                  {buttonText}
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
-
-      <style>
-        {`
-          @keyframes pulseBlueWhite {
-            0% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-        `}
-      </style>
     </div>
   );
 }
