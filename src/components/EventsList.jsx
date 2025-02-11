@@ -88,7 +88,7 @@ function EventsList() {
           return (
             <div
               key={event.id}
-              className="shadow-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between relative bg-white rounded-lg border-2 mb-4"
+              className="shadow-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between relative bg-white border-2 mb-4"
               style={{
                 borderColor: isEventToday
                   ? 'green'

@@ -54,15 +54,16 @@ export const editIdea = async (id, idea, description, technologies) => {
 
 export const deleteIdea = async (id, email) => {
   try {
-    const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}`, {
-      data: { email }, // Pass the email in the request body
-    });
+    const response = await axios.delete(
+      `${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}?email=${email}` // Pass email in query
+    );
     return response.data;
   } catch (error) {
     console.error('Error deleting idea:', error);
     throw error;
   }
 };
+
 
 // Function to like an idea
 export const likeIdea = async (ideaId, email) => {

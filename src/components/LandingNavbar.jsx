@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+// Import the image properly if it's inside src/assets
+import votteLogo from '../assets/votte_favicon.png'; 
+
 function LandingNavbar() {
   const [showButton, setShowButton] = useState(false);
 
@@ -27,7 +30,7 @@ function LandingNavbar() {
         {/* Logo/Favicon Button (Refreshes the Page) */}
         <a href="/" onClick={handleLogoClick} className="flex items-center">
           <img
-            src="../src/assets/votte_favicon.png"
+            src={votteLogo} // Ensure correct import
             alt="Votte Logo"
             className="h-10 w-10 ml-2 cursor-pointer"
           />

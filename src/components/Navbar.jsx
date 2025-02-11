@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Import the image properly
+import votteLogo from '../assets/votte_favicon.png'; 
+
 const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com', 'william@flushingtech.org'];
 
 function Navbar({ userName }) {
@@ -36,7 +39,7 @@ function Navbar({ userName }) {
       {/* Logo in the top left - Clicking it navigates to /home */}
       <button onClick={goToHome} className="flex items-center">
         <img
-          src="../src/assets/votte_favicon.png"
+          src={votteLogo} // Fixed image import
           alt="Votte Logo"
           className="h-10 w-10 ml-2 cursor-pointer"
         />
