@@ -11,7 +11,8 @@ function EventScreen() {
   const { eventId } = useParams();
   const email = localStorage.getItem('userEmail');
   const [event, setEvent] = useState(null);
-  const [eventStage, setEventStage] = useState(1); // Track the stage of the event
+  const [eventStage, setEventStage] = useState(1);
+  const [subStage, setSubStage] = useState('1'); // Default sub-stage to 1
   const [ideasRefreshKey, setIdeasRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,9 +36,10 @@ function EventScreen() {
         if (!eventDetails) throw new Error('Event not found');
         setEvent(eventDetails);
 
-        // Fetch the event stage
+        // Fetch the event stage & sub-stage
         const stageData = await getEventStage(eventId);
         setEventStage(stageData.stage);
+        setSubStage(stageData.current_sub_stage || '1');
 
         setLoading(false);
       } catch (err) {
@@ -144,12 +146,19 @@ function EventScreen() {
 
           {/* Stage-Specific Content */}
           <div className="submissions-container">
-            {eventStage === 1 && (
+            {eventStage === 1 && subStage === '1' && (
               <>
                 <p className="submissions-open">Submissions Open</p>
                 <div className="add-idea-button-container">
                   <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
                 </div>
+              </>
+            )}
+            {eventStage === 1 && subStage === '2' && (
+              <>
+                <p className="submissions-open locked">
+                  🔒 Submissions Locked
+                </p>
               </>
             )}
             {eventStage === 2 && <p className="votte-time">Votte Time - Submissions Closed</p>}

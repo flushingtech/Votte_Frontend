@@ -304,3 +304,17 @@ export const getIdeaById = async (ideaId) => {
     throw error;
   }
 };
+
+// Function to set the sub-stage of an event (1.1 -> 1.2 or vice versa)
+export const setEventSubStage = async (eventId, subStage) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
+      sub_stage: subStage,
+    });
+    return response.data.event; // Return updated event
+  } catch (error) {
+    console.error("Error setting event sub-stage:", error);
+    throw error;
+  }
+};
+
