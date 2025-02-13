@@ -27,11 +27,14 @@ export const getIdeas = async () => {
   }
 };
 
-// Function to get ideas by event ID
+// Function to get ideas by event ID (updated to include Most Creative votes)
 export const getIdeasByEvent = async (eventId) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);
-    return response.data.ideas;
+    return response.data.ideas.map(idea => ({
+      ...idea,
+      mostCreativeVotes: idea.most_creative_votes || 0, // Include Most Creative votes
+    }));
   } catch (error) {
     console.error('Error fetching ideas by event:', error);
     throw error;
@@ -270,14 +273,18 @@ export const getUserVotes = async (userEmail) => {
   }
 };
 
-// Function to transition the event to Results Time (stage 3)
+// Function to transition the event to Results Time (stage 3) (updated to include Most Creative results)
 export const setEventToResultsTime = async (eventId) => {
   try {
-      const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
-      return response.data.event; // Return the updated event
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
+    
+    // Fetch Most Creative votes for final results
+    const mostCreativeVotes = await getMostCreativeVotes(eventId);
+    
+    return { event: response.data.event, mostCreativeVotes };
   } catch (error) {
-      console.error('Error transitioning to Results Time:', error);
-      throw error;
+    console.error('Error transitioning to Results Time:', error);
+    throw error;
   }
 };
 
@@ -318,3 +325,28 @@ export const setEventSubStage = async (eventId, subStage) => {
   }
 };
 
+// Function to submit a Most Creative vote
+export const submitMostCreativeVote = async (userEmail, ideaId, eventId) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative`, {
+      user_email: userEmail,
+      idea_id: ideaId,
+      event_id: eventId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting Most Creative vote:', error);
+    throw error;
+  }
+};
+
+// Function to get Most Creative votes for an event
+export const getMostCreativeVotes = async (eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative/${eventId}`);
+    return response.data.votes; // Returns an array of votes for ideas
+  } catch (error) {
+    console.error('Error fetching Most Creative votes:', error);
+    throw error;
+  }
+};
