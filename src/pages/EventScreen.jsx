@@ -6,6 +6,7 @@ import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
 import Stage_2_Ideas from '../components/Stage_2_Ideas';
 import Stage_3_Ideas from '../components/Stage_3_Ideas';
+import MostCreativeScreen from '../components/MostCreativeScreen'; // Import MostCreativeScreen
 
 function EventScreen() {
   const { eventId } = useParams();
@@ -169,11 +170,9 @@ function EventScreen() {
         {/* Conditionally Render Ideas */}
         <div className="max-w-3xl mx-auto mt-3">
           {eventStage === 1 ? (
-            <Stage_1_Ideas
-              key={ideasRefreshKey}
-              eventId={eventId}
-              refreshIdeas={refreshIdeas}
-            />
+            <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
+          ) : eventStage === 2 && subStage === '1' ? (
+            <MostCreativeScreen key={ideasRefreshKey} eventId={eventId} />
           ) : eventStage === 2 ? (
             <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : (

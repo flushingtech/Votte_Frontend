@@ -269,23 +269,29 @@ const IdeasForEvent = ({ userEmail }) => {
               {ideas.map((idea) => (
                 <li
                   key={idea.id}
-                  className={`p-4 border border-gray-500 bg-[#1E2A3A] flex items-center justify-between relative transition-all duration-300 ${idea.stage === 2 ? "border-green-500 shadow-green-glow" : ""
+                  className={`p-4 border border-gray-500 bg-[#1E2A3A] flex items-center relative transition-all duration-300 ${idea.stage === 2 ? "border-green-500 shadow-green-glow" : ""
                     }`}
                 >
-                  {/* Checkbox to toggle idea stage */}
-                  {eventStage === 1 && eventSubStage === "2" && (
-                    <input
-                      type="checkbox"
-                      checked={idea.stage === 2}
-                      onChange={() => handleToggleIdeaSelection(idea.id, idea.stage)}
-                      className="mr-3 cursor-pointer"
-                    />
-                  )}
 
-                  <div>
-                    <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
-                    <p className="text-gray-300 mt-1">{idea.description}</p>
-                  </div>
+                  {/* Checkbox to toggle idea stage */}
+                  <div className="flex items-center">
+  {/* Checkbox to toggle idea stage */}
+  {eventStage === 1 && eventSubStage === "2" && (
+    <input
+      type="checkbox"
+      checked={idea.stage === 2}
+      onChange={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+      className="mr-3 cursor-pointer"
+    />
+  )}
+
+  {/* Idea details */}
+  <div>
+    <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
+    <p className="text-gray-300 mt-1">{idea.description}</p>
+  </div>
+</div>
+
 
                   {/* Glowing effect for Stage 2 ideas */}
                   {idea.stage === 2 && (
