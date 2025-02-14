@@ -117,7 +117,7 @@ const IdeasForEvent = ({ userEmail }) => {
     try {
       console.log(`Attempting to transition event ${event.id} to Stage 2.2 (Most Technical Voting)...`);
 
-      // Ensure the event is at Stage 2 before changing sub-stage
+      // Ensure the event is already in Stage 2 before changing sub-stage
       if (eventStage !== 2) {
         console.log(`Setting event ${event.id} to Stage 2...`);
         const updatedEvent = await setEventStage(event.id, 2);
@@ -129,7 +129,7 @@ const IdeasForEvent = ({ userEmail }) => {
         }
       }
 
-      // Now, set the sub-stage to 2.2 (Most Technical)
+      // Now, set the sub-stage to 2.2 (Most Technical Voting)
       const updatedEventSubStage = await setEventSubStage(event.id, "2");
       console.log("API Response:", updatedEventSubStage);
 
@@ -145,6 +145,7 @@ const IdeasForEvent = ({ userEmail }) => {
       alert("Failed to transition to Most Technical Voting.");
     }
   };
+
 
 
   const handleStartResultsPhase = async () => {
@@ -275,22 +276,22 @@ const IdeasForEvent = ({ userEmail }) => {
 
                   {/* Checkbox to toggle idea stage */}
                   <div className="flex items-center">
-  {/* Checkbox to toggle idea stage */}
-  {eventStage === 1 && eventSubStage === "2" && (
-    <input
-      type="checkbox"
-      checked={idea.stage === 2}
-      onChange={() => handleToggleIdeaSelection(idea.id, idea.stage)}
-      className="mr-3 cursor-pointer"
-    />
-  )}
+                    {/* Checkbox to toggle idea stage */}
+                    {eventStage === 1 && eventSubStage === "2" && (
+                      <input
+                        type="checkbox"
+                        checked={idea.stage === 2}
+                        onChange={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+                        className="mr-3 cursor-pointer"
+                      />
+                    )}
 
-  {/* Idea details */}
-  <div>
-    <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
-    <p className="text-gray-300 mt-1">{idea.description}</p>
-  </div>
-</div>
+                    {/* Idea details */}
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
+                      <p className="text-gray-300 mt-1">{idea.description}</p>
+                    </div>
+                  </div>
 
 
                   {/* Glowing effect for Stage 2 ideas */}

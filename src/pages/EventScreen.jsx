@@ -5,15 +5,15 @@ import Navbar from '../components/Navbar';
 import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
 import Stage_2_Ideas from '../components/Stage_2_Ideas';
+import Stage_2_2_Ideas from '../components/Stage_2-2_Ideas'; // ✅ Import the Most Technical Voting Component
 import Stage_3_Ideas from '../components/Stage_3_Ideas';
-import MostCreativeScreen from '../components/MostCreativeScreen'; // Import MostCreativeScreen
 
 function EventScreen() {
   const { eventId } = useParams();
   const email = localStorage.getItem('userEmail');
   const [event, setEvent] = useState(null);
   const [eventStage, setEventStage] = useState(1);
-  const [subStage, setSubStage] = useState('1'); // Default sub-stage to 1
+  const [subStage, setSubStage] = useState('1');
   const [ideasRefreshKey, setIdeasRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,17 +57,17 @@ function EventScreen() {
 
   if (loading)
     return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+      <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
         <Navbar userName={email} backToHome={true} />
-        <p className="text-center mt-10">Loading event details...</p>
+        <p className="text-center mt-10 text-white">Loading event details...</p>
       </div>
     );
 
   if (error)
     return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+      <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
         <Navbar userName={email} backToHome={true} />
-        <p className="text-center mt-10">{error}</p>
+        <p className="text-center mt-10 text-red-500">{error}</p>
       </div>
     );
 
@@ -104,7 +104,7 @@ function EventScreen() {
             }
 
             .votte-time {
-              color: #28A745; /* Green for Stage 2 */
+              color: #28A745;
               background-color: #2A2F3C;
               padding: 8px 12px;
               font-size: 14px;
@@ -115,7 +115,7 @@ function EventScreen() {
             }
 
             .our-winners {
-              color: #FFA500; /* Orange for Stage 3 */
+              color: #FFA500;
               background-color: #2A2F3C;
               padding: 8px 12px;
               font-size: 14px;
@@ -133,12 +133,9 @@ function EventScreen() {
         </style>
 
         {/* Event Information */}
-        <div
-          className="max-w-3xl mx-auto p-4 border border-white shadow-md"
-          style={{ backgroundColor: '#1E2A3A', position: 'relative' }}
-        >
+        <div className="max-w-3xl mx-auto p-4 border border-white shadow-md" style={{ backgroundColor: '#1E2A3A', position: 'relative' }}>
           {/* Event Title */}
-          <h1 className="text-4xl font-normal text-center mb-1 event-title">{event?.title}</h1>
+          <h1 className="event-title">{event?.title}</h1>
 
           {/* Event Date */}
           <p className="text-lg font-bold text-left text-gray-400 mb-2">
@@ -156,11 +153,7 @@ function EventScreen() {
               </>
             )}
             {eventStage === 1 && subStage === '2' && (
-              <>
-                <p className="submissions-open locked">
-                  🔒 Submissions Locked
-                </p>
-              </>
+              <p className="submissions-open locked">🔒 Submissions Locked</p>
             )}
             {eventStage === 2 && <p className="votte-time">Votte Time - Submissions Closed</p>}
             {eventStage === 3 && <p className="our-winners">Our Winners!</p>}
@@ -172,9 +165,9 @@ function EventScreen() {
           {eventStage === 1 ? (
             <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
           ) : eventStage === 2 && subStage === '1' ? (
-            <MostCreativeScreen key={ideasRefreshKey} eventId={eventId} />
-          ) : eventStage === 2 ? (
-            <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
+            <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Show Most Creative Voting (2.1)
+          ) : eventStage === 2 && subStage === '2' ? (
+            <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Show Most Technical Voting (2.2)
           ) : (
             <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
           )}
