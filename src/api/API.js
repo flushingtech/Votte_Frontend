@@ -237,38 +237,57 @@ export const getEventStage = async (eventId) => {
 };
 
 // Function to submit a vote for an idea
-export const submitVote = async (ideaId, userEmail, rating) => {
+export const submitVote = async (ideaId, userEmail, eventId, voteType) => {  // No rating parameter
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/vote`, { // Updated endpoint
-      user_email: userEmail, // Match the backend parameter
-      idea_id: ideaId, // Match the backend parameter
-      rating, // Pass the user's rating
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/vote`, {
+      user_email: userEmail,
+      idea_id: ideaId,
+      event_id: eventId,
+      vote_type: voteType,
     });
-    return response.data; // Return the response data for further use
+    return response.data;
   } catch (error) {
-    console.error('Error submitting vote:', error);
+    console.error('Error submitting vote:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const unvote = async (userEmail, ideaId, eventId, voteType) => {
+  try {
+    const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/votes/unvote`, {
+      data: { user_email: userEmail, idea_id: ideaId, event_id: eventId, vote_type: voteType },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error removing vote:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getUserVote = async (userEmail, eventId, voteType) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/user-vote`, {
+      params: { user_email: userEmail, event_id: eventId, vote_type: voteType },
+    });
+
+    return response.data.userVote; // Returns idea_id if voted, otherwise null
+  } catch (error) {
+    console.error('Error fetching user vote:', error.response?.data || error.message);
     throw error;
   }
 };
 
 // Function to get all votes for a specific idea
-export const getVotesForIdea = async (ideaId) => {
+export const getVotesForIdea = async (ideaId, voteType = null) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`);
-    return response.data.votes; // Return an array of votes for the idea
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`, {
+      params: voteType ? { vote_type: voteType } : {}, // Filter by vote_type if provided
+    });
+
+    return response.data.votes;
   } catch (error) {
     console.error('Error fetching votes for idea:', error);
-    throw error;
-  }
-};
-
-// Function to get all votes by a specific user
-export const getUserVotes = async (userEmail) => {
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/user/${userEmail}`);
-    return response.data.votes; // Return an array of votes by the user
-  } catch (error) {
-    console.error('Error fetching user votes:', error);
     throw error;
   }
 };
@@ -324,59 +343,3 @@ export const setEventSubStage = async (eventId, subStage) => {
     throw error;
   }
 };
-
-// Function to submit a Most Creative vote
-export const submitMostCreativeVote = async (userEmail, ideaId, eventId) => {
-  try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative/vote`, { // Add "/vote"
-      user_email: userEmail,
-      idea_id: ideaId,
-      event_id: eventId,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error submitting Most Creative vote:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-// Function to get Most Creative votes for an event
-export const getMostCreativeVotes = async (eventId) => {
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative/${eventId}`);
-    return response.data.votes; // Returns an array of votes for ideas
-  } catch (error) {
-    console.error('Error fetching Most Creative votes:', error);
-    throw error;
-  }
-};
-
-export const unvoteMostCreative = async (userEmail, eventId) => {
-  try {
-      const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative/unvote`, {
-          data: { user_email: userEmail, event_id: eventId }, // Pass data in `data` field for DELETE request
-      });
-      return response.data;
-  } catch (error) {
-      console.error('Error removing Most Creative vote:', error.response?.data || error.message);
-      throw error;
-  }
-};
-
-export const getUserMostCreativeVote = async (userEmail, eventId) => {
-  try {
-    console.log(`Fetching user vote: userEmail=${userEmail}, eventId=${eventId}`);
-
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/most-creative/user-vote`, {
-      params: { user_email: userEmail, event_id: eventId },
-    });
-
-    console.log("User vote response:", response.data);
-    return response.data.userVote; // Returns idea_id if voted, otherwise null
-  } catch (error) {
-    console.error('Error fetching user vote:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-

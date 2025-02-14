@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { getIdeasByEvent, submitMostCreativeVote, unvoteMostCreative } from '../api/API';
+import { getIdeasByEvent, submitVote, unvote, getUserVote } from '../api/API';
 
 function MostCreativeScreen({ eventId }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [voting, setVoting] = useState(false);
-  const [userVote, setUserVote] = useState(null); // Track user's vote
+  const [userVote, setUserVote] = useState(null);
   const [voteError, setVoteError] = useState('');
 
   const userEmail = localStorage.getItem('userEmail');
+  const voteType = "Most Creative"; // Keep this fixed for this screen
 
   useEffect(() => {
     const fetchIdeas = async () => {
@@ -17,6 +18,10 @@ function MostCreativeScreen({ eventId }) {
         const eventIdeas = await getIdeasByEvent(eventId);
         const stage2Ideas = eventIdeas.filter((idea) => idea.stage === 2);
         setIdeas(stage2Ideas);
+
+        // Check if user has already voted
+        const userVoteData = await getUserVote(userEmail, eventId, voteType);
+        setUserVote(userVoteData);
       } catch (err) {
         console.error('Error fetching ideas:', err);
         setError('Failed to load ideas.');
@@ -26,25 +31,25 @@ function MostCreativeScreen({ eventId }) {
     };
 
     fetchIdeas();
-  }, [eventId]);
+  }, [eventId, voteType, userEmail]);
 
   const handleVoteClick = async (ideaId) => {
     if (!userEmail) {
       setVoteError('User email not found.');
       return;
     }
-
+  
     setVoting(true);
     setVoteError('');
-
+  
     try {
       if (userVote === ideaId) {
-        // User is unvoting
-        await unvoteMostCreative(userEmail, eventId);
+        // Unvote
+        await unvote(userEmail, ideaId, eventId, "Most Creative");
         setUserVote(null);
       } else {
-        // User is voting
-        await submitMostCreativeVote(userEmail, ideaId, eventId);
+        // Vote
+        await submitVote(ideaId, userEmail, eventId, "Most Creative");
         setUserVote(ideaId);
       }
     } catch (err) {
@@ -53,7 +58,7 @@ function MostCreativeScreen({ eventId }) {
     } finally {
       setVoting(false);
     }
-  };
+  };  
 
   if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
