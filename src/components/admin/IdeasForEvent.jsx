@@ -146,6 +146,38 @@ const IdeasForEvent = ({ userEmail }) => {
     }
   };
 
+  const handleStartMostImpactfulVoting = async () => {
+    try {
+      console.log(`Attempting to transition event ${event.id} to Stage 2.3 (Most Impactful Voting)...`);
+
+      // Ensure the event is at Stage 2 before changing sub-stage
+      if (eventStage !== 2) {
+        console.log(`Setting event ${event.id} to Stage 2...`);
+        const updatedEvent = await setEventStage(event.id, 2);
+        setEventStageState(updatedEvent.stage);
+
+        if (updatedEvent.stage !== 2) {
+          alert("Failed to update event to Stage 2.");
+          return;
+        }
+      }
+
+      // Now, set the sub-stage to 2.3 (Most Impactful)
+      const updatedEventSubStage = await setEventSubStage(event.id, "3");
+      console.log("API Response:", updatedEventSubStage);
+
+      if (updatedEventSubStage.stage === 2 && updatedEventSubStage.current_sub_stage === "3") {
+        setEventSubStageState(updatedEventSubStage.current_sub_stage);
+        alert(`Event "${updatedEventSubStage.title}" is now in Stage 2.3 (Most Impactful Voting)!`);
+      } else {
+        console.error("Stage update mismatch:", updatedEventSubStage);
+        alert("Failed to transition to Most Impactful Voting. Please refresh and try again.");
+      }
+    } catch (error) {
+      console.error("Error transitioning to Most Impactful Voting:", error);
+      alert("Failed to transition to Most Impactful Voting.");
+    }
+  };
 
 
   const handleStartResultsPhase = async () => {
@@ -247,12 +279,22 @@ const IdeasForEvent = ({ userEmail }) => {
 
               {eventSubStage === "2" && (
                 <button
+                  onClick={handleStartMostImpactfulVoting} // ✅ New Button for 2.3
+                  className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Start Most Impactful Voting
+                </button>
+              )}
+
+              {eventSubStage === "3" && (
+                <button
                   onClick={handleStartResultsPhase}
                   className="px-4 py-2 rounded bg-purple-500 hover:bg-purple-600 text-white"
                 >
                   Start Results Phase
                 </button>
               )}
+
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
 import Stage_2_Ideas from '../components/Stage_2_Ideas';
 import Stage_2_2_Ideas from '../components/Stage_2-2_Ideas'; // ✅ Import the Most Technical Voting Component
+import Stage_2_3_Ideas from '../components/Stage_2-3_Ideas';
 import Stage_3_Ideas from '../components/Stage_3_Ideas';
 
 function EventScreen() {
@@ -165,12 +166,15 @@ function EventScreen() {
           {eventStage === 1 ? (
             <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
           ) : eventStage === 2 && subStage === '1' ? (
-            <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Show Most Creative Voting (2.1)
+            <MostCreativeScreen key={ideasRefreshKey} eventId={eventId} />
           ) : eventStage === 2 && subStage === '2' ? (
-            <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Show Most Technical Voting (2.2)
+            <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} />
+          ) : eventStage === 2 && subStage === '3' ? (
+            <Stage_2_3_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Added for Most Impactful
           ) : (
             <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
           )}
+          
         </div>
       </div>
     </div>
