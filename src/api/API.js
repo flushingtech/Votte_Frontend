@@ -295,17 +295,22 @@ export const getVotesForIdea = async (ideaId, voteType = null) => {
 // Function to transition the event to Results Time (stage 3) (updated to include Most Creative results)
 export const setEventToResultsTime = async (eventId) => {
   try {
+    // Set event to Stage 3 (Results Time)
     const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
-    
-    // Fetch Most Creative votes for final results
-    const mostCreativeVotes = await getMostCreativeVotes(eventId);
-    
-    return { event: response.data.event, mostCreativeVotes };
+
+    // Determine winners automatically
+    await determineWinners(eventId);
+
+    // Fetch the results after determining winners
+    const results = await getEventResults(eventId);
+
+    return { event: response.data.event, results }; // Returns event and winners
   } catch (error) {
     console.error('Error transitioning to Results Time:', error);
     throw error;
   }
 };
+
 
 // Function to update latest scores for all ideas
 export const updateAverageScores = async () => {
@@ -340,6 +345,34 @@ export const setEventSubStage = async (eventId, subStage) => {
     return response.data.event; // Return updated event
   } catch (error) {
     console.error("Error setting event sub-stage:", error);
+    throw error;
+  }
+};
+
+// Function to determine winners for an event (Most Creative, Most Technical, Most Impactful)
+export const determineWinners = async (eventId) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/determine-winners`, {
+      event_id: eventId,
+    });
+
+    return response.data; // Returns { message, winners }
+  } catch (error) {
+    console.error('Error determining winners:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get results (winners) for an event
+export const getEventResults = async (eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/results`, {
+      params: { event_id: eventId },
+    });
+
+    return response.data.results; // Returns an array of winners
+  } catch (error) {
+    console.error('Error fetching event results:', error.response?.data || error.message);
     throw error;
   }
 };
