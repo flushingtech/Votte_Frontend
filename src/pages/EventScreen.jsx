@@ -107,11 +107,11 @@ function EventScreen() {
             .votte-time {
               color: #28A745;
               background-color: #2A2F3C;
-              padding: 8px 12px;
+              padding: 8px 20px;
               font-size: 14px;
               font-weight: bold;
               text-transform: uppercase;
-              box-shadow: 0 0 10px #28A745, 0 0 20px #28A745, 0 0 30px #28A745;
+              box-shadow: 0 0 5px #28A745, 0 0 5px #28A745, 0 0 10px #28A745;
               border-radius: 5px;
             }
 
@@ -122,7 +122,7 @@ function EventScreen() {
               font-size: 14px;
               font-weight: bold;
               text-transform: uppercase;
-              box-shadow: 0 0 10px #FFA500, 0 0 20px #FFA500, 0 0 30px #FFA500;
+              box-shadow: 0 0 5px #FFA500, 0 0 5px #FFA500, 0 0 10px #FFA500;
               border-radius: 5px;
             }
 
@@ -156,7 +156,7 @@ function EventScreen() {
             {eventStage === 1 && subStage === '2' && (
               <p className="submissions-open locked">🔒 Submissions Locked</p>
             )}
-            {eventStage === 2 && <p className="votte-time">Votte Time - Submissions Closed</p>}
+            {eventStage === 2 && <p className="votte-time">Votte Time</p>}
             {eventStage === 3 && <p className="our-winners">Our Winners!</p>}
           </div>
         </div>
@@ -166,7 +166,7 @@ function EventScreen() {
           {eventStage === 1 ? (
             <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
           ) : eventStage === 2 && subStage === '1' ? (
-            <MostCreativeScreen key={ideasRefreshKey} eventId={eventId} />
+            <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : eventStage === 2 && subStage === '2' ? (
             <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : eventStage === 2 && subStage === '3' ? (

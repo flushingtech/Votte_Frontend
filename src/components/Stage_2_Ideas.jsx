@@ -10,97 +10,107 @@ function Stage_2_Ideas({ eventId }) {
   const [voteError, setVoteError] = useState('');
 
   const userEmail = localStorage.getItem('userEmail');
-  const voteType = "Most Creative"; // Keep this fixed for this screen
+  const voteType = "Most Creative";
 
   useEffect(() => {
     const fetchIdeas = async () => {
       try {
         const eventIdeas = await getIdeasByEvent(eventId);
-        console.log("Fetched ideas:", eventIdeas); // Debugging log
-  
-        const stage2Ideas = eventIdeas.filter((idea) => idea.stage === 2);
-        setIdeas(stage2Ideas);
+        setIdeas(eventIdeas.filter((idea) => idea.stage === 2));
       } catch (err) {
-        console.error("Error fetching ideas:", err);
         setError("Failed to load ideas.");
       } finally {
         setLoading(false);
       }
     };
-  
+
     const fetchUserVote = async () => {
       try {
         const userVoteData = await getUserVote(userEmail, eventId, voteType);
-        console.log("User's existing vote:", userVoteData); // Debugging log
         setUserVote(userVoteData);
-      } catch (err) {
-        console.error("Error fetching user vote:", err);
-        // Do NOT set global error here, just log the issue
-      }
+      } catch (err) {}
     };
-  
+
     fetchIdeas();
     fetchUserVote();
   }, [eventId, voteType, userEmail]);
-  
-  
 
   const handleVoteClick = async (ideaId) => {
     if (!userEmail) {
       setVoteError('User email not found.');
       return;
     }
-  
+
     setVoting(true);
     setVoteError('');
-  
+
     try {
       if (userVote === ideaId) {
-        // Unvote
         await unvote(userEmail, ideaId, eventId, voteType);
         setUserVote(null);
       } else {
-        // Vote
         await submitVote(ideaId, userEmail, eventId, voteType);
         setUserVote(ideaId);
       }
     } catch (err) {
-      console.error('Error handling vote:', err.response?.data || err.message);
       setVoteError('Failed to process vote. Please try again.');
     } finally {
       setVoting(false);
     }
-  };  
+  };
 
   if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white" style={{ backgroundColor: 'transparent', maxHeight: '60vh', overflowY: 'auto' }}>
-      <h2 className="text-lg font-bold text-white">Vote for the Most Creative Idea!</h2>
+    <div 
+      className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] relative"
+      style={{
+        boxShadow: '0px 0px 15px 3px rgb(0, 255, 0)', // Green glow effect
+      }}
+    >
+      <h2 className="text-lg font-bold text-green-400 mb-3">MOST CREATIVE</h2>
 
       {ideas.length === 0 ? (
-        <p className="text-center text-gray-500">No ideas are currently in Stage 2.</p>
+        <p className="text-gray-500">No ideas are currently in Stage 2.</p>
       ) : (
         <ul className="space-y-2">
-          {ideas.map((idea) => (
-            <li key={idea.id} className="relative p-2 border border-green-500 shadow" style={{ backgroundColor: '#1E2A3A' }}>
-              <div>
-                <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
-                <p className="text-xs text-gray-300 mt-1">{idea.description}</p>
-              </div>
-              <button
-                onClick={() => handleVoteClick(idea.id)}
-                className={`absolute top-2 right-2 px-2 py-1 text-xs ${
-                  userVote === idea.id ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-                } text-white rounded transition-all`}
-                disabled={voting}
-              >
-                {userVote === idea.id ? 'Unvote' : 'Vote Most Creative'}
-              </button>
-            </li>
-          ))}
-        </ul>
+  {ideas.map((idea) => (
+    <li 
+      key={idea.id} 
+      className="flex items-center justify-between p-3 border shadow transition-all"
+      style={{
+        backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A', // Change background to white if voted
+        borderColor: 'white',
+        borderWidth: '2px',
+      }}
+    >
+      <div>
+        <h3 className={`text-sm font-bold ${userVote === idea.id ? 'text-white' : 'text-white'}`}>
+          {idea.idea}
+        </h3>
+        <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
+          {idea.description}
+        </p>
+      </div>
+      <button
+        onClick={() => handleVoteClick(idea.id)}
+        className={`px-5 py-3 text-sm font-bold rounded transition-all ${
+          userVote === idea.id 
+            ? 'bg-red-600 hover:bg-red-700 text-white' 
+            : 'bg-green-600 hover:bg-green-700 text-white'
+        }`}
+        style={{
+          boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)', // Green button shadow
+        }}
+        disabled={voting}
+      >
+        {userVote === idea.id ? 'Unvote' : 'Votte'}
+      </button>
+    </li>
+  ))}
+</ul>
+
       )}
       {voteError && <p className="text-xs text-red-500 text-center">{voteError}</p>}
     </div>
