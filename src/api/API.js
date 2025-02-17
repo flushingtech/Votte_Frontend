@@ -27,11 +27,14 @@ export const getIdeas = async () => {
   }
 };
 
-// Function to get ideas by event ID
+// Function to get ideas by event ID (updated to include Most Creative votes)
 export const getIdeasByEvent = async (eventId) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);
-    return response.data.ideas;
+    return response.data.ideas.map(idea => ({
+      ...idea,
+      mostCreativeVotes: idea.most_creative_votes || 0, // Include Most Creative votes
+    }));
   } catch (error) {
     console.error('Error fetching ideas by event:', error);
     throw error;
@@ -234,52 +237,80 @@ export const getEventStage = async (eventId) => {
 };
 
 // Function to submit a vote for an idea
-export const submitVote = async (ideaId, userEmail, rating) => {
+export const submitVote = async (ideaId, userEmail, eventId, voteType) => {  // No rating parameter
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/vote`, { // Updated endpoint
-      user_email: userEmail, // Match the backend parameter
-      idea_id: ideaId, // Match the backend parameter
-      rating, // Pass the user's rating
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/vote`, {
+      user_email: userEmail,
+      idea_id: ideaId,
+      event_id: eventId,
+      vote_type: voteType,
     });
-    return response.data; // Return the response data for further use
+    return response.data;
   } catch (error) {
-    console.error('Error submitting vote:', error);
+    console.error('Error submitting vote:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const unvote = async (userEmail, ideaId, eventId, voteType) => {
+  try {
+    const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/votes/unvote`, {
+      data: { user_email: userEmail, idea_id: ideaId, event_id: eventId, vote_type: voteType },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error removing vote:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getUserVote = async (userEmail, eventId, voteType) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/user-vote`, {
+      params: { user_email: userEmail, event_id: eventId, vote_type: voteType },
+    });
+
+    return response.data.userVote; // Returns idea_id if voted, otherwise null
+  } catch (error) {
+    console.error('Error fetching user vote:', error.response?.data || error.message);
     throw error;
   }
 };
 
 // Function to get all votes for a specific idea
-export const getVotesForIdea = async (ideaId) => {
+export const getVotesForIdea = async (ideaId, voteType = null) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`);
-    return response.data.votes; // Return an array of votes for the idea
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`, {
+      params: voteType ? { vote_type: voteType } : {}, // Filter by vote_type if provided
+    });
+
+    return response.data.votes;
   } catch (error) {
     console.error('Error fetching votes for idea:', error);
     throw error;
   }
 };
 
-// Function to get all votes by a specific user
-export const getUserVotes = async (userEmail) => {
+// Function to transition the event to Results Time (stage 3) (updated to include Most Creative results)
+export const setEventToResultsTime = async (eventId) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/user/${userEmail}`);
-    return response.data.votes; // Return an array of votes by the user
+    // Set event to Stage 3 (Results Time)
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
+
+    // Determine winners automatically
+    await determineWinners(eventId);
+
+    // Fetch the results after determining winners
+    const results = await getEventResults(eventId);
+
+    return { event: response.data.event, results }; // Returns event and winners
   } catch (error) {
-    console.error('Error fetching user votes:', error);
+    console.error('Error transitioning to Results Time:', error);
     throw error;
   }
 };
 
-// Function to transition the event to Results Time (stage 3)
-export const setEventToResultsTime = async (eventId) => {
-  try {
-      const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`);
-      return response.data.event; // Return the updated event
-  } catch (error) {
-      console.error('Error transitioning to Results Time:', error);
-      throw error;
-  }
-};
 
 // Function to update latest scores for all ideas
 export const updateAverageScores = async () => {
@@ -301,6 +332,47 @@ export const getIdeaById = async (ideaId) => {
     return response.data.idea;
   } catch (error) {
     console.error('Error fetching idea details:', error);
+    throw error;
+  }
+};
+
+// Function to set the sub-stage of an event (1.1 -> 1.2 or vice versa)
+export const setEventSubStage = async (eventId, subStage) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
+      sub_stage: subStage,
+    });
+    return response.data.event; // Return updated event
+  } catch (error) {
+    console.error("Error setting event sub-stage:", error);
+    throw error;
+  }
+};
+
+// Function to determine winners for an event (Most Creative, Most Technical, Most Impactful)
+export const determineWinners = async (eventId) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/votes/determine-winners`, {
+      event_id: eventId,
+    });
+
+    return response.data; // Returns { message, winners }
+  } catch (error) {
+    console.error('Error determining winners:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get results (winners) for an event
+export const getEventResults = async (eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/results`, {
+      params: { event_id: eventId },
+    });
+
+    return response.data.results; // Returns an array of winners
+  } catch (error) {
+    console.error('Error fetching event results:', error.response?.data || error.message);
     throw error;
   }
 };
