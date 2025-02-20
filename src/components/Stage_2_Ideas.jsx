@@ -66,7 +66,7 @@ function Stage_2_Ideas({ eventId }) {
     <div 
       className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] relative"
       style={{
-        boxShadow: '0px 0px 15px 3px rgb(0, 255, 0)', // Green glow effect
+        boxShadow: '0px 0px 5px 3px rgb(0, 255, 0)', // Green glow effect
       }}
     >
       <h2 className="text-lg font-bold text-green-400 mb-3">MOST CREATIVE</h2>

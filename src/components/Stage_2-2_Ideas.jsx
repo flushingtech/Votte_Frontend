@@ -67,7 +67,7 @@ function Stage_2_2_Ideas({ eventId }) {
       className="max-w-3xl mx-auto mt-3 p-3 border border-white relative"
       style={{
         backgroundColor: "#1E2A3A",
-        boxShadow: "0px 0px 15px 3px rgb(246, 63, 246)", // ✅ Purple Glow Effect
+        boxShadow: "0px 0px 5px 3px rgb(246, 63, 246)", // ✅ Purple Glow Effect
       }}
     >
       <h2

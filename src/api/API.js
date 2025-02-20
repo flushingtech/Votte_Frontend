@@ -376,3 +376,5 @@ export const getEventResults = async (eventId) => {
     throw error;
   }
 };
+
+
