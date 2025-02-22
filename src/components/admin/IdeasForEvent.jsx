@@ -577,16 +577,15 @@ const IdeasForEvent = ({ userEmail }) => {
                     </span>
                   )}
 
-                  {/* Select/Deselect Idea (Bottom-Right Corner) */}
-                  {eventStage === 1 && eventSubStage === "2" && (
-                    <button
-                      onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
-                      className={`absolute bottom-4 right-4 px-4 py-2 rounded-sm text-white transition-all 
-              ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
-                    >
-                      {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
-                    </button>
-                  )}
+{/* Select/Deselect Idea (Bottom-Right Corner) */}
+<button
+  onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+  className={`absolute bottom-4 right-4 px-4 py-2 rounded-sm text-white transition-all 
+    ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
+>
+  {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
+</button>
+
                 </li>
               ))}
             </ul>
