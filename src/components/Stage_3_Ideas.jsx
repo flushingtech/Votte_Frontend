@@ -73,15 +73,18 @@ function Stage_3_Ideas({ eventId }) {
                   <p className="text-sm font-semibold">{winner.idea_title || "Unknown"}</p>
                   <p className="text-xs text-gray-700">{winner.idea_description}</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    By: {winner.idea_contributors && winner.idea_contributors.trim()
-                      ? winner.idea_contributors.split(',').map((c, index) => (
-                        <span key={index} className="text-blue-400">
-                          {c.trim().slice(0, 6)}
-                          {index !== winner.idea_contributors.split(',').length - 1 && ", "}
-                        </span>
-                      ))
+                    By: {winner.idea_contributors && winner.idea_contributors !== "{}" && winner.idea_contributors.trim()
+                      ? winner.idea_contributors
+                        .split(",")
+                        .map((email, index) => (
+                          <span key={index} className="text-blue-400">
+                            {email.trim().slice(0, 6)}
+                            {index !== winner.idea_contributors.split(",").length - 1 && ", "}
+                          </span>
+                        ))
                       : "N/A"}
                   </p>
+
 
                   <p className="text-xs text-gray-600">Votes: {winner.votes}</p>
                 </div>
@@ -100,15 +103,19 @@ function Stage_3_Ideas({ eventId }) {
                 <p className="text-sm font-semibold text-white">{winner.idea_title || "Unknown"}</p>
                 <p className="text-xs text-gray-300">{winner.idea_description}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                    By: {winner.idea_contributors && winner.idea_contributors.trim()
-                      ? winner.idea_contributors.split(',').map((c, index) => (
+                  By: {winner.idea_contributors && winner.idea_contributors !== "{}" && winner.idea_contributors.trim()
+                    ? winner.idea_contributors
+                      .split(",")
+                      .map((email, index) => (
                         <span key={index} className="text-blue-400">
-                          {c.trim().slice(0, 6)}
-                          {index !== winner.idea_contributors.split(',').length - 1 && ", "}
+                          {email.trim().slice(0, 6)}
+                          {index !== winner.idea_contributors.split(",").length - 1 && ", "}
                         </span>
                       ))
-                      : "N/A"}
-                  </p>
+                    : "N/A"}
+                </p>
+
+
                 <p className="text-xs text-gray-400">Votes: {winner.votes}</p>
               </div>
             );
