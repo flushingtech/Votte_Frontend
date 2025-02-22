@@ -9,7 +9,8 @@ import {
   setEventSubStage,
   setEventToResultsTime,
   updateAverageScores,
-  setIdeaStage // ✅ Add this import
+  setIdeaStage,
+  addContributorToIdea
 } from '../../api/API';
 
 
@@ -19,6 +20,8 @@ const IdeasForEvent = ({ userEmail }) => {
   const [error, setError] = useState(null);
   const [eventStage, setEventStageState] = useState(1);
   const [eventSubStage, setEventSubStageState] = useState("1");
+  const [contributorInputs, setContributorInputs] = useState({});
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,6 +87,37 @@ const IdeasForEvent = ({ userEmail }) => {
       alert("Failed to update idea stage.");
     }
   };
+
+  const handleContributorChange = (ideaId, email) => {
+    setContributorInputs((prev) => ({
+      ...prev,
+      [ideaId]: email, // Store input per idea ID
+    }));
+  };
+
+  const handleAddContributor = async (ideaId) => {
+    const contributorEmail = contributorInputs[ideaId]?.trim();
+
+    if (!contributorEmail) {
+      alert('Please enter a contributor email.');
+      return;
+    }
+
+    try {
+      await addContributorToIdea(ideaId, contributorEmail);
+      alert('Contributor added successfully!');
+
+      // Reset input field after successful addition
+      setContributorInputs((prev) => ({
+        ...prev,
+        [ideaId]: '',
+      }));
+    } catch (error) {
+      console.error('Error adding contributor:', error);
+      alert('Failed to add contributor.');
+    }
+  };
+
 
   const handleBackToSubmissionsOpen = async () => {
     try {
@@ -513,31 +547,45 @@ const IdeasForEvent = ({ userEmail }) => {
                   className={`p-4 border border-gray-500 bg-[#1E2A3A] flex items-center justify-between relative transition-all duration-300 ${idea.stage === 2 ? "border-green-500 shadow-green-glow" : ""
                     }`}
                 >
-                  <div>
-                    <h3 className="text-xl font-bold text-white">{idea.idea}</h3>
-                    <p className="text-gray-300 mt-1">{idea.description}</p>
+                  {/* Add Contributor (Top-Right Corner) */}
+                  <div className="absolute top-4 right-4 flex space-x-2">
+                    <input
+                      type="email"
+                      placeholder="Enter contributor email"
+                      value={contributorInputs[idea.id] || ''}
+                      onChange={(e) => handleContributorChange(idea.id, e.target.value)}
+                      className="p-2 border border-gray-400 bg-[#0F172A] text-white w-48"
+                    />
+                    <button
+                      onClick={() => handleAddContributor(idea.id)}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-sm transition-all"
+                    >
+                      Add
+                    </button>
                   </div>
 
-                  {/* ✅ Wrap "In Voting Stage" and button in a flex container */}
-                  <div className="flex items-center space-x-4">
-                    {/* "In Voting Stage" label */}
-                    {idea.stage === 2 && (
-                      <span className="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">
-                        In Voting Stage
-                      </span>
-                    )}
-
-                    {/* Select/Deselect Button */}
-                    {eventStage === 1 && eventSubStage === "2" && (
-                      <button
-                        onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
-                        className={`px-4 py-2 rounded text-white ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"
-                          }`}
-                      >
-                        {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
-                      </button>
-                    )}
+                  {/* Idea Title & Description */}
+                  <div className="mb-10"> {/* Pushed down to avoid overlap with the contributor section */}
+                    <h3 className="text-xl font-semibold text-white">{idea.idea}</h3>
+                    <p className="text-gray-300 text-sm">{idea.description}</p>
                   </div>
+
+                  {/* Voting Stage Label */}
+                  {idea.stage === 2 && (
+                    <span className="absolute bottom-4 left-4 px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-sm">
+                      In Voting Stage
+                    </span>
+                  )}
+
+{/* Select/Deselect Idea (Bottom-Right Corner) */}
+<button
+  onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+  className={`absolute bottom-4 right-4 px-4 py-2 rounded-sm text-white transition-all 
+    ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
+>
+  {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
+</button>
+
                 </li>
               ))}
             </ul>

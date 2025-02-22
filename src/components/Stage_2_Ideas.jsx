@@ -28,7 +28,7 @@ function Stage_2_Ideas({ eventId }) {
       try {
         const userVoteData = await getUserVote(userEmail, eventId, voteType);
         setUserVote(userVoteData);
-      } catch (err) {}
+      } catch (err) { }
     };
 
     fetchIdeas();
@@ -63,10 +63,10 @@ function Stage_2_Ideas({ eventId }) {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div 
+    <div
       className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] relative"
       style={{
-        boxShadow: '0px 0px 15px 3px rgb(0, 255, 0)', // Green glow effect
+        boxShadow: '0px 0px 5px 3px rgb(0, 255, 0)', // Green glow effect
       }}
     >
       <h2 className="text-lg font-bold text-green-400 mb-3">MOST CREATIVE</h2>
@@ -75,41 +75,51 @@ function Stage_2_Ideas({ eventId }) {
         <p className="text-gray-500">No ideas are currently in Stage 2.</p>
       ) : (
         <ul className="space-y-2">
-  {ideas.map((idea) => (
-    <li 
-      key={idea.id} 
-      className="flex items-center justify-between p-3 border shadow transition-all"
-      style={{
-        backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A', // Change background to white if voted
-        borderColor: 'white',
-        borderWidth: '2px',
-      }}
-    >
-      <div>
-        <h3 className={`text-sm font-bold ${userVote === idea.id ? 'text-white' : 'text-white'}`}>
-          {idea.idea}
-        </h3>
-        <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
-          {idea.description}
-        </p>
-      </div>
-      <button
-        onClick={() => handleVoteClick(idea.id)}
-        className={`px-5 py-3 text-sm font-bold rounded transition-all ${
-          userVote === idea.id 
-            ? 'bg-red-600 hover:bg-red-700 text-white' 
-            : 'bg-green-600 hover:bg-green-700 text-white'
-        }`}
-        style={{
-          boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)', // Green button shadow
-        }}
-        disabled={voting}
-      >
-        {userVote === idea.id ? 'Unvote' : 'Votte'}
-      </button>
-    </li>
-  ))}
-</ul>
+          {ideas.map((idea) => (
+            <li
+              key={idea.id}
+              className="flex items-center justify-between p-3 border shadow transition-all"
+              style={{
+                backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A', // Change background to white if voted
+                borderColor: 'white',
+                borderWidth: '2px',
+              }}
+            >
+              <div>
+                <h3 className={`text-sm font-bold ${userVote === idea.id ? 'text-white' : 'text-white'}`}>
+                  {idea.idea}
+                </h3>
+                <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
+                  {idea.description}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  By: {idea.contributors && idea.contributors.trim()
+                    ? idea.contributors.split(',').map((c, index) => (
+                      <span key={index} className="text-blue-400">
+                        {c.trim().slice(0, 6)}
+                        {index !== idea.contributors.split(',').length - 1 && ", "}
+                      </span>
+                    ))
+                    : "N/A"}
+                </p>
+
+              </div>
+              <button
+                onClick={() => handleVoteClick(idea.id)}
+                className={`px-5 py-3 text-sm font-bold rounded transition-all ${userVote === idea.id
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                style={{
+                  boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)', // Green button shadow
+                }}
+                disabled={voting}
+              >
+                {userVote === idea.id ? 'Unvote' : 'Votte'}
+              </button>
+            </li>
+          ))}
+        </ul>
 
       )}
       {voteError && <p className="text-xs text-red-500 text-center">{voteError}</p>}
