@@ -377,4 +377,29 @@ export const getEventResults = async (eventId) => {
   }
 };
 
+export const addContributorToIdea = async (ideaId, contributorEmail) => {
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api/ideas/${ideaId}/add-contributor`;
+    console.log("📢 Sending request to:", url, "with data:", { contributor_email: contributorEmail });
+
+    const response = await axios.put(url, { contributor_email: contributorEmail });
+    console.log("✅ Contributor added successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error adding contributor:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+export const getContributorsForIdea = async (ideaId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${ideaId}/contributors`);
+    return response.data.contributors;
+  } catch (error) {
+    console.error('Error fetching contributors:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
