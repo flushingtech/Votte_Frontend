@@ -72,7 +72,7 @@ function Stage_3_Ideas({ eventId }) {
                   <h3 className="text-lg font-bold text-black">🏆 {winner.category}</h3>
                   <p className="text-sm font-semibold">{winner.idea_title || "Unknown"}</p>
                   <p className="text-xs text-gray-700">{winner.idea_description}</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  {/* <p className="text-xs text-gray-400 mt-1">
                     By: {winner.idea_contributors && winner.idea_contributors !== "{}" && winner.idea_contributors.trim()
                       ? winner.idea_contributors
                         .split(",")
@@ -83,7 +83,7 @@ function Stage_3_Ideas({ eventId }) {
                           </span>
                         ))
                       : "N/A"}
-                  </p>
+                  </p> */}
 
 
                   <p className="text-xs text-gray-600">Votes: {winner.votes}</p>
@@ -102,7 +102,7 @@ function Stage_3_Ideas({ eventId }) {
                 <h3 className="text-md font-bold text-white">{winner.category} Winner</h3>
                 <p className="text-sm font-semibold text-white">{winner.idea_title || "Unknown"}</p>
                 <p className="text-xs text-gray-300">{winner.idea_description}</p>
-                <p className="text-xs text-gray-400 mt-1">
+                {/* <p className="text-xs text-gray-400 mt-1">
                   By: {winner.idea_contributors && winner.idea_contributors !== "{}" && winner.idea_contributors.trim()
                     ? winner.idea_contributors
                       .split(",")
@@ -113,7 +113,7 @@ function Stage_3_Ideas({ eventId }) {
                         </span>
                       ))
                     : "N/A"}
-                </p>
+                </p> */}
 
 
                 <p className="text-xs text-gray-400">Votes: {winner.votes}</p>

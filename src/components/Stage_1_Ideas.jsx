@@ -241,19 +241,11 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                             <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
                                             <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
                                             <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
-                                            <p className="text-xs text-gray-400 mt-1">
+                                            {/* <p className="text-xs text-gray-400 mt-1">
                                                 By: {idea.contributors && idea.contributors !== "{}"
-                                                    ? idea.contributors.split(",").map((email, index) => (
-                                                        <span key={index} className="text-blue-400">
-                                                            {email.trim().slice(0, 6)}
-                                                            {index !== idea.contributors.split(",").length - 1 && ", "}
-                                                        </span>
-                                                    ))
+                                                    ? <span className="text-blue-400">{idea.contributors}</span>
                                                     : "N/A"}
-                                            </p>
-
-
-
+                                            </p> */}
                                         </div>
 
                                         {isYourIdea && (

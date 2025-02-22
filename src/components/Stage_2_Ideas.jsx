@@ -92,18 +92,11 @@ function Stage_2_Ideas({ eventId }) {
                 <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
                   {idea.description}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                {/* <p className="text-xs text-gray-400 mt-1">
                   By: {idea.contributors && idea.contributors !== "{}"
-                    ? idea.contributors.split(",").map((email, index) => (
-                      <span key={index} className="text-blue-400">
-                        {email.trim().slice(0, 6)}
-                        {index !== idea.contributors.split(",").length - 1 && ", "}
-                      </span>
-                    ))
+                    ? <span className="text-blue-400">{idea.contributors}</span>
                     : "N/A"}
-                </p>
-
-
+                </p> */}
               </div>
               <button
                 onClick={() => handleVoteClick(idea.id)}
