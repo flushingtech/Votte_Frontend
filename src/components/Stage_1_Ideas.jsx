@@ -226,13 +226,12 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                             return (
                                 <li
                                     key={idea.id}
-                                    className={`relative p-2 shadow ${
-                                        isYourIdea
-                                            ? 'glowing-border'
-                                            : isMostPopular
+                                    className={`relative p-2 shadow ${isYourIdea
+                                        ? 'glowing-border'
+                                        : isMostPopular
                                             ? 'blue-yellow-glow'
                                             : 'border-gray-500'
-                                    }`}
+                                        }`}
                                     style={{
                                         backgroundColor: '#1E2A3A',
                                     }}
@@ -242,7 +241,18 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                             <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
                                             <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
                                             <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
-                                            <p className="text-xs text-gray-400 mt-1">By: {idea.email}</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                By: {idea.contributors && idea.contributors.trim()
+                                                    ? idea.contributors.split(',').map((c, index) => (
+                                                        <span key={index} className="text-blue-400">
+                                                            {c.trim().slice(0, 6)}
+                                                            {index !== idea.contributors.split(',').length - 1 && ", "}
+                                                        </span>
+                                                    ))
+                                                    : "N/A"}
+                                            </p>
+
+
                                         </div>
 
                                         {isYourIdea && (

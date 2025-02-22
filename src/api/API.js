@@ -390,16 +390,3 @@ export const addContributorToIdea = async (ideaId, contributorEmail) => {
     throw error;
   }
 };
-
-
-
-export const getContributorsForIdea = async (ideaId) => {
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${ideaId}/contributors`);
-    return response.data.contributors;
-  } catch (error) {
-    console.error('Error fetching contributors:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
