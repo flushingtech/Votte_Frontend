@@ -1,0 +1,92 @@
+import { useEffect, useState } from 'react';
+import EventsList from '../components/EventsList';
+import Navbar from '../components/Navbar';
+import MyIdeas from '../components/MyIdeas';
+import LikedIdeas from '../components/LikedIdeas';
+
+// Function to decode JWT manually
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    return null;
+  }
+};
+
+function Home() {
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const decodedToken = decodeToken(token);
+      const email = decodedToken?.email || 'Guest';
+      setUserName(email);
+      setUserEmail(email);
+      localStorage.setItem('userEmail', email); // Store email in local storage
+    }
+  }, []);
+
+  return (
+    <div
+      className="home-page flex flex-col"
+      style={{ backgroundColor: '#030C18', minHeight: '100vh' }}
+    >
+      <Navbar userName={userName} />
+
+      {/* Flex container for the main content */}
+      <div
+        className="flex flex-col md:flex-row flex-grow mx-auto p-4 gap-4"
+        style={{ maxWidth: '100%', width: '100%' }}
+      >
+        {/* Events Section (Appears first on mobile, right on desktop) */}
+        <div
+          className="w-full md:w-[30%] border border-white shadow-sm"
+          style={{
+            padding: '0.5rem',
+            width: '100%',
+          }}
+        >
+          <EventsList />
+        </div>
+
+        {/* Left Section: MyIdeas and LikedIdeas */}
+        <div className="w-full md:w-[70%] flex flex-col gap-6">
+          {/* MyIdeas */}
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '0.5rem',
+              width: '100%',
+            }}
+          >
+            <MyIdeas email={userEmail} />
+          </div>
+
+          {/* LikedIdeas */}
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '0.5rem',
+              width: '100%',
+            }}
+          >
+            <LikedIdeas email={userEmail} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;
