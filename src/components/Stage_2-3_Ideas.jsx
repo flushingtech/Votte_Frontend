@@ -71,9 +71,8 @@ function Stage_2_3_Ideas({ eventId }) {
       style={{
         backgroundColor: "#1E2A3A",
         boxShadow: "0px 0px 5px 3px rgb(255, 0, 0)",
-        maxHeight: containerRef.current?.scrollHeight > 500 ? "500px" : "auto",
-        overflowY:
-          containerRef.current?.scrollHeight > 500 ? "auto" : "visible",
+        maxHeight: "500px",
+        overflowY: ideas.length * 68 > 500 ? "auto" : "hidden", // Assume each idea item takes up around 68px
       }}
     >
       <h2
