@@ -1,45 +1,54 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-// Import the image properly
-import votteLogo from '../assets/votte_favicon.png'; 
-
-const adminEmails = ['flushingtech.nyc@gmail.com', 'tkhattab1999@gmail.com', 'admin2@example.com', 'william@flushingtech.org'];
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import votteLogo from "../assets/votte_favicon.png";
+import { checkAdminStatus } from "../api/API";
 
 function Navbar({ userName }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
-  const userEmail = user?.email || '';
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userEmail = user?.email || "";
+
+  useEffect(() => {
+    const fetchAdminStatus = async () => {
+      if (userEmail) {
+        const adminStatus = await checkAdminStatus(userEmail);
+        setIsAdmin(adminStatus);
+      }
+    };
+
+    fetchAdminStatus();
+  }, [userEmail]); // Runs when userEmail changes
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     setIsDropdownOpen(false);
-    navigate('/');
+    navigate("/");
   };
 
   const goToAdminPage = () => {
     setIsDropdownOpen(false);
-    navigate('/admin');
+    navigate("/admin");
   };
 
   const goToHome = () => {
-    navigate('/home');
+    navigate("/home");
   };
 
   return (
     <nav
       className="flex items-center justify-between p-3 shadow-md border relative"
-      style={{ backgroundColor: '#FFFFFF' }} // White background
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Logo in the top left - Clicking it navigates to /home */}
+      {/* Logo - Clicking navigates to /home */}
       <button onClick={goToHome} className="flex items-center">
         <img
-          src={votteLogo} // Fixed image import
+          src={votteLogo}
           alt="Votte Logo"
           className="h-10 w-10 ml-2 cursor-pointer"
         />
@@ -59,9 +68,9 @@ function Navbar({ userName }) {
         {isDropdownOpen && (
           <div
             className="absolute right-0 top-full mt-2 w-36 bg-white border shadow-lg text-center z-50"
-            style={{ minWidth: '150px' }} // Ensures enough space for options
+            style={{ minWidth: "150px" }}
           >
-            {adminEmails.includes(userEmail) && (
+            {isAdmin && (
               <button
                 onClick={goToAdminPage}
                 className="w-full text-sm px-4 py-2 text-gray-700 hover:bg-gray-200 transition"
