@@ -3,7 +3,7 @@ import googleLogo from '../assets/google-logo.png'; // Adjust the path based on 
 function GoogleLoginButton({ onClick, isLoading }) {
     return (
         <div> {/* Removed the centering class here */}
-            <button style="border-radius: 200px"
+            <button
                 className={`bg-white text-gray-600 py-4 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hover:shadow-lg hover:shadow-blue-500/50 flex items-center ${
                     isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
