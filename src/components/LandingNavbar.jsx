@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 // Import the image properly if it's inside src/assets
-import votteLogo from '../assets/votte_favicon.png'; 
+import votteLogo from '../assets/header-logo.png'; 
 
 function LandingNavbar() {
   const [showButton, setShowButton] = useState(false);
