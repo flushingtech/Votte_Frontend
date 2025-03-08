@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LandingNavbar from '../components/LandingNavbar';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import backgroundImage from '../assets/landing-bg.png'; // Adjust the path as needed (changed to flushingtech.org background)
+import backgroundImage from '../assets/background.webp'; // Adjust the path as needed (changed to flushingtech.org background)
 
 function Landing() {
   const navigate = useNavigate();

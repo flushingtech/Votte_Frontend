@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 // Import the image properly if it's inside src/assets
-import votteLogo from '../assets/votte_favicon.png'; 
+import votteLogo from '../assets/header-logo.png'; 
 
 function LandingNavbar() {
   const [showButton, setShowButton] = useState(false);
@@ -25,7 +25,7 @@ function LandingNavbar() {
       {/* Navbar */}
       <nav
         className="fixed top-0 left-0 right-0 flex items-center p-3 border-b shadow-md"
-        style={{ backgroundColor: '#FFFFFF' }} // White navbar 
+        style={{ backgroundColor: '#FFE4CE' }} // Peach navbar
       >
         {/* Logo/Favicon Button (Refreshes the Page) */}
         <a href="/" onClick={handleLogoClick} className="flex items-center">
