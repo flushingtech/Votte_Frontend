@@ -32,7 +32,7 @@ function LandingNavbar() {
           <img
             src={votteLogo} // Ensure correct import
             alt="Votte Logo"
-            className="h-10 w-10 ml-2 cursor-pointer"
+            className="h-10 w-30 ml-2 cursor-pointer"
           />
         </a>
       </nav>
