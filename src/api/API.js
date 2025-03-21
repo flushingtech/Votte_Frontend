@@ -388,3 +388,15 @@ export const addContributorToIdea = async (ideaId, contributorEmail) => {
     throw error;
   }
 };
+
+// Function to get ideas where the user is a contributor
+export const getContributedIdeas = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/contributed/${email}`);
+    return response.data.ideas;
+  } catch (error) {
+    console.error('❌ Error fetching contributed ideas:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
