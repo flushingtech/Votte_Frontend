@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getIdeasByEvent, getLikedIdeas, deleteIdea } from '../api/API';
 import LikeButton from './LikeButton';
 import EditIdea from './EditIdea';
@@ -11,6 +12,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     const [editingIdea, setEditingIdea] = useState(null);
     const [userLikedIdeas, setUserLikedIdeas] = useState([]);
     const userEmail = localStorage.getItem('userEmail') || null;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -238,7 +240,12 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                 >
                                     <div className="idea-container">
                                         <div className="content-section">
-                                            <h3 className="text-sm font-bold text-white">{idea.idea}</h3>
+                                            <h3
+                                                className="text-sm font-bold text-white cursor-pointer"
+                                                onClick={() => navigate(`/idea/${idea.id}`)} // Navigate on click
+                                            >
+                                                {idea.idea}
+                                            </h3>
                                             <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
                                             <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
                                             {/* <p className="text-xs text-gray-400 mt-1">
