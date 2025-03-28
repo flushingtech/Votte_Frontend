@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { getIdeasByEvent, submitVote, unvote, getUserVote } from '../api/API';
+import React, { useState, useEffect } from "react";
+import { getIdeasByEvent, submitVote, unvote, getUserVote } from "../api/API";
 
 function Stage_2_Ideas({ eventId }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [voting, setVoting] = useState(false);
   const [userVote, setUserVote] = useState(null);
-  const [voteError, setVoteError] = useState('');
+  const [voteError, setVoteError] = useState("");
 
-  const userEmail = localStorage.getItem('userEmail');
+  const userEmail = localStorage.getItem("userEmail");
   const voteType = "Most Creative";
 
   useEffect(() => {
@@ -28,7 +28,7 @@ function Stage_2_Ideas({ eventId }) {
       try {
         const userVoteData = await getUserVote(userEmail, eventId, voteType);
         setUserVote(userVoteData);
-      } catch (err) { }
+      } catch (err) {}
     };
 
     fetchIdeas();
@@ -37,12 +37,12 @@ function Stage_2_Ideas({ eventId }) {
 
   const handleVoteClick = async (ideaId) => {
     if (!userEmail) {
-      setVoteError('User email not found.');
+      setVoteError("User email not found.");
       return;
     }
 
     setVoting(true);
-    setVoteError('');
+    setVoteError("");
 
     try {
       if (userVote === ideaId) {
@@ -53,20 +53,24 @@ function Stage_2_Ideas({ eventId }) {
         setUserVote(ideaId);
       }
     } catch (err) {
-      setVoteError('Failed to process vote. Please try again.');
+      setVoteError("Failed to process vote. Please try again.");
     } finally {
       setVoting(false);
     }
   };
 
-  if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
+  if (loading)
+    return <p className="text-center text-gray-500">Loading ideas...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div
-      className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] relative"
+      className="max-w-3xl mx-auto p-3 border border-white bg-[#1E2A3A] relative"
       style={{
-        boxShadow: '0px 0px 5px 3px rgb(0, 255, 0)', // Green glow effect
+        boxShadow: "0px 0px 5px 3px rgb(0, 255, 0)", // Green Glow Effect
+        minHeight: "100vh", // Ensures full-screen height until overflow
+        overflowY: "auto", // Enables scrollbar when content exceeds viewport
+        boxSizing: "border-box", // Prevents padding/borders from affecting height
       }}
     >
       <h2 className="text-lg font-bold text-green-400 mb-3">MOST CREATIVE</h2>
@@ -80,43 +84,48 @@ function Stage_2_Ideas({ eventId }) {
               key={idea.id}
               className="flex items-center justify-between p-3 border shadow transition-all"
               style={{
-                backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A', // Change background to white if voted
-                borderColor: 'white',
-                borderWidth: '2px',
+                backgroundColor: userVote === idea.id ? "#000" : "#1E2A3A", // Black Background if Voted
+                borderColor: "white",
+                borderWidth: "2px",
               }}
             >
               <div>
-                <h3 className={`text-sm font-bold ${userVote === idea.id ? 'text-white' : 'text-white'}`}>
+                <h3
+                  className={`text-sm font-bold ${
+                    userVote === idea.id ? "text-white" : "text-white"
+                  }`}
+                >
                   {idea.idea}
                 </h3>
-                <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
+                <p
+                  className={`text-xs ${
+                    userVote === idea.id ? "text-gray-300" : "text-gray-300"
+                  }`}
+                >
                   {idea.description}
                 </p>
-                {/* <p className="text-xs text-gray-400 mt-1">
-                  By: {idea.contributors && idea.contributors !== "{}"
-                    ? <span className="text-blue-400">{idea.contributors}</span>
-                    : "N/A"}
-                </p> */}
               </div>
               <button
                 onClick={() => handleVoteClick(idea.id)}
-                className={`px-5 py-3 text-sm font-bold rounded transition-all ${userVote === idea.id
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}
+                className={`px-5 py-3 text-sm font-bold rounded transition-all ${
+                  userVote === idea.id
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+                }`}
                 style={{
-                  boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)', // Green button shadow
+                  boxShadow: "0px 4px 10px rgba(0, 255, 0, 0.5)", // Green Button Shadow
                 }}
                 disabled={voting}
               >
-                {userVote === idea.id ? 'Unvote' : 'Votte'}
+                {userVote === idea.id ? "Unvote" : "Vote"}
               </button>
             </li>
           ))}
         </ul>
-
       )}
-      {voteError && <p className="text-xs text-red-500 text-center">{voteError}</p>}
+      {voteError && (
+        <p className="text-xs text-red-500 text-center">{voteError}</p>
+      )}
     </div>
   );
 }

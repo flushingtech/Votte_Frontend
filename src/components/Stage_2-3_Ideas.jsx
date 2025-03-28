@@ -70,15 +70,16 @@ function Stage_2_3_Ideas({ eventId }) {
       className="max-w-3xl mx-auto mt-3 p-3 border border-white relative"
       style={{
         backgroundColor: "#1E2A3A",
-        boxShadow: "0px 0px 5px 3px rgb(255, 0, 0)",
-        maxHeight: "500px",
-        overflowY: ideas.length * 68 > 500 ? "auto" : "hidden", // Assume each idea item takes up around 68px
+        boxShadow: "0px 0px 5px 3px rgb(255, 0, 0)", // Red Glow Effect
+        minHeight: "100vh", // Ensures full-screen height until content overflows
+        overflowY: "auto", // Enables scrollbar when content exceeds viewport
+        boxSizing: "border-box", // Prevents padding/border from affecting height
       }}
     >
       <h2
         className="text-lg font-bold text-red-300 mb-3"
         style={{
-          textShadow: "1px 1px 3px rgba(255, 255, 255, 0.6)",
+          textShadow: "1px 1px 3px rgba(255, 255, 255, 0.6)", // White Stroke Effect
         }}
       >
         MOST IMPACTFUL
@@ -93,7 +94,7 @@ function Stage_2_3_Ideas({ eventId }) {
               key={idea.id}
               className="flex items-center justify-between p-3 border shadow transition-all"
               style={{
-                backgroundColor: userVote === idea.id ? "#000" : "#1E2A3A",
+                backgroundColor: userVote === idea.id ? "#000" : "#1E2A3A", // Black Background if Voted
                 borderColor: "white",
                 borderWidth: "2px",
               }}
@@ -122,7 +123,7 @@ function Stage_2_3_Ideas({ eventId }) {
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
                 style={{
-                  boxShadow: "0px 4px 10px rgba(0, 255, 0, 0.5)",
+                  boxShadow: "0px 4px 10px rgba(0, 255, 0, 0.5)", // Green Button Shadow
                 }}
                 disabled={voting}
               >
