@@ -49,19 +49,31 @@ function Home() {
         className="flex flex-col md:flex-row flex-grow mx-auto p-4 gap-4"
         style={{ maxWidth: '100%', width: '100%' }}
       >
-        {/* Events Section (Appears first on mobile, right on desktop) */}
-        <div
-          className="w-full md:w-[30%] border border-white shadow-sm"
-          style={{
-            padding: '0.5rem',
-            width: '100%',
-          }}
-        >
-          <EventsList />
+        {/* Events Section (Appears first on mobile, left on desktop) */}
+        <div className="w-full md:w-[70%] flex flex-col gap-6">
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '0.5rem',
+              width: '100%',
+            }}
+          >
+            <EventsList />
+          </div>
+
+          <div
+            className="flex-1 border border-white shadow-sm overflow-y-auto"
+            style={{
+              padding: '0.5rem',
+              width: '100%',
+            }}
+          >
+            {/* <EventsList /> */}
+          </div>
         </div>
 
-        {/* Left Section: MyIdeas and LikedIdeas */}
-        <div className="w-full md:w-[70%] flex flex-col gap-6">
+        {/* Right Section: MyIdeas and LikedIdeas */}
+        <div className="w-full md:w-[50%] flex flex-col gap-6">
           {/* MyIdeas */}
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
@@ -85,7 +97,7 @@ function Home() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
