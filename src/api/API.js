@@ -400,3 +400,48 @@ export const getContributedIdeas = async (email) => {
   }
 };
 
+// Function to get the total number of ideas the user contributed to
+export const getContributedIdeaCount = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/contributed-count/${email}`);
+    return response.data.contributedCount;
+  } catch (error) {
+    console.error('Error fetching contributed idea count:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get total number of votes received by a user (authored + contributed ideas)
+export const getTotalVotesForUser = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/total-votes/${email}`);
+    return response.data.totalVotes;
+  } catch (error) {
+    console.error('Error fetching total votes for user:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get the number of hackathon wins (as owner or contributor)
+export const getHackathonWins = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/hackathon-wins/${email}`);
+    return response.data.totalWins;
+  } catch (error) {
+    console.error('Error fetching hackathon wins:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get detailed hackathon wins (event title + date)
+export const getHackathonWinsDetails = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/hackathon-wins-details/${email}`);
+    return response.data.wins;
+  } catch (error) {
+    console.error('Error fetching hackathon win details:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
