@@ -400,3 +400,13 @@ export const getContributedIdeas = async (email) => {
   }
 };
 
+// Function to get the total number of ideas the user contributed to
+export const getContributedIdeaCount = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/contributed-count/${email}`);
+    return response.data.contributedCount;
+  } catch (error) {
+    console.error('Error fetching contributed idea count:', error.response?.data || error.message);
+    throw error;
+  }
+};

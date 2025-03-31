@@ -7,6 +7,7 @@ import AdminPage from './pages/Admin';
 import EventScreen from './pages/EventScreen';
 import IdeasForEvent from './components/admin/IdeasForEvent'; // Admin Event Screen
 import IdeaScreen from './components/IdeaScreen';
+import Profile from './components/Profile';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -50,6 +51,11 @@ function App() {
 
           {/* New route for single idea screen */}
           <Route path="/idea/:ideaId" element={<IdeaScreen />} />
+
+          <Route
+            path="/profile"
+            element={<Profile user={{ email: userEmail }} />}
+          />
 
           {/* Admin routes */}
           <Route

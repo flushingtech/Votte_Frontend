@@ -3,6 +3,7 @@ import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
 import LikedIdeas from '../components/LikedIdeas';
+import Profile from '../components/Profile';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -68,7 +69,8 @@ function Home() {
               width: '100%',
             }}
           >
-            {/* <EventsList /> */}
+            <Profile user={{ email: userEmail }} />
+
           </div>
         </div>
 
