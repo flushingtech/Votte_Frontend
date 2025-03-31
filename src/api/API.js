@@ -410,3 +410,14 @@ export const getContributedIdeaCount = async (email) => {
     throw error;
   }
 };
+
+// Function to get total number of votes received by a user (authored + contributed ideas)
+export const getTotalVotesForUser = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/total-votes/${email}`);
+    return response.data.totalVotes;
+  } catch (error) {
+    console.error('Error fetching total votes for user:', error.response?.data || error.message);
+    throw error;
+  }
+};
