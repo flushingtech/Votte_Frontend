@@ -421,3 +421,27 @@ export const getTotalVotesForUser = async (email) => {
     throw error;
   }
 };
+
+// Function to get the number of hackathon wins (as owner or contributor)
+export const getHackathonWins = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/hackathon-wins/${email}`);
+    return response.data.totalWins;
+  } catch (error) {
+    console.error('Error fetching hackathon wins:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Function to get detailed hackathon wins (event title + date)
+export const getHackathonWinsDetails = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/hackathon-wins-details/${email}`);
+    return response.data.wins;
+  } catch (error) {
+    console.error('Error fetching hackathon win details:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+

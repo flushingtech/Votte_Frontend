@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react';
-import { getContributedIdeaCount, getTotalVotesForUser } from '../api/API';
+import { getContributedIdeaCount, getTotalVotesForUser, getHackathonWins, getHackathonWinsDetails } from '../api/API';
 
 const Profile = ({ user }) => {
     const [contributedCount, setContributedCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [totalVotes, setTotalVotes] = useState(0);
+    const [hackathonWins, setHackathonWins] = useState(0);
+    const [detailedWins, setDetailedWins] = useState([]);
+    const [showWins, setShowWins] = useState(false);
 
     useEffect(() => {
         if (!user?.email) return;
 
         const fetchStats = async () => {
             try {
-                const [count, votes] = await Promise.all([
+                const [count, wins, winDetails] = await Promise.all([
                     getContributedIdeaCount(user.email),
-                    getTotalVotesForUser(user.email),
+                    getHackathonWins(user.email),
+                    getHackathonWinsDetails(user.email),
                 ]);
                 setContributedCount(count);
-                setTotalVotes(votes);
+                setHackathonWins(wins);
+                setDetailedWins(winDetails);
             } catch (error) {
                 console.error('Error fetching profile stats:', error);
             } finally {
@@ -26,6 +31,7 @@ const Profile = ({ user }) => {
 
         fetchStats();
     }, [user?.email]);
+
 
     return (
         <div className="profile-container relative flex flex-col h-full">
@@ -39,17 +45,48 @@ const Profile = ({ user }) => {
                 {loading ? (
                     <p className="text-sm text-center">Loading your stats...</p>
                 ) : (
-                    <div>
-                        <div className="p-4 bg-white border-2 border-[#1E2A3A] rounded shadow-md">
-                            <h3 className="text-lg font-semibold text-[#1E2A3A] mb-2">Total Contributions</h3>
-                            <p className="text-2xl font-bold text-green-600">{contributedCount}</p>
+                    <div className="text-white text-sm sm:text-base space-y-2">
+                        <div className="flex justify-between border-b border-gray-600 pb-1">
+                            <span className="font-medium">Total Contributions</span>
+                            <span className="text-green-400 font-bold">{contributedCount}</span>
                         </div>
 
-                        <div className="p-4 bg-white border-2 border-[#1E2A3A] rounded shadow-md">
-                            <h3 className="text-lg font-semibold text-[#1E2A3A] mb-2">Total Votes Received</h3>
-                            <p className="text-2xl font-bold text-blue-600">{totalVotes}</p>
+                        <div className="flex justify-between border-b border-gray-600 pb-1">
+                            <span className="font-medium">Total Votes Received</span>
+                            <span className="text-blue-400 font-bold">{totalVotes}</span>
                         </div>
+
+                        <div className="flex justify-between items-center border-b border-gray-600 pb-1">
+                            <span className="font-medium">Hackathon Wins</span>
+                            <div className="flex items-center gap-3">
+                                <span className="text-purple-400 font-bold">{hackathonWins}</span>
+                                {hackathonWins > 0 && (
+                                    <button
+                                        onClick={() => setShowWins(prev => !prev)}
+                                        className="text-xs underline text-blue-300 hover:text-blue-200"
+                                    >
+                                        {showWins ? 'Hide' : 'View'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {showWins && (
+                            <ul className="pl-4 list-disc text-gray-300 mt-2 space-y-1">
+                                {detailedWins.map(win => (
+                                    <li key={win.event_id}>
+                                        <span className="text-white font-medium">{win.event_title}</span> –{' '}
+                                        {new Date(win.event_date).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
+
 
                 )}
             </div>
