@@ -67,12 +67,17 @@ function Stage_2_Ideas({ eventId }) {
       className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] relative"
       style={{
         boxShadow: '0px 0px 5px 3px rgb(0, 255, 0)', // Green glow effect
+        height: '60vh', // <-- fixed height
+        overflowY: 'auto', // <-- scroll if needed
+        overflowX: 'hidden',
       }}
     >
       <h2 className="text-lg font-bold text-green-400 mb-3">MOST CREATIVE</h2>
 
       {ideas.length === 0 ? (
-        <p className="text-gray-500">No ideas are currently in Stage 2.</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">No ideas are currently in Stage 2.</p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {ideas.map((idea) => (
@@ -80,7 +85,7 @@ function Stage_2_Ideas({ eventId }) {
               key={idea.id}
               className="flex items-center justify-between p-3 border shadow transition-all"
               style={{
-                backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A', // Change background to white if voted
+                backgroundColor: userVote === idea.id ? '#000' : '#1E2A3A',
                 borderColor: 'white',
                 borderWidth: '2px',
               }}
@@ -92,11 +97,6 @@ function Stage_2_Ideas({ eventId }) {
                 <p className={`text-xs ${userVote === idea.id ? 'text-gray-300' : 'text-gray-300'}`}>
                   {idea.description}
                 </p>
-                {/* <p className="text-xs text-gray-400 mt-1">
-                  By: {idea.contributors && idea.contributors !== "{}"
-                    ? <span className="text-blue-400">{idea.contributors}</span>
-                    : "N/A"}
-                </p> */}
               </div>
               <button
                 onClick={() => handleVoteClick(idea.id)}
@@ -105,7 +105,7 @@ function Stage_2_Ideas({ eventId }) {
                   : 'bg-green-600 hover:bg-green-700 text-white'
                   }`}
                 style={{
-                  boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)', // Green button shadow
+                  boxShadow: '0px 4px 10px rgba(0, 255, 0, 0.5)',
                 }}
                 disabled={voting}
               >
@@ -114,8 +114,8 @@ function Stage_2_Ideas({ eventId }) {
             </li>
           ))}
         </ul>
-
       )}
+      
       {voteError && <p className="text-xs text-red-500 text-center">{voteError}</p>}
     </div>
   );
