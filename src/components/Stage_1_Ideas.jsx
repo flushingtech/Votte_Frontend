@@ -212,7 +212,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                 className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
                 style={{
                     backgroundColor: 'transparent',
-                    height: '65vh',        // <-- always 65% of viewport
+                    height: '60vh',        // <-- always 65% of viewport
                     overflowY: 'auto',
                     overflowX: 'hidden',
                 }}
