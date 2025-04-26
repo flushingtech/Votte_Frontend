@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getIdeasByEvent, getLikedIdeas, deleteIdea } from '../api/API';
 import LikeButton from './LikeButton';
 import EditIdea from './EditIdea';
+import Markdown from "react-markdown";
 
 function Stage_1_Ideas({ eventId, refreshIdeas }) {
     const [ideas, setIdeas] = useState([]);
@@ -248,7 +249,9 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                             >
                                                 {idea.idea}
                                             </h3>
-                                            <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
+                                            <p className="text-xs text-gray-100 mt-1 markdown">
+                                              <Markdown>{idea.description}</Markdown>
+                                            </p>
                                             <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
                                         </div>
 
