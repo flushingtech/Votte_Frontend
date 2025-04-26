@@ -65,7 +65,6 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
     if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
 
-    // Calculate the maximum likes among all ideas
     const maxLikes = Math.max(...ideas.map((idea) => idea.likes), 0);
 
     return (
@@ -213,12 +212,15 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                 className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
                 style={{
                     backgroundColor: 'transparent',
-                    maxHeight: '68vh',
+                    height: '65vh',        // <-- always 65% of viewport
                     overflowY: 'auto',
+                    overflowX: 'hidden',
                 }}
             >
                 {ideas.length === 0 ? (
-                    <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
+                    </div>
                 ) : (
                     <ul className="space-y-2">
                         {ideas.map((idea) => {
@@ -242,17 +244,12 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                                         <div className="content-section">
                                             <h3
                                                 className="text-sm font-bold text-white cursor-pointer"
-                                                onClick={() => navigate(`/idea/${idea.id}`)} // Navigate on click
+                                                onClick={() => navigate(`/idea/${idea.id}`)}
                                             >
                                                 {idea.idea}
                                             </h3>
                                             <p className="text-xs text-gray-100 mt-1">{idea.description}</p>
                                             <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
-                                            {/* <p className="text-xs text-gray-400 mt-1">
-                                                By: {idea.contributors && idea.contributors !== "{}"
-                                                    ? <span className="text-blue-400">{idea.contributors}</span>
-                                                    : "N/A"}
-                                            </p> */}
                                         </div>
 
                                         {isYourIdea && (
