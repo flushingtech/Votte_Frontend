@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { submitIdea, getEventStage } from '../api/API';
+import Markdown from "react-markdown";
 
 function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [idea, setIdea] = useState('');
@@ -98,6 +99,10 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Clear and intriguing - easy to grasp yet sparks curiosity."
                   />
+                  <div className="w-full h-auto min-h-24 px-3 border border-gray-500 bg-gray-700 text-white shadow-sm">
+                    <span className="font-bold">Markdown Preview</span>
+                    <div className='markdown text-left'><Markdown>{description}</Markdown></div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-300 mb-1">Tech Magic:</label>

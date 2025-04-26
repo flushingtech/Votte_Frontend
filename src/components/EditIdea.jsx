@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { editIdea } from '../api/API';
+import Markdown from "react-markdown";
 
 function EditIdea({ ideaData, onEditSuccess }) {
   const [idea, setIdea] = useState(ideaData.idea);
@@ -52,6 +53,10 @@ function EditIdea({ ideaData, onEditSuccess }) {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Edit your description here..."
         />
+        <div className="w-full h-auto min-h-24 px-3 border border-gray-300 shadow-sm text-center">
+          <span className="font-bold">Markdown Preview</span>
+          <div className='markdown text-left'><Markdown>{description}</Markdown></div>
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-white mb-1">Edit Technologies:</label>
