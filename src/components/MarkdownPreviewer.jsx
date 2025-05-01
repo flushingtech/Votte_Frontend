@@ -45,7 +45,7 @@ export default function MarkdownPreviewer({ children, text }) {
       </div>
       {children}
       {previewPressed && (
-        <div className="w-full h-64 max-h-[25vh] min-h-24 px-3 border border-gray-500 bg-gray-700 text-white shadow-sm overflow-auto">
+        <div className="w-full h-64 max-h-[25vh] min-h-24 px-3 border border-gray-500 bg-gray-700 text-white shadow-sm overflow-auto text-center">
           <span className="font-bold">Markdown Preview</span>
           <div ref={markdownRef} className="markdown text-left text-xs">
             <Markdown>{text}</Markdown>
