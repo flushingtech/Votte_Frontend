@@ -90,7 +90,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
       {isFormVisible && (
         <>
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-x-0 top-[4em] z-50 flex items-center justify-center">
             <div className="bg-gray-800 p-8 max-w-4xl mx-auto rounded-lg space-y-4 w-11/12 md:w-1/2">
               <h2 className="text-2xl font-bold text-white text-center">
                 Submit Your Idea
