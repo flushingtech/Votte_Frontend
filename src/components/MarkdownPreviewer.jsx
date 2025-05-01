@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 
 export default function MarkdownPreviewer({ children, text }) {
   const [previewPressed, setPreviewPressed] = React.useState(false);
+  const [animated, setAnimated] = React.useState(false);
   const markdownRef = React.useRef(null);
   React.useEffect(() => {
     if (text) {
@@ -16,7 +17,12 @@ export default function MarkdownPreviewer({ children, text }) {
     }
   }, [text]);
   return (
-    <>
+    <div
+      onClick={() => {
+        console.log("click");
+        setAnimated(true);
+      }}
+    >
       <div className="border border-gray-500 text-left">
         <button
           type="button"
@@ -29,7 +35,12 @@ export default function MarkdownPreviewer({ children, text }) {
         >
           Preview
         </button>
-        <span className="text-gray-500 mx-2">
+        <span
+          className={
+            "text-lg mx-2 tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-400 from-45% via-white via-50% to-gray-400 to-55% bg-[length:200%_auto] bg-[position:110%_0%]" +
+            (animated ? " animate-shimmer" : "")
+          }
+        >
           Votte now supports Markdown. Try it on!
         </span>
       </div>
@@ -42,7 +53,7 @@ export default function MarkdownPreviewer({ children, text }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
