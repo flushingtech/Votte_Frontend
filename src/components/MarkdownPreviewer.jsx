@@ -19,7 +19,6 @@ export default function MarkdownPreviewer({ children, text }) {
   return (
     <div
       onClick={() => {
-        console.log("click");
         setAnimated(true);
       }}
     >
