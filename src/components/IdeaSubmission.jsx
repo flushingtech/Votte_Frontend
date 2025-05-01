@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
-import { submitIdea, getEventStage } from '../api/API';
+import { useState, useEffect } from "react";
+import { submitIdea, getEventStage } from "../api/API";
 import Markdown from "react-markdown";
+import MarkdownPreviewer from "./MarkdownPreviewer";
 
 function IdeaSubmission({ email, eventId, refreshIdeas }) {
-  const [idea, setIdea] = useState('');
-  const [description, setDescription] = useState('');
-  const [technologies, setTechnologies] = useState('');
+  const [idea, setIdea] = useState("");
+  const [description, setDescription] = useState("");
+  const [technologies, setTechnologies] = useState("");
   const [isBuilt, setIsBuilt] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [eventStage, setEventStage] = useState(1); // State for event stage
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
         const eventStageData = await getEventStage(eventId);
         setEventStage(eventStageData.stage);
       } catch (error) {
-        console.error('Error fetching event stage:', error);
+        console.error("Error fetching event stage:", error);
       } finally {
         setLoading(false);
       }
@@ -31,18 +32,27 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
     e.preventDefault();
 
     if (!idea || !description || !technologies) {
-      setMessage('Please fill in all fields: idea, description, and technologies');
+      setMessage(
+        "Please fill in all fields: idea, description, and technologies"
+      );
       return;
     }
 
     try {
-      const response = await submitIdea(email, idea, description, technologies, eventId, isBuilt);
+      const response = await submitIdea(
+        email,
+        idea,
+        description,
+        technologies,
+        eventId,
+        isBuilt
+      );
 
       if (response.status === 201) {
-        setMessage('Idea submitted successfully!');
-        setIdea('');
-        setDescription('');
-        setTechnologies('');
+        setMessage("Idea submitted successfully!");
+        setIdea("");
+        setDescription("");
+        setTechnologies("");
         setIsBuilt(false);
         setIsFormVisible(false);
 
@@ -52,8 +62,8 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
       if (error.response && error.response.status === 400) {
         setMessage(error.response.data.message);
       } else {
-        console.error('Error submitting idea:', error);
-        setMessage('An error occurred while submitting your idea.');
+        console.error("Error submitting idea:", error);
+        setMessage("An error occurred while submitting your idea.");
       }
     }
   };
@@ -65,7 +75,9 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   return (
     <div className="w-full text-center">
       {eventStage === 2 ? (
-        <p className="text-yellow-500 font-bold text-lg">Votte Time - Submissions are closed.</p>
+        <p className="text-yellow-500 font-bold text-lg">
+          Votte Time - Submissions are closed.
+        </p>
       ) : (
         <button
           onClick={() => setIsFormVisible(true)}
@@ -80,10 +92,14 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-gray-800 p-8 max-w-4xl mx-auto rounded-lg space-y-4 w-11/12 md:w-1/2">
-              <h2 className="text-2xl font-bold text-white text-center">Submit Your Idea</h2>
+              <h2 className="text-2xl font-bold text-white text-center">
+                Submit Your Idea
+              </h2>
               <form onSubmit={handleIdeaSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">Your Big Idea:</label>
+                  <label className="block text-sm font-bold text-gray-300 mb-1">
+                    Your Big Idea:
+                  </label>
                   <textarea
                     className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-16"
                     value={idea}
@@ -92,20 +108,22 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">A Good Description:</label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Clear and intriguing - easy to grasp yet sparks curiosity."
-                  />
-                  <div className="w-full h-auto min-h-24 px-3 border border-gray-500 bg-gray-700 text-white shadow-sm">
-                    <span className="font-bold">Markdown Preview</span>
-                    <div className='markdown text-left'><Markdown>{description}</Markdown></div>
-                  </div>
+                  <label className="block text-sm font-bold text-gray-300 mb-1">
+                    A Good Description:
+                  </label>
+                  <MarkdownPreviewer text={description}>
+                    <textarea
+                      className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Clear and intriguing - easy to grasp yet sparks curiosity."
+                    />
+                  </MarkdownPreviewer>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">Tech Magic:</label>
+                  <label className="block text-sm font-bold text-gray-300 mb-1">
+                    Tech Magic:
+                  </label>
                   <textarea
                     className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-16"
                     value={technologies}
@@ -120,7 +138,9 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     onChange={(e) => setIsBuilt(e.target.checked)}
                     className="mr-2"
                   />
-                  <label className="text-sm font-bold text-gray-300">Is this idea already built?</label>
+                  <label className="text-sm font-bold text-gray-300">
+                    Is this idea already built?
+                  </label>
                 </div>
                 <button
                   type="submit"
@@ -131,7 +151,13 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
               </form>
 
               {message && (
-                <p className={`mt-4 text-sm font-semibold ${message.includes('successfully') ? 'text-green-500' : 'text-red-500'}`}>
+                <p
+                  className={`mt-4 text-sm font-semibold ${
+                    message.includes("successfully")
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
                   {message}
                 </p>
               )}

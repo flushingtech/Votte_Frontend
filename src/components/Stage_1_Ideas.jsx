@@ -1,77 +1,78 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getIdeasByEvent, getLikedIdeas, deleteIdea } from '../api/API';
-import LikeButton from './LikeButton';
-import EditIdea from './EditIdea';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getIdeasByEvent, getLikedIdeas, deleteIdea } from "../api/API";
+import LikeButton from "./LikeButton";
+import EditIdea from "./EditIdea";
 import Markdown from "react-markdown";
 
 function Stage_1_Ideas({ eventId, refreshIdeas }) {
-    const [ideas, setIdeas] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [menuOpenId, setMenuOpenId] = useState(null);
-    const [editingIdea, setEditingIdea] = useState(null);
-    const [userLikedIdeas, setUserLikedIdeas] = useState([]);
-    const userEmail = localStorage.getItem('userEmail') || null;
-    const navigate = useNavigate();
+  const [ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const [editingIdea, setEditingIdea] = useState(null);
+  const [userLikedIdeas, setUserLikedIdeas] = useState([]);
+  const userEmail = localStorage.getItem("userEmail") || null;
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchIdeas = async () => {
-            try {
-                const eventIdeas = await getIdeasByEvent(eventId);
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        const eventIdeas = await getIdeasByEvent(eventId);
 
-                if (userEmail) {
-                    const likedIdeas = await getLikedIdeas(userEmail);
-                    setUserLikedIdeas(likedIdeas);
-                }
-
-                const sortedIdeas = eventIdeas.sort((a, b) => {
-                    if (a.email === userEmail && b.email !== userEmail) return -1;
-                    if (a.email !== userEmail && b.email === userEmail) return 1;
-                    return b.likes - a.likes;
-                });
-
-                setIdeas(sortedIdeas);
-            } catch (err) {
-                console.error('Error fetching ideas:', err);
-                setError('Failed to load ideas.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchIdeas();
-    }, [eventId, userEmail]);
-
-    const handleDelete = async (ideaId) => {
-        if (window.confirm('Are you sure you want to delete this idea?')) {
-            try {
-                await deleteIdea(ideaId, userEmail);
-                setIdeas((prevIdeas) => prevIdeas.filter((idea) => idea.id !== ideaId));
-                if (refreshIdeas) refreshIdeas();
-            } catch (err) {
-                console.error('Error deleting idea:', err);
-                alert('Failed to delete idea.');
-            }
+        if (userEmail) {
+          const likedIdeas = await getLikedIdeas(userEmail);
+          setUserLikedIdeas(likedIdeas);
         }
+
+        const sortedIdeas = eventIdeas.sort((a, b) => {
+          if (a.email === userEmail && b.email !== userEmail) return -1;
+          if (a.email !== userEmail && b.email === userEmail) return 1;
+          return b.likes - a.likes;
+        });
+
+        setIdeas(sortedIdeas);
+      } catch (err) {
+        console.error("Error fetching ideas:", err);
+        setError("Failed to load ideas.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleEditSuccess = (updatedIdea) => {
-        setIdeas((prevIdeas) =>
-            prevIdeas.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
-        );
-        setEditingIdea(null);
-    };
+    fetchIdeas();
+  }, [eventId, userEmail]);
 
-    if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
-    if (error) return <p className="text-center text-red-500">{error}</p>;
+  const handleDelete = async (ideaId) => {
+    if (window.confirm("Are you sure you want to delete this idea?")) {
+      try {
+        await deleteIdea(ideaId, userEmail);
+        setIdeas((prevIdeas) => prevIdeas.filter((idea) => idea.id !== ideaId));
+        if (refreshIdeas) refreshIdeas();
+      } catch (err) {
+        console.error("Error deleting idea:", err);
+        alert("Failed to delete idea.");
+      }
+    }
+  };
 
-    const maxLikes = Math.max(...ideas.map((idea) => idea.likes), 0);
+  const handleEditSuccess = (updatedIdea) => {
+    setIdeas((prevIdeas) =>
+      prevIdeas.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
+    );
+    setEditingIdea(null);
+  };
 
-    return (
-        <>
-            <style>
-                {`
+  if (loading)
+    return <p className="text-center text-gray-500">Loading ideas...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+
+  const maxLikes = Math.max(...ideas.map((idea) => idea.likes), 0);
+
+  return (
+    <>
+      <style>
+        {`
           .glowing-border {
             border: 2px solid white;
             box-shadow: 0 0 2px white, 0 0 4px white, 0 0 6px white;
@@ -207,125 +208,139 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
             bottom: -30px;
           }
         `}
-            </style>
+      </style>
 
-            <div
-                className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
-                style={{
-                    backgroundColor: 'transparent',
-                    height: '60vh',        // <-- always 65% of viewport
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                }}
-            >
-                {ideas.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
+      <div
+        className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
+        style={{
+          backgroundColor: "transparent",
+          height: "60vh", // <-- always 65% of viewport
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
+        {ideas.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-center text-gray-500">
+              No ideas have been submitted yet.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {ideas.map((idea) => {
+              const isMostPopular = idea.likes === maxLikes;
+              const isYourIdea = idea.email === userEmail;
+
+              return (
+                <li
+                  key={idea.id}
+                  className={`relative p-2 shadow ${
+                    isYourIdea
+                      ? "glowing-border"
+                      : isMostPopular
+                      ? "blue-yellow-glow"
+                      : "border-gray-500"
+                  }`}
+                  style={{
+                    backgroundColor: "#1E2A3A",
+                  }}
+                >
+                  <div className="idea-container">
+                    <div className="content-section">
+                      <h3
+                        className="text-sm font-bold text-white cursor-pointer"
+                        onClick={() => navigate(`/idea/${idea.id}`)}
+                      >
+                        {idea.idea}
+                      </h3>
+                      <div className="text-sm text-gray-100 mt-1 markdown">
+                        <Markdown>{idea.description}</Markdown>
+                      </div>
+                      <p className="text-xs text-gray-300">
+                        Tech Magic: {idea.technologies}
+                      </p>
                     </div>
-                ) : (
-                    <ul className="space-y-2">
-                        {ideas.map((idea) => {
-                            const isMostPopular = idea.likes === maxLikes;
-                            const isYourIdea = idea.email === userEmail;
 
-                            return (
-                                <li
-                                    key={idea.id}
-                                    className={`relative p-2 shadow ${isYourIdea
-                                        ? 'glowing-border'
-                                        : isMostPopular
-                                            ? 'blue-yellow-glow'
-                                            : 'border-gray-500'
-                                        }`}
-                                    style={{
-                                        backgroundColor: '#1E2A3A',
-                                    }}
-                                >
-                                    <div className="idea-container">
-                                        <div className="content-section">
-                                            <h3
-                                                className="text-sm font-bold text-white cursor-pointer"
-                                                onClick={() => navigate(`/idea/${idea.id}`)}
-                                            >
-                                                {idea.idea}
-                                            </h3>
-                                            <p className="text-xs text-gray-100 mt-1 markdown">
-                                              <Markdown>{idea.description}</Markdown>
-                                            </p>
-                                            <p className="text-xs text-gray-300">Tech Magic: {idea.technologies}</p>
-                                        </div>
-
-                                        {isYourIdea && (
-                                            <div className="your-idea-section">
-                                                <div className="your-idea-container">Your Idea</div>
-                                                {isMostPopular && (
-                                                    <div className="most-popular-container">
-                                                        Most Popular
-                                                    </div>
-                                                )}
-                                                <div className="likes-count">{idea.likes} Likes</div>
-                                                <div
-                                                    className="menu-button"
-                                                    onClick={() =>
-                                                        setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
-                                                    }
-                                                >
-                                                    ...
-                                                </div>
-                                                {menuOpenId === idea.id && (
-                                                    <div className="dropdown-menu">
-                                                        <button onClick={() => setEditingIdea(idea)}>Edit</button>
-                                                        <button onClick={() => handleDelete(idea.id)}>Delete</button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {!isYourIdea && (
-                                            <div className="most-popular-like-wrapper">
-                                                {isMostPopular && (
-                                                    <div className="most-popular-container">
-                                                        Most Popular
-                                                    </div>
-                                                )}
-                                                <div className="like-button-wrapper">
-                                                    <LikeButton
-                                                        ideaId={idea.id}
-                                                        currentUserEmail={userEmail}
-                                                        initialLikes={idea.likes}
-                                                        hasLiked={userLikedIdeas.includes(idea.id)}
-                                                        onLikeChange={(updatedIdea) =>
-                                                            setIdeas((prevIdeas) =>
-                                                                prevIdeas.map((i) =>
-                                                                    i.id === updatedIdea.id ? updatedIdea : i
-                                                                )
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
-
-                {editingIdea && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                        <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
-                        <button
-                            className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
-                            onClick={() => setEditingIdea(null)}
+                    {isYourIdea && (
+                      <div className="your-idea-section">
+                        <div className="your-idea-container">Your Idea</div>
+                        {isMostPopular && (
+                          <div className="most-popular-container">
+                            Most Popular
+                          </div>
+                        )}
+                        <div className="likes-count">{idea.likes} Likes</div>
+                        <div
+                          className="menu-button"
+                          onClick={() =>
+                            setMenuOpenId(
+                              menuOpenId === idea.id ? null : idea.id
+                            )
+                          }
                         >
-                            Close
-                        </button>
-                    </div>
-                )}
-            </div>
-        </>
-    );
+                          ...
+                        </div>
+                        {menuOpenId === idea.id && (
+                          <div className="dropdown-menu">
+                            <button onClick={() => setEditingIdea(idea)}>
+                              Edit
+                            </button>
+                            <button onClick={() => handleDelete(idea.id)}>
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {!isYourIdea && (
+                      <div className="most-popular-like-wrapper">
+                        {isMostPopular && (
+                          <div className="most-popular-container">
+                            Most Popular
+                          </div>
+                        )}
+                        <div className="like-button-wrapper">
+                          <LikeButton
+                            ideaId={idea.id}
+                            currentUserEmail={userEmail}
+                            initialLikes={idea.likes}
+                            hasLiked={userLikedIdeas.includes(idea.id)}
+                            onLikeChange={(updatedIdea) =>
+                              setIdeas((prevIdeas) =>
+                                prevIdeas.map((i) =>
+                                  i.id === updatedIdea.id ? updatedIdea : i
+                                )
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {editingIdea && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <EditIdea
+              ideaData={editingIdea}
+              onEditSuccess={handleEditSuccess}
+            />
+            <button
+              className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
+              onClick={() => setEditingIdea(null)}
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export default Stage_1_Ideas;
