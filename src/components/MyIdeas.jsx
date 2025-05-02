@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserIdeas, getContributedIdeas } from "../api/API";
 import { useNavigate } from "react-router-dom";
-import Markdown from "react-markdown";
+import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
 function MyIdeas({ email }) {
   const [ideas, setIdeas] = useState([]);
@@ -184,7 +184,7 @@ function IdeaList({ ideas, handleEventClick }) {
               }}
             >
               <div className="text-xs markdown">
-                <Markdown>{idea.description}</Markdown>
+                <MarkdownWithPlugins>{idea.description}</MarkdownWithPlugins>
               </div>
             </div>
           </div>
