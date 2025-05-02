@@ -1,10 +1,21 @@
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import Markdown from "react-markdown";
 import PropTypes from "prop-types";
-export default function MarkdownWithPlugins({ children }) {
-  return <Markdown remarkPlugins={[remarkGfm]}>{children}</Markdown>;
+export default function MarkdownWithPlugins({
+  children,
+  className = "prose prose-sm",
+}) {
+  return (
+    <div className={className}>
+      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+        {children}
+      </Markdown>
+    </div>
+  );
 }
 
 MarkdownWithPlugins.propTypes = {
   children: PropTypes.node.isRequired,
+  className: PropTypes.string,
 };

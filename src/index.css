@@ -1,5 +1,2 @@
 /* Import global styles */
 @import "./styles/tailwind.css";
-.markdown > * {
-  all: revert;
-}

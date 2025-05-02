@@ -253,8 +253,8 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                       >
                         {idea.idea}
                       </h3>
-                      <div className="text-sm text-gray-100 mt-1 markdown">
-                        <MarkdownWithPlugins>
+                      <div className="text-sm text-gray-100 mt-1">
+                        <MarkdownWithPlugins className="prose prose-invert prose-sm">
                           {idea.description}
                         </MarkdownWithPlugins>
                       </div>
