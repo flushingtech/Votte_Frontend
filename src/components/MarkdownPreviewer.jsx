@@ -1,21 +1,57 @@
 import React from "react";
 import Markdown from "react-markdown";
 import PropTypes from "prop-types";
+import removeMd from "remove-markdown";
 
-export default function MarkdownPreviewer({ children, text }) {
+export default function MarkdownPreviewer({ children, text, textRef }) {
   const [previewPressed, setPreviewPressed] = React.useState(false);
   const [animated, setAnimated] = React.useState(false);
   const markdownRef = React.useRef(null);
   React.useEffect(() => {
-    if (text) {
-      const lines = text.split("\n");
-      console.log("lines", lines);
-      console.log(markdownRef.current);
-      if (markdownRef.current) {
-        console.log("markdown ref", markdownRef.current.children);
-      }
+    if (textRef.current && markdownRef.current) {
+      renewEventListener(textRef.current, "click", syncPreviewHandler);
+      renewEventListener(textRef.current, "keyup", syncPreviewHandler);
+      if (text) syncPreviewHandler();
     }
-  }, [text]);
+    function findLineNumber(text, position) {
+      const diff = text.length - removeMd(text).length;
+      const adjustedPosition =
+        position - Math.round(diff * (position / text.length));
+      let wordCount = 0;
+      const lines = removeMd(text)
+        .split("\n")
+        .filter((line) => line.trim() !== "");
+      const lineNumber = lines.findIndex((line, i, arr) => {
+        wordCount += line.length;
+        if (wordCount >= adjustedPosition || i === arr.length - 1) {
+          return true;
+        }
+        return false;
+      });
+      return lineNumber / lines.length;
+    }
+    function syncPreviewHandler() {
+      const cursorPosition = textRef.current.selectionStart;
+      const cursorLine = findLineNumber(text, cursorPosition);
+      const previewElements = markdownRef.current.querySelectorAll(
+        "h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre"
+      );
+      const previewLine = Math.min(
+        Math.round(cursorLine * previewElements.length),
+        previewElements.length - 1
+      );
+      previewElements[previewLine].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [text, previewPressed, textRef]);
+  function renewEventListener(node, eventType, handler) {
+    if (node) {
+      node.removeEventListener(eventType, handler);
+      node.addEventListener(eventType, handler);
+    }
+  }
   return (
     <div
       onClick={() => {
@@ -59,4 +95,5 @@ export default function MarkdownPreviewer({ children, text }) {
 MarkdownPreviewer.propTypes = {
   children: PropTypes.node,
   text: PropTypes.string.isRequired,
+  textRef: PropTypes.object,
 };
