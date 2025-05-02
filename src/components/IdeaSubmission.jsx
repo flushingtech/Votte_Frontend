@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { submitIdea, getEventStage } from "../api/API";
-import Markdown from "react-markdown";
 import MarkdownPreviewer from "./MarkdownPreviewer";
 
 function IdeaSubmission({ email, eventId, refreshIdeas }) {
@@ -12,6 +11,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [eventStage, setEventStage] = useState(1); // State for event stage
   const [loading, setLoading] = useState(true);
+  const textRef = useRef(null);
 
   useEffect(() => {
     const fetchEventStage = async () => {
@@ -111,8 +111,9 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   <label className="block text-sm font-bold text-gray-300 mb-1">
                     A Good Description:
                   </label>
-                  <MarkdownPreviewer text={description}>
+                  <MarkdownPreviewer text={description} textRef={textRef}>
                     <textarea
+                      ref={textRef}
                       className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { editIdea } from "../api/API";
 import MarkdownPreviewer from "./MarkdownPreviewer";
 
@@ -8,13 +8,6 @@ function EditIdea({ ideaData, onEditSuccess }) {
   const [description, setDescription] = useState(ideaData.description);
   const [technologies, setTechnologies] = useState(ideaData.technologies);
   const [message, setMessage] = useState("");
-  useEffect(() => {
-    if (textRef.current) {
-      textRef.current.addEventListener("click", () => {
-        console.log(textRef.current.selectionStart);
-      });
-    }
-  }, []);
   const handleEdit = async (e) => {
     e.preventDefault();
 
@@ -64,7 +57,7 @@ function EditIdea({ ideaData, onEditSuccess }) {
           <label className="block text-sm font-medium text-white mb-1">
             Edit Description:
           </label>
-          <MarkdownPreviewer text={description}>
+          <MarkdownPreviewer text={description} textRef={textRef}>
             <textarea
               ref={textRef}
               className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
