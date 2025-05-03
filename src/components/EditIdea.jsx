@@ -57,7 +57,7 @@ function EditIdea({ ideaData, onEditSuccess }) {
           <label className="block text-sm font-medium text-white mb-1">
             Edit Description:
           </label>
-          <MarkdownPreviewer text={description} textRef={textRef}>
+          <MarkdownPreviewer textRef={textRef}>
             <textarea
               ref={textRef}
               className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
