@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import removeMd from "remove-markdown";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
-export default function MarkdownPreviewer({ children, text, textRef }) {
+export default function MarkdownPreviewer({ children, textRef }) {
   const [previewPressed, setPreviewPressed] = React.useState(false);
   const [animated, setAnimated] = React.useState(false);
   const markdownRef = React.useRef(null);
@@ -11,7 +11,6 @@ export default function MarkdownPreviewer({ children, text, textRef }) {
     if (textRef.current && markdownRef.current) {
       renewEventListener(textRef.current, "click", syncPreviewHandler);
       renewEventListener(textRef.current, "keyup", syncPreviewHandler);
-      if (text) syncPreviewHandler();
     }
     function findLineNumber(text, position) {
       const diff = text.length - removeMd(text).length;
@@ -32,10 +31,12 @@ export default function MarkdownPreviewer({ children, text, textRef }) {
     }
     function syncPreviewHandler() {
       const cursorPosition = textRef.current.selectionStart;
-      const cursorLine = findLineNumber(text, cursorPosition);
-      const previewElements = markdownRef.current.querySelectorAll(
-        "h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote, pre"
-      );
+      const cursorLine = findLineNumber(textRef.current.value, cursorPosition);
+      const previewElements = Array.from(
+        markdownRef.current.children[0]?.children
+      )
+        .map((node) => getElements(node))
+        .flat();
       const previewLine = Math.min(
         Math.round(cursorLine * previewElements.length),
         previewElements.length - 1
@@ -44,8 +45,19 @@ export default function MarkdownPreviewer({ children, text, textRef }) {
         behavior: "smooth",
         block: "center",
       });
+      function getElements(node) {
+        if (!node) return [];
+        const output = [];
+        if (["block", "list-item"].includes(getComputedStyle(node).display)) {
+          output.push(node);
+        }
+        for (let child of node.children) {
+          output.push(...getElements(child));
+        }
+        return output;
+      }
     }
-  }, [text, previewPressed, textRef]);
+  }, [previewPressed, textRef]);
   function renewEventListener(node, eventType, handler) {
     if (node) {
       node.removeEventListener(eventType, handler);
@@ -83,9 +95,9 @@ export default function MarkdownPreviewer({ children, text, textRef }) {
       {previewPressed && (
         <div className="w-full h-64 max-h-[25vh] min-h-24 px-3 border border-gray-500 bg-gray-700 text-white shadow-sm overflow-auto text-center">
           <span className="font-bold">Markdown Preview</span>
-          <div ref={markdownRef} className="text-left text-xs">
+          <div ref={markdownRef} className="text-left">
             <MarkdownWithPlugins className="prose prose-invert prose-sm">
-              {text}
+              {textRef.current.value}
             </MarkdownWithPlugins>
           </div>
         </div>
@@ -96,6 +108,5 @@ export default function MarkdownPreviewer({ children, text, textRef }) {
 
 MarkdownPreviewer.propTypes = {
   children: PropTypes.node.isRequired,
-  text: PropTypes.string.isRequired,
-  textRef: PropTypes.object,
+  textRef: PropTypes.object.isRequired,
 };

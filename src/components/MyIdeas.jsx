@@ -183,9 +183,9 @@ function IdeaList({ ideas, handleEventClick }) {
                 maxWidth: "100%",
               }}
             >
-              <div className="text-xs">
-                <MarkdownWithPlugins>{idea.description}</MarkdownWithPlugins>
-              </div>
+              <MarkdownWithPlugins className="text-sm">
+                {idea.description}
+              </MarkdownWithPlugins>
             </div>
           </div>
         </li>
