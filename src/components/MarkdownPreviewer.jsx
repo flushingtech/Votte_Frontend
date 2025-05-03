@@ -38,10 +38,10 @@ export default function MarkdownPreviewer({ children, textRef }) {
         .map((node) => getElements(node))
         .flat();
       const previewLine = Math.min(
-        Math.round(cursorLine * previewElements.length),
-        previewElements.length - 1
+        Math.round(cursorLine * previewElements?.length),
+        previewElements?.length - 1
       );
-      previewElements[previewLine].scrollIntoView({
+      previewElements[previewLine]?.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
@@ -97,7 +97,7 @@ export default function MarkdownPreviewer({ children, textRef }) {
           <span className="font-bold">Markdown Preview</span>
           <div ref={markdownRef} className="text-left">
             <MarkdownWithPlugins className="prose prose-invert prose-sm">
-              {textRef.current.value}
+              {textRef.current?.value}
             </MarkdownWithPlugins>
           </div>
         </div>
