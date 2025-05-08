@@ -444,4 +444,13 @@ export const getHackathonWinsDetails = async (email) => {
   }
 };
 
+export const getAllUsers = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/all-users`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    throw error;
+  }
+};
 
