@@ -1,71 +1,46 @@
 import { useEffect, useState } from "react";
-import { getUserIdeas, getContributedIdeas } from "../api/API";
+import { getContributedIdeas } from "../api/API";
 import { useNavigate } from "react-router-dom";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
 function MyIdeas({ email }) {
-  const [ideas, setIdeas] = useState([]);
   const [contributedIdeas, setContributedIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [contributedLoading, setContributedLoading] = useState(false);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("myIdeas"); // Track active tab
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserIdeas = async () => {
+    const fetchContributedIdeas = async () => {
       try {
-        const userIdeas = await getUserIdeas(email);
-        setIdeas(userIdeas);
+        const contributed = await getContributedIdeas(email);
+        setContributedIdeas(contributed);
       } catch (err) {
-        console.error("Error fetching user ideas:", err);
-        setError("Failed to load your ideas");
+        console.error("Error fetching contributed ideas:", err);
+        setError("Failed to load contributed ideas");
       } finally {
         setLoading(false);
       }
     };
 
-    if (email) {
-      fetchUserIdeas();
-    }
+    if (email) fetchContributedIdeas();
   }, [email]);
 
-  const fetchContributedIdeas = async () => {
-    setContributedLoading(true);
-    try {
-      const contributed = await getContributedIdeas(email);
-      setContributedIdeas(contributed);
-    } catch (err) {
-      console.error("Error fetching contributed ideas:", err);
-      setError("Failed to load contributed ideas");
-    } finally {
-      setContributedLoading(false);
-    }
-  };
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    if (tab === "contributed" && contributedIdeas.length === 0) {
-      fetchContributedIdeas(); // Fetch only if not already loaded
-    }
-  };
-
-  const handleEventClick = (eventId) => {
-    if (eventId) {
-      navigate(`/event/${eventId}`);
+  const handleIdeaClick = (ideaId) => {
+    if (ideaId) {
+      navigate(`/idea/${ideaId}`);
     } else {
-      console.error("Event ID is undefined for this idea.");
+      console.error("Idea ID is undefined.");
     }
   };
 
-  if (loading) return <p>Loading your ideas...</p>;
+  if (loading) return <p>Loading contributed ideas...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="my-ideas-section bg-transparent relative flex flex-col h-full">
-      {/* Tab Header */}
+      {/* Header */}
       <div
-        className="flex border shadow-md"
+        className="flex border shadow-md justify-center"
         style={{
           backgroundColor: "#1E2A3A",
           border: "2px solid white",
@@ -74,45 +49,15 @@ function MyIdeas({ email }) {
           zIndex: 10,
         }}
       >
-        <button
-          className={`flex-1 p-2 text-xl font-bold text-white ${
-            activeTab === "myIdeas" ? "border-b-4 border-yellow-400" : ""
-          }`}
-          onClick={() => handleTabChange("myIdeas")}
-        >
-          My Ideas
-        </button>
-        <button
-          className={`flex-1 p-2 text-xl font-bold text-white ${
-            activeTab === "contributed" ? "border-b-4 border-yellow-400" : ""
-          }`}
-          onClick={() => handleTabChange("contributed")}
-        >
-          Contributed
-        </button>
+        <span className="p-2 text-xl font-bold text-white">My Projects</span>
       </div>
 
-      {/* Scrollable Ideas List */}
+      {/* Contributed Ideas */}
       <div
         className="overflow-y-auto"
         style={{ maxHeight: "30vh", paddingTop: "8px" }}
       >
-        {activeTab === "myIdeas" ? (
-          ideas.length === 0 ? (
-            <div className="p-3 shadow-md border bg-white text-left">
-              <h3 className="text-lg font-bold text-black">
-                You haven’t submitted any ideas yet.
-              </h3>
-              <p className="text-gray-700 text-sm mt-2">
-                Click on an event and add your ideas there.
-              </p>
-            </div>
-          ) : (
-            <IdeaList ideas={ideas} handleEventClick={handleEventClick} />
-          )
-        ) : contributedLoading ? (
-          <p>Loading contributed ideas...</p>
-        ) : contributedIdeas.length === 0 ? (
+        {contributedIdeas.length === 0 ? (
           <div className="p-3 shadow-md border bg-white text-left">
             <h3 className="text-lg font-bold text-black">
               No contributed ideas yet.
@@ -122,10 +67,7 @@ function MyIdeas({ email }) {
             </p>
           </div>
         ) : (
-          <IdeaList
-            ideas={contributedIdeas}
-            handleEventClick={handleEventClick}
-          />
+          <IdeaList ideas={contributedIdeas} handleIdeaClick={handleIdeaClick} />
         )}
       </div>
     </div>
@@ -133,7 +75,7 @@ function MyIdeas({ email }) {
 }
 
 // Reusable Idea List Component
-function IdeaList({ ideas, handleEventClick }) {
+function IdeaList({ ideas, handleIdeaClick }) {
   return (
     <ul className="space-y-1">
       {ideas.map((idea) => (
@@ -148,15 +90,13 @@ function IdeaList({ ideas, handleEventClick }) {
         >
           <button
             className="absolute top-2 right-2 text-xs font-semibold bg-black text-white px-2 py-1 hover:bg-gray-800 transition-all"
-            onClick={() => handleEventClick(idea.event_id)}
+            onClick={() => handleIdeaClick(idea.id)}
             style={{ border: "1px solid #666", borderRadius: "4px" }}
           >
-            View Event
+            View Idea
           </button>
 
-          <div
-            style={{ display: "flex", flexDirection: "column", width: "100%" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <h3
               className="text-sm font-bold text-black"
               style={{

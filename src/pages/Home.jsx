@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
-import LikedIdeas from '../components/LikedIdeas';
 import Profile from '../components/Profile';
 
 // Function to decode JWT manually
@@ -70,13 +69,11 @@ function Home() {
             }}
           >
             <Profile user={{ email: userEmail }} />
-
           </div>
         </div>
 
-        {/* Right Section: MyIdeas and LikedIdeas */}
+        {/* Right Section: My Projects (only contributed ideas) */}
         <div className="w-full md:w-[50%] flex flex-col gap-6">
-          {/* MyIdeas */}
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
             style={{
@@ -84,22 +81,11 @@ function Home() {
               width: '100%',
             }}
           >
-            <MyIdeas email={userEmail} />
-          </div>
-
-          {/* LikedIdeas */}
-          <div
-            className="flex-1 border border-white shadow-sm overflow-y-auto"
-            style={{
-              padding: '0.5rem',
-              width: '100%',
-            }}
-          >
-            <LikedIdeas email={userEmail} />
+            <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
