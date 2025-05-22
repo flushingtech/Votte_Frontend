@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getIdeaById } from '../api/API';
-import Navbar from '../components/Navbar'; // Assuming you have a Navbar component
+import Navbar from '../components/Navbar';
+import ButtonUpload from '../components/ButtonUpload'; // Import here
 
 function IdeaScreen() {
   const { ideaId } = useParams();
@@ -32,24 +33,22 @@ function IdeaScreen() {
     }
   }, [ideaId]);
 
-  if (loading)
-    return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar />
-        <p className="text-center mt-10">Loading idea details...</p>
-      </div>
-    );
+  if (loading) return (
+    <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+      <Navbar />
+      <p className="text-center mt-10">Loading idea details...</p>
+    </div>
+  );
 
-  if (error)
-    return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar />
-        <p className="text-center mt-10 text-red-500">{error}</p>
-      </div>
-    );
+  if (error) return (
+    <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
+      <Navbar />
+      <p className="text-center mt-10 text-red-500">{error}</p>
+    </div>
+  );
 
   return (
-    <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ backgroundColor: '#030C18', minHeight: '100vh', overflow: 'auto' }}>
       <Navbar />
 
       <div className="p-3">
@@ -92,12 +91,8 @@ function IdeaScreen() {
           `}
         </style>
 
-        {/* Idea Title */}
-        <div className="idea-title-container">
-          {idea?.idea}
-        </div>
+        <div className="idea-title-container">{idea?.idea}</div>
 
-        {/* Idea Details */}
         <div className="idea-details-container">
           <p className="idea-info">
             <span className="idea-label">Description:</span> {idea?.description}
@@ -114,6 +109,12 @@ function IdeaScreen() {
           <p className="idea-info">
             <span className="idea-label">Event:</span> {idea?.event_title || 'N/A'}
           </p>
+
+          {/* Upload image section */}
+          <div className="mt-5">
+            <h2 className="text-white text-lg mb-2">Upload an image for this idea:</h2>
+            <ButtonUpload />
+          </div>
         </div>
       </div>
     </div>
