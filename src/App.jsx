@@ -8,6 +8,7 @@ import EventScreen from './pages/EventScreen';
 import IdeasForEvent from './components/admin/IdeasForEvent'; // Admin Event Screen
 import IdeaScreen from './components/IdeaScreen';
 import Profile from './components/Profile';
+import PastEvents from './components/PastEvents';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -55,6 +56,11 @@ function App() {
           <Route
             path="/profile"
             element={<Profile user={{ email: userEmail }} />}
+          />
+
+          <Route
+            path="/past-events"
+            element={<PastEvents />}
           />
 
           {/* Admin routes */}

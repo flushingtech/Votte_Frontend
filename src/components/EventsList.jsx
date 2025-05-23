@@ -71,7 +71,7 @@ function EventsList() {
 
       {/* Scrollable Events List */}
       <div className="overflow-y-auto max-h-[30vh] pt-2">
-        {filteredEvents.map((event, index) => {
+        {filteredEvents.map((event) => {
           const isNextUpcoming = nextUpcomingEvent && event.id === nextUpcomingEvent.id;
           const isEventToday = isToday(event.event_date);
 
@@ -102,7 +102,7 @@ function EventsList() {
                   : 'none',
               }}
             >
-              {/* Labels: Bigger on mobile, smaller on desktop */}
+              {/* Labels */}
               {isEventToday && (
                 <div className="absolute top-0 left-0 bg-green-500 text-white text-sm sm:text-xs font-bold px-5 sm:px-3 py-2 sm:py-1 rounded-none">
                   TODAY!
@@ -125,7 +125,7 @@ function EventsList() {
                 </p>
               </div>
 
-              {/* Buttons Row */}
+              {/* Button */}
               <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
                 <button
                   className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
@@ -144,6 +144,16 @@ function EventsList() {
             </div>
           );
         })}
+      </div>
+
+      {/* Bottom Button */}
+      <div className="mt-2 flex justify-start px-2">
+        <button
+          onClick={() => navigate('/past-events')}
+          className="bg-[#1E2A3A] text-white text-sm px-4 py-2 border border-white rounded hover:bg-[#2d3e50] transition"
+        >
+          Past Events
+        </button>
       </div>
     </div>
   );
