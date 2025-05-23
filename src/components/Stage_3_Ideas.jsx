@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getIdeasByEvent, determineWinners, getEventResults } from "../api/API";
 
 function Stage_3_Ideas({ eventId }) {
   const [winners, setWinners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStage3Results = async () => {
       try {
         await determineWinners(eventId);
-
         const eventWinners = await getEventResults(eventId);
 
         const sortedWinners = eventWinners.sort((a, b) => {
@@ -45,54 +46,54 @@ function Stage_3_Ideas({ eventId }) {
     <div
       className="max-w-3xl mx-auto mt-3 p-3 border border-white bg-[#1E2A3A] flex flex-col relative"
       style={{
-        boxShadow: "0px 0px 15px 0px rgb(255, 255, 255)", // White Glow
+        boxShadow: "0px 0px 15px 0px rgb(255, 255, 255)",
         height: "60vh",
         overflow: "hidden",
       }}
     >
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto space-y-2">
         {winners.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-gray-500">No winners have been determined yet.</p>
           </div>
         ) : (
-          <div className="flex-1 space-y-2">
-            {winners.map((winner) => {
-              const borderClass = categoryStyles[winner.category];
+          winners.map((winner) => {
+            const isHackathon = winner.category === "Hackathon Winner";
+            const borderClass = categoryStyles[winner.category];
 
-              if (winner.category === "Hackathon Winner") {
-                return (
-                  <div
-                    key={winner.category}
-                    className="p-4 border bg-white text-black"
-                    style={{
-                      boxShadow: "0px 0px 5px 2px rgb(255, 123, 0)", // Orange Glow for Hackathon Winner
-                    }}
-                  >
-                    <h3 className="text-lg font-bold text-black">🏆 {winner.category}</h3>
-                    <p className="text-sm font-semibold">{winner.idea_title || "Unknown"}</p>
-                    <p className="text-xs text-gray-700">{winner.idea_description}</p>
-                    <p className="text-xs text-gray-600">Votes: {winner.votes}</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div
-                  key={winner.category}
-                  className={`p-2 border ${borderClass} bg-[#1E2A3A]`}
-                  style={{
-                    boxShadow: "0px 0px 5px 2px rgba(255, 255, 255, 0.42)", // White Glow for other categories
-                  }}
+            return (
+              <div
+                key={winner.category}
+                className={`relative p-4 border ${borderClass} ${isHackathon ? "bg-white text-black" : "bg-[#1E2A3A] text-white"}`}
+                style={{
+                  boxShadow: isHackathon
+                    ? "0px 0px 5px 2px rgb(255, 123, 0)"
+                    : "0px 0px 5px 2px rgba(255, 255, 255, 0.42)",
+                }}
+              >
+                <button
+                  onClick={() => navigate(`/idea/${winner.winning_idea_id}`)}
+                  className={`absolute top-2 right-2 text-xs font-semibold px-2 py-1 border rounded ${
+                    isHackathon
+                      ? "bg-black text-white hover:bg-gray-900"
+                      : "bg-white text-black hover:bg-gray-200"
+                  } transition`}
                 >
-                  <h3 className="text-md font-bold text-white">{winner.category} Winner</h3>
-                  <p className="text-sm font-semibold text-white">{winner.idea_title || "Unknown"}</p>
-                  <p className="text-xs text-gray-300">{winner.idea_description}</p>
-                  <p className="text-xs text-gray-400">Votes: {winner.votes}</p>
-                </div>
-              );
-            })}
-          </div>
+                  View Idea
+                </button>
+
+                <h3 className="text-md font-bold">
+                  {isHackathon ? "🏆 " : ""}
+                  {winner.category} Winner
+                </h3>
+                <p className="text-sm font-semibold">
+                  {winner.idea_title || "Unknown"}
+                </p>
+                <p className="text-xs text-gray-300">{winner.idea_description}</p>
+                <p className="text-xs text-gray-400">Votes: {winner.votes}</p>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
