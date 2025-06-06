@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getEvents, getEventStage } from '../api/API';
+import { getEvents, getEventStage, checkAdminStatus } from '../api/API';
 import Navbar from '../components/Navbar';
 import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
 import Stage_2_Ideas from '../components/Stage_2_Ideas';
-import Stage_2_2_Ideas from '../components/Stage_2-2_Ideas'; // ✅ Import the Most Technical Voting Component
+import Stage_2_2_Ideas from '../components/Stage_2-2_Ideas';
 import Stage_2_3_Ideas from '../components/Stage_2-3_Ideas';
 import Stage_3_Ideas from '../components/Stage_3_Ideas';
+import ButtonUploadEvent from '../components/ButtonUploadEvent';
 
 function EventScreen() {
   const { eventId } = useParams();
   const email = localStorage.getItem('userEmail');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [event, setEvent] = useState(null);
   const [eventStage, setEventStage] = useState(1);
   const [subStage, setSubStage] = useState('1');
@@ -38,10 +40,12 @@ function EventScreen() {
         if (!eventDetails) throw new Error('Event not found');
         setEvent(eventDetails);
 
-        // Fetch the event stage & sub-stage
         const stageData = await getEventStage(eventId);
         setEventStage(stageData.stage);
         setSubStage(stageData.current_sub_stage || '1');
+
+        const isAdminStatus = await checkAdminStatus(email);
+        setIsAdmin(isAdminStatus);
 
         setLoading(false);
       } catch (err) {
@@ -128,27 +132,34 @@ function EventScreen() {
 
             .add-idea-button-container {
               display: flex;
-              justify-content: flex-end;
+              flex-direction: column;
+              align-items: flex-end;
+              gap: 10px;
+            }
+
+            .event-upload-wrapper {
+              transform: scale(0.85);
+              align-self: flex-start;
             }
           `}
         </style>
 
-        {/* Event Information */}
         <div className="max-w-3xl mx-auto p-4 border border-white shadow-md" style={{ backgroundColor: '#1E2A3A', position: 'relative' }}>
-          {/* Event Title */}
           <h1 className="event-title">{event?.title}</h1>
-
-          {/* Event Date */}
           <p className="text-lg font-bold text-left text-gray-400 mb-2">
             {new Date(event?.event_date).toLocaleDateString()}
           </p>
 
-          {/* Stage-Specific Content */}
           <div className="submissions-container">
             {eventStage === 1 && subStage === '1' && (
               <>
                 <p className="submissions-open">Submissions Open</p>
                 <div className="add-idea-button-container">
+                  {isAdmin && (
+                    <div className="event-upload-wrapper">
+                      <ButtonUploadEvent eventId={eventId} />
+                    </div>
+                  )}
                   <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
                 </div>
               </>
@@ -161,7 +172,6 @@ function EventScreen() {
           </div>
         </div>
 
-        {/* Conditionally Render Ideas */}
         <div className="max-w-3xl mx-auto mt-3">
           {eventStage === 1 ? (
             <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
@@ -170,11 +180,10 @@ function EventScreen() {
           ) : eventStage === 2 && subStage === '2' ? (
             <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : eventStage === 2 && subStage === '3' ? (
-            <Stage_2_3_Ideas key={ideasRefreshKey} eventId={eventId} /> // ✅ Added for Most Impactful
+            <Stage_2_3_Ideas key={ideasRefreshKey} eventId={eventId} />
           ) : (
             <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
           )}
-          
         </div>
       </div>
     </div>
