@@ -89,6 +89,27 @@ function EventScreen() {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+              }
+
+              .submission-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+
+              .checked-in-badge {
+                color: #28a745;
+                background-color: #2A2F3C;
+                padding: 8px 12px;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 5px;
+                box-shadow: 0 0 5px #28a745, 0 0 10px #28a745;
+                display: flex;
+                align-items: center;
+                gap: 6px;
               }
 
               .submissions-open {
@@ -159,52 +180,27 @@ function EventScreen() {
             )}
 
             <div className="submissions-container">
-              {eventStage === 1 && subStage === '1' && (
-                <>
-                  <p className="submissions-open">Submissions Open</p>
-                  <div className="add-idea-button-container">
-                    {isAdmin && (
-                      <div className="event-upload-wrapper">
-                        <ButtonUploadEvent eventId={eventId} />
-                      </div>
-                    )}
-                    <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
+              <div className="submission-left">
+                {eventStage === 1 && subStage === '1' && <p className="submissions-open">Submissions Open</p>}
+                {eventStage === 1 && subStage === '2' && <p className="submissions-open locked">🔒 Submissions Locked</p>}
+                {eventStage === 2 && <p className="votte-time">Votte Time</p>}
+                {eventStage === 3 && <p className="our-winners">Our Winners!</p>}
+
+                {(event?.checked_in || '').split(',').includes(email) && (
+                  <span className="checked-in-badge">✅ CHECKED IN</span>
+                )}
+              </div>
+
+              <div className="add-idea-button-container">
+                {isAdmin && (
+                  <div className="event-upload-wrapper">
+                    <ButtonUploadEvent eventId={eventId} />
                   </div>
-                </>
-              )}
-
-              {eventStage === 1 && subStage === '2' && (
-                <>
-                  <p className="submissions-open locked">🔒 Submissions Locked</p>
-                  {isAdmin && (
-                    <div className="event-upload-wrapper">
-                      <ButtonUploadEvent eventId={eventId} />
-                    </div>
-                  )}
-                </>
-              )}
-
-              {eventStage === 2 && (
-                <>
-                  <p className="votte-time">Votte Time</p>
-                  {isAdmin && (
-                    <div className="event-upload-wrapper">
-                      <ButtonUploadEvent eventId={eventId} />
-                    </div>
-                  )}
-                </>
-              )}
-
-              {eventStage === 3 && (
-                <>
-                  <p className="our-winners">Our Winners!</p>
-                  {isAdmin && (
-                    <div className="event-upload-wrapper">
-                      <ButtonUploadEvent eventId={eventId} />
-                    </div>
-                  )}
-                </>
-              )}
+                )}
+                {eventStage === 1 && subStage === '1' && (
+                  <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
+                )}
+              </div>
             </div>
           </div>
 

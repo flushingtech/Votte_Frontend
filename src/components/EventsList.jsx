@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { dateTimeFormatter } from '/src/utils/intlUtils';
+import { checkInToEvent } from '../api/API'; // adjust path if needed
 
 function EventsList() {
   const [events, setEvents] = useState([]);
@@ -9,12 +10,12 @@ function EventsList() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const userEmail = localStorage.getItem('userEmail');
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/api/events/all-events`,
-        );
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/all-events`);
         setEvents(response.data.events);
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -74,16 +75,39 @@ function EventsList() {
         {filteredEvents.map((event) => {
           const isNextUpcoming = nextUpcomingEvent && event.id === nextUpcomingEvent.id;
           const isEventToday = isToday(event.event_date);
+          const isCheckedIn = (event.checked_in || '').split(',').includes(userEmail);
 
-          let buttonText = 'Add An Idea';
+          let buttonText = '';
           let buttonColor = '#1E2A3A';
-          if (event.stage === 2) {
-            buttonText = 'Vote for a Winner';
-            buttonColor = '#28A745';
-          } else if (event.stage === 3) {
+
+          if (event.stage === 3) {
             buttonText = 'View Winners';
             buttonColor = '#FF5722';
+          } else if (isCheckedIn) {
+            buttonText = event.stage === 2 ? 'Vote for a Winner' : 'View Ideas';
+            buttonColor = event.stage === 2 ? '#28A745' : '#1E2A3A';
+          } else if (isEventToday) {
+            buttonText = 'Check In';
+            buttonColor = '#007BFF';
+          } else {
+            buttonText = 'Add An Idea';
+            buttonColor = '#1E2A3A';
           }
+
+          const handleButtonClick = async (e) => {
+            e.stopPropagation();
+            if (buttonText === 'Check In') {
+              try {
+                await checkInToEvent(event.id, userEmail);
+                navigate(`/event/${event.id}?checkedIn=true`);
+              } catch (err) {
+                console.error('Check-in failed:', err);
+                alert('Check-in failed');
+              }
+            } else {
+              handleEventClick(event.id);
+            }
+          };          
 
           return (
             <div
@@ -129,10 +153,7 @@ function EventsList() {
               <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
                 <button
                   className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEventClick(event.id);
-                  }}
+                  onClick={handleButtonClick}
                   style={{
                     backgroundColor: buttonColor,
                     borderRadius: '3px',

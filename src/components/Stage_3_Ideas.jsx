@@ -137,7 +137,7 @@ function Stage_3_Ideas({ eventId }) {
                 <p className="text-sm font-semibold">
                   {winner.idea_title || "Unknown"}
                 </p>
-                <p className="text-xs text-gray-300">{winner.idea_description}</p>
+                <p className="text-xs text-gray-500">{winner.idea_description}</p>
                 <p className="text-xs text-gray-400">Votes: {winner.votes}</p>
               </div>
             );

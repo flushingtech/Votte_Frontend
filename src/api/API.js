@@ -454,3 +454,9 @@ export const getAllUsers = async () => {
   }
 };
 
+export const checkInToEvent = async (eventId, email) => {
+  const res = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/${eventId}/check-in`, {
+    email,
+  });
+  return res.data;
+};
