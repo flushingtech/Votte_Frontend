@@ -44,14 +44,16 @@ function EventsList() {
   const currentDate = getEasternDate();
 
   const isToday = (date) => {
-    const eventDate = toEasternDate(date); // already has -1 day applied
+    const eventDate = toEasternDate(date);
+    const oneDayEarlier = new Date(eventDate);
+    oneDayEarlier.setDate(oneDayEarlier.getDate() - 1);
+  
     return (
-      eventDate.getDate() === currentDate.getDate() &&
-      eventDate.getMonth() === currentDate.getMonth() &&
-      eventDate.getFullYear() === currentDate.getFullYear()
+      oneDayEarlier.getDate() === currentDate.getDate() &&
+      oneDayEarlier.getMonth() === currentDate.getMonth() &&
+      oneDayEarlier.getFullYear() === currentDate.getFullYear()
     );
   };
-  
   
 
   // --- SAFELY FILTER NEXT & RECENT EVENTS ---
