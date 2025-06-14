@@ -11,7 +11,6 @@ function EventsList() {
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
-  // --- TIME HELPERS ---
   const getEasternDate = () => {
     return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
   };
@@ -20,7 +19,6 @@ function EventsList() {
     return new Date(new Date(dateString).toLocaleString('en-US', { timeZone: 'America/New_York' }));
   };
 
-  // --- FETCH EVENTS ---
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -43,6 +41,7 @@ function EventsList() {
 
   const isToday = (date) => {
     const eventDate = toEasternDate(date);
+    eventDate.setDate(eventDate.getDate() - 1); // Subtract 1 day
     return (
       eventDate.getDate() === currentDate.getDate() &&
       eventDate.getMonth() === currentDate.getMonth() &&
@@ -50,21 +49,28 @@ function EventsList() {
     );
   };
 
-  // --- SAFELY FILTER NEXT & RECENT EVENTS ---
   const recentPastEvent = events
-    .filter((event) => toEasternDate(event.event_date) < currentDate)
+    .filter((event) => {
+      const d = toEasternDate(event.event_date);
+      d.setDate(d.getDate() - 1);
+      return d < currentDate;
+    })
     .reduce((latest, event) => {
-      return !latest || toEasternDate(event.event_date) > toEasternDate(latest.event_date)
-        ? event
-        : latest;
+      const d = toEasternDate(event.event_date);
+      d.setDate(d.getDate() - 1);
+      return !latest || d > toEasternDate(latest.event_date) ? event : latest;
     }, null);
 
   const nextUpcomingEvent = events
-    .filter((event) => toEasternDate(event.event_date) >= currentDate)
+    .filter((event) => {
+      const d = toEasternDate(event.event_date);
+      d.setDate(d.getDate() - 1);
+      return d >= currentDate;
+    })
     .reduce((closest, event) => {
-      return !closest || toEasternDate(event.event_date) < toEasternDate(closest.event_date)
-        ? event
-        : closest;
+      const d = toEasternDate(event.event_date);
+      d.setDate(d.getDate() - 1);
+      return !closest || d < toEasternDate(closest.event_date) ? event : closest;
     }, null);
 
   const filteredEvents = [];
@@ -78,15 +84,14 @@ function EventsList() {
 
   return (
     <div className="events-container relative flex flex-col h-full">
-      {/* Sticky Header */}
       <div className="p-2 border shadow-md bg-[#1E2A3A] border-white sticky top-0 z-10">
         <h2 className="text-xl sm:text-lg font-bold text-white text-center">Events</h2>
       </div>
 
-      {/* Scrollable Events List */}
       <div className="overflow-y-auto max-h-[30vh] pt-2">
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
+          easternDate.setDate(easternDate.getDate() - 1); // Show 1 day earlier
           const isNextUpcoming = nextUpcomingEvent && event.id === nextUpcomingEvent.id;
           const isEventToday = isToday(event.event_date);
           const isCheckedIn = (event.checked_in || '').split(',').includes(userEmail);
@@ -140,7 +145,6 @@ function EventsList() {
                   : 'none',
               }}
             >
-              {/* Labels */}
               {isEventToday && (
                 <div className="absolute top-0 left-0 bg-green-500 text-white text-sm sm:text-xs font-bold px-5 sm:px-3 py-2 sm:py-1 rounded-none">
                   TODAY!
@@ -152,7 +156,6 @@ function EventsList() {
                 </div>
               )}
 
-              {/* Event Info */}
               <div className="flex-1 pt-8 sm:pt-2 min-w-[60%]">
                 <h3 className="text-lg sm:text-sm font-bold text-black truncate">
                   {event.title}
@@ -162,7 +165,6 @@ function EventsList() {
                 </p>
               </div>
 
-              {/* Button */}
               <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
                 <button
                   className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
@@ -180,7 +182,6 @@ function EventsList() {
         })}
       </div>
 
-      {/* Bottom Button */}
       <div className="mt-2 flex justify-start px-2">
         <button
           onClick={() => navigate('/past-events')}
