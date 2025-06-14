@@ -45,15 +45,13 @@ function EventsList() {
 
   const isToday = (date) => {
     const eventDate = toEasternDate(date);
-    const oneDayEarlier = new Date(eventDate);
-    oneDayEarlier.setDate(oneDayEarlier.getDate() - 1);
-  
     return (
-      oneDayEarlier.getDate() === currentDate.getDate() &&
-      oneDayEarlier.getMonth() === currentDate.getMonth() &&
-      oneDayEarlier.getFullYear() === currentDate.getFullYear()
+      eventDate.getDate() === currentDate.getDate() &&
+      eventDate.getMonth() === currentDate.getMonth() &&
+      eventDate.getFullYear() === currentDate.getFullYear()
     );
   };
+  
   
 
   // --- SAFELY FILTER NEXT & RECENT EVENTS ---
