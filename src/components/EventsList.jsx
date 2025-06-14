@@ -17,7 +17,10 @@ function EventsList() {
   };
 
   const toEasternDate = (dateString) => {
-    return new Date(new Date(dateString).toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const original = new Date(dateString);
+    const adjusted = new Date(original);
+    adjusted.setDate(adjusted.getDate() - 1);
+    return new Date(adjusted.toLocaleString('en-US', { timeZone: 'America/New_York' }));
   };
 
   // --- FETCH EVENTS ---
@@ -164,16 +167,18 @@ function EventsList() {
 
               {/* Button */}
               <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
-                <button
-                  className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
-                  onClick={handleButtonClick}
-                  style={{
-                    backgroundColor: buttonColor,
-                    borderRadius: '3px',
-                  }}
-                >
-                  {buttonText}
-                </button>
+                {isEventToday && (
+                  <button
+                    className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
+                    onClick={handleButtonClick}
+                    style={{
+                      backgroundColor: buttonColor,
+                      borderRadius: '3px',
+                    }}
+                  >
+                    {buttonText}
+                  </button>
+                )}
               </div>
             </div>
           );
