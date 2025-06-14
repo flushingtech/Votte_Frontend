@@ -26,6 +26,15 @@ function Home() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
+  const getEasternDate = () => {
+    const eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    eastern.setHours(0, 0, 0, 0); // strip time
+    return eastern;
+  };
+  
+  const todayEastern = getEasternDate();
+  
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -62,14 +71,14 @@ function Home() {
             <div className="text-white text-xs mb-2 text-center">
               Today is {new Date().toLocaleDateString('en-US', {
                 weekday: 'long',
-                month: 'short',
+                month: 'long',
                 day: 'numeric',
                 year: 'numeric',
                 timeZone: 'America/New_York',
               })}
             </div>
 
-            <EventsList />
+            <EventsList today={todayEastern} />
           </div>
 
 
