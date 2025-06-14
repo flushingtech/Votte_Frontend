@@ -17,12 +17,11 @@ function EventsList() {
   };
 
   const toEasternDate = (dateString) => {
-    const original = new Date(dateString);
-    const adjusted = new Date(original);
-    adjusted.setDate(adjusted.getDate() - 1);
-    return new Date(adjusted.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const eastern = new Date(new Date(dateString).toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    eastern.setDate(eastern.getDate() - 1); // subtract 1 day
+    return eastern;
   };
-
+  
   // --- FETCH EVENTS ---
   useEffect(() => {
     const fetchEvents = async () => {
@@ -45,13 +44,15 @@ function EventsList() {
   const currentDate = getEasternDate();
 
   const isToday = (date) => {
-    const eventDate = toEasternDate(date);
+    const eventDate = toEasternDate(date); // already has -1 day applied
     return (
       eventDate.getDate() === currentDate.getDate() &&
       eventDate.getMonth() === currentDate.getMonth() &&
       eventDate.getFullYear() === currentDate.getFullYear()
     );
   };
+  
+  
 
   // --- SAFELY FILTER NEXT & RECENT EVENTS ---
   const recentPastEvent = events
@@ -167,18 +168,16 @@ function EventsList() {
 
               {/* Button */}
               <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 mt-3 sm:mt-0">
-                {isEventToday && (
-                  <button
-                    className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
-                    onClick={handleButtonClick}
-                    style={{
-                      backgroundColor: buttonColor,
-                      borderRadius: '3px',
-                    }}
-                  >
-                    {buttonText}
-                  </button>
-                )}
+                <button
+                  className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
+                  onClick={handleButtonClick}
+                  style={{
+                    backgroundColor: buttonColor,
+                    borderRadius: '3px',
+                  }}
+                >
+                  {buttonText}
+                </button>
               </div>
             </div>
           );
