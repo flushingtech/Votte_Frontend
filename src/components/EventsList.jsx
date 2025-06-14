@@ -45,7 +45,7 @@ function EventsList() {
 
   const isToday = (date) => {
     const eventDate = toEasternDate(date);
-    eventDate.setDate(eventDate.getDate() - 1); // show TODAY the day before the real date
+    eventDate.setDate(eventDate.getDate()); // show TODAY the day before the real date
     return (
       eventDate.getDate() === currentDate.getDate() &&
       eventDate.getMonth() === currentDate.getMonth() &&
