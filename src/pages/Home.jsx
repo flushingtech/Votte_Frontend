@@ -58,8 +58,20 @@ function Home() {
               width: '100%',
             }}
           >
+            {/* Today's Date */}
+            <div className="text-white text-xs mb-2 text-center">
+              Today is {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                timeZone: 'America/New_York',
+              })}
+            </div>
+
             <EventsList />
           </div>
+
 
           <div
             className="flex-1 border border-white shadow-sm overflow-y-auto"
