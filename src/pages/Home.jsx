@@ -31,9 +31,9 @@ function Home() {
     eastern.setHours(0, 0, 0, 0); // strip time
     return eastern;
   };
-  
+
   const todayEastern = getEasternDate();
-  
+
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -67,8 +67,8 @@ function Home() {
               width: '100%',
             }}
           >
-            {/* Today's Date */}
-            <div className="text-white text-xs mb-2 text-center">
+            {/* Today's Date in bottom right */}
+            <div className="text-white text-xs text-right mt-2" style={{ position: 'absolute', bottom: 10, right: 10 }}>
               Today is {new Date().toLocaleDateString('en-US', {
                 weekday: 'long',
                 month: 'long',
@@ -77,6 +77,7 @@ function Home() {
                 timeZone: 'America/New_York',
               })}
             </div>
+
 
             <EventsList today={todayEastern} />
           </div>
