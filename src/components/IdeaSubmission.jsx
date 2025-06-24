@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { submitIdea, getEventStage } from "../api/API";
+import {
+  submitIdea,
+  getEventStage,
+  getPreviousProjects,
+} from "../api/API";
 import MarkdownPreviewer from "./MarkdownPreviewer";
 
 function IdeaSubmission({ email, eventId, refreshIdeas }) {
@@ -9,8 +13,10 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [isBuilt, setIsBuilt] = useState(false);
   const [message, setMessage] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [eventStage, setEventStage] = useState(1); // State for event stage
+  const [selectedMode, setSelectedMode] = useState(null); // 'new' | 'previous' | 'archived'
+  const [eventStage, setEventStage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [previousProjects, setPreviousProjects] = useState([]);
   const textRef = useRef(null);
 
   useEffect(() => {
@@ -32,21 +38,12 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
     e.preventDefault();
 
     if (!idea || !description || !technologies) {
-      setMessage(
-        "Please fill in all fields: idea, description, and technologies"
-      );
+      setMessage("Please fill in all fields: idea, description, and technologies");
       return;
     }
 
     try {
-      const response = await submitIdea(
-        email,
-        idea,
-        description,
-        technologies,
-        eventId,
-        isBuilt
-      );
+      const response = await submitIdea(email, idea, description, technologies, eventId, isBuilt);
 
       if (response.status === 201) {
         setMessage("Idea submitted successfully!");
@@ -55,8 +52,8 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
         setTechnologies("");
         setIsBuilt(false);
         setIsFormVisible(false);
-
-        if (refreshIdeas) refreshIdeas(); // Trigger refresh for IdeasList
+        setSelectedMode(null);
+        if (refreshIdeas) refreshIdeas();
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
@@ -91,65 +88,135 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
         <>
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
           <div className="fixed inset-x-0 top-[4em] z-50 flex items-center justify-center">
-            <div className="bg-gray-800 p-8 max-w-4xl mx-auto rounded-lg space-y-4 w-11/12 md:w-1/2">
-              <h2 className="text-2xl font-bold text-white text-center">
+            <div
+              className="relative p-6 space-y-4 shadow-lg"
+              style={{
+                width: "800px",
+                margin: "0 auto",
+                backgroundColor: "#030C18",
+                color: "white",
+                borderRadius: "0px",
+              }}
+            >
+              <button
+                onClick={() => {
+                  setIsFormVisible(false);
+                  setSelectedMode(null);
+                }}
+                className="absolute top-4 left-4 text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 font-semibold"
+              >
+                ← Back
+              </button>
+
+              <h2 className="text-2xl font-bold text-white text-center mb-6">
                 Submit Your Idea
               </h2>
-              <form onSubmit={handleIdeaSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">
-                    Your Big Idea:
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-16"
-                    value={idea}
-                    onChange={(e) => setIdea(e.target.value)}
-                    placeholder="Describe your groundbreaking concept."
-                  />
+
+              {!selectedMode ? (
+                <div className="flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => setSelectedMode("new")}
+                    className="bg-blue-800 hover:bg-blue-900 text-white py-1.5 px-4 font-medium text-left w-64"
+                  >
+                    🧠 New Idea
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const data = await getPreviousProjects();
+                        setPreviousProjects(data.ideas || data);
+                        setSelectedMode("previous");
+                      } catch (err) {
+                        console.error("Failed to load previous projects:", err);
+                      }
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white py-1.5 px-4 font-medium text-left w-64"
+                  >
+                    📂 Previous Projects
+                  </button>
+                  <button
+                    onClick={() => setSelectedMode("archived")}
+                    className="bg-gray-600 hover:bg-gray-900 text-white py-1.5 px-4 font-medium text-left w-64"
+                  >
+                    🗃️ Archived Projects
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">
-                    A Good Description:
-                  </label>
-                  <MarkdownPreviewer textRef={textRef}>
+              ) : selectedMode === "previous" ? (
+<div
+  className="space-y-2 max-h-64 overflow-y-auto pr-2"
+  style={{ scrollbarWidth: "thin" }}
+>
+  {previousProjects.map((project, index) => (
+    <div
+      key={index}
+      className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
+    >
+      <p className="font-semibold text-white text-sm">{project.idea}</p>
+      <p className="text-gray-300 text-xs">{project.description}</p>
+      <p className="text-gray-400 italic text-xs">
+        Technologies: {project.technologies || "N/A"}
+      </p>
+    </div>
+  ))}
+</div>
+
+              ) : (
+                <form onSubmit={handleIdeaSubmit} className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-bold text-white mb-1">
+                      Your Big Idea:
+                    </label>
                     <textarea
-                      ref={textRef}
-                      className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Clear and intriguing - easy to grasp yet sparks curiosity."
+                      className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+                      value={idea}
+                      onChange={(e) => setIdea(e.target.value)}
+                      placeholder="Describe your groundbreaking concept."
                     />
-                  </MarkdownPreviewer>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-300 mb-1">
-                    Tech Magic:
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-500 bg-gray-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-16"
-                    value={technologies}
-                    onChange={(e) => setTechnologies(e.target.value)}
-                    placeholder="What cool technologies will you use to bring this to life?"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={isBuilt}
-                    onChange={(e) => setIsBuilt(e.target.checked)}
-                    className="mr-2"
-                  />
-                  <label className="text-sm font-bold text-gray-300">
-                    Is this idea already built?
-                  </label>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-orange-600 text-white py-2 px-4 font-semibold hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  Submit Idea
-                </button>
-              </form>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-white mb-1">
+                      A Good Description:
+                    </label>
+                    <MarkdownPreviewer textRef={textRef}>
+                      <textarea
+                        ref={textRef}
+                        className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Clear and intriguing - easy to grasp yet sparks curiosity."
+                      />
+                    </MarkdownPreviewer>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-white mb-1">
+                      Tech Magic:
+                    </label>
+                    <textarea
+                      className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+                      value={technologies}
+                      onChange={(e) => setTechnologies(e.target.value)}
+                      placeholder="What cool technologies will you use to bring this to life?"
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={isBuilt}
+                      onChange={(e) => setIsBuilt(e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label className="text-sm font-bold text-white">
+                      Is this idea already built?
+                    </label>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-orange-600 text-white py-2 px-4 font-semibold hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    Submit Idea
+                  </button>
+                </form>
+              )}
 
               {message && (
                 <p
@@ -162,13 +229,6 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   {message}
                 </p>
               )}
-
-              <button
-                onClick={() => setIsFormVisible(false)}
-                className="mt-4 w-full bg-red-600 text-white py-2 px-4 font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </>

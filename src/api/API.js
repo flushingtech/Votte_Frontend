@@ -460,3 +460,13 @@ export const checkInToEvent = async (eventId, email) => {
   });
   return res.data;
 };
+
+export const getPreviousProjects = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/previous-projects`);
+    return response.data; // or response.data.ideas if you wrap it on the backend
+  } catch (error) {
+    console.error('Error fetching previous projects:', error);
+    throw error;
+  }
+};
