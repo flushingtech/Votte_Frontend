@@ -142,23 +142,34 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   </button>
                 </div>
               ) : selectedMode === "previous" ? (
-<div
-  className="space-y-2 max-h-64 overflow-y-auto pr-2"
-  style={{ scrollbarWidth: "thin" }}
->
-  {previousProjects.map((project, index) => (
-    <div
-      key={index}
-      className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
-    >
-      <p className="font-semibold text-white text-sm">{project.idea}</p>
-      <p className="text-gray-300 text-xs">{project.description}</p>
-      <p className="text-gray-400 italic text-xs">
-        Technologies: {project.technologies || "N/A"}
-      </p>
-    </div>
-  ))}
-</div>
+                <div
+                  className="space-y-2 max-h-64 overflow-y-auto pr-2"
+                  style={{ scrollbarWidth: "thin" }}
+                >
+                  {previousProjects.map((project, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
+                    >
+                      <p className="font-semibold text-white text-sm">{project.idea}</p>
+                      {project.event_title && (
+                        <p className="text-gray-400 text-xs">Event: {project.event_title}</p>
+                      )}
+                      {project.contributors && (
+                        <p className="text-gray-400 text-xs">
+                          Contributors: {project.contributors
+                            .split(',')
+                            .map(c => c.trim().split('@')[0])
+                            .join(', ')}
+
+                        </p>
+                      )}
+
+
+                    </div>
+                  ))}
+                </div>
+
 
               ) : (
                 <form onSubmit={handleIdeaSubmit} className="space-y-4 mt-4">
@@ -220,11 +231,10 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
 
               {message && (
                 <p
-                  className={`mt-4 text-sm font-semibold ${
-                    message.includes("successfully")
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
+                  className={`mt-4 text-sm font-semibold ${message.includes("successfully")
+                    ? "text-green-500"
+                    : "text-red-500"
+                    }`}
                 >
                   {message}
                 </p>
