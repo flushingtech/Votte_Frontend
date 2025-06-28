@@ -152,9 +152,13 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                       className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
                     >
                       <p className="font-semibold text-white text-sm">{project.idea}</p>
-                      {project.event_title && (
-                        <p className="text-gray-400 text-xs">Event: {project.event_title}</p>
-                      )}
+                      {project.event_title && project.event_date && (
+                        <p className="text-gray-400 text-xs">
+  Event: {project.event_title} ({new Date(project.event_date).toLocaleDateString()})
+</p>
+
+)}
+
                       {project.contributors && (
                         <p className="text-gray-400 text-xs">
                           Contributors: {project.contributors
