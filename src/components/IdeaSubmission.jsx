@@ -3,6 +3,7 @@ import {
   submitIdea,
   getEventStage,
   getPreviousProjects,
+  addIdeaToEvent,
 } from "../api/API";
 import MarkdownPreviewer from "./MarkdownPreviewer";
 
@@ -13,7 +14,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [isBuilt, setIsBuilt] = useState(false);
   const [message, setMessage] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [selectedMode, setSelectedMode] = useState(null); // 'new' | 'previous' | 'archived'
+  const [selectedMode, setSelectedMode] = useState(null);
   const [eventStage, setEventStage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [previousProjects, setPreviousProjects] = useState([]);
@@ -44,7 +45,6 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
 
     try {
       const response = await submitIdea(email, idea, description, technologies, eventId, isBuilt);
-
       if (response.status === 201) {
         setMessage("Idea submitted successfully!");
         setIdea("");
@@ -62,6 +62,17 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
         console.error("Error submitting idea:", error);
         setMessage("An error occurred while submitting your idea.");
       }
+    }
+  };
+
+  const handleAddToEvent = async (ideaId) => {
+    try {
+      await addIdeaToEvent(ideaId, eventId);
+      setMessage("Added to event successfully!");
+      if (refreshIdeas) refreshIdeas();
+    } catch (error) {
+      console.error("Failed to add idea to event:", error);
+      setMessage("Failed to add idea to event.");
     }
   };
 
@@ -90,13 +101,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
           <div className="fixed inset-x-0 top-[4em] z-50 flex items-center justify-center">
             <div
               className="relative p-6 space-y-4 shadow-lg"
-              style={{
-                width: "800px",
-                margin: "0 auto",
-                backgroundColor: "#030C18",
-                color: "white",
-                borderRadius: "0px",
-              }}
+              style={{ width: "800px", margin: "0 auto", backgroundColor: "#030C18", color: "white", borderRadius: "0px" }}
             >
               <button
                 onClick={() => {
@@ -138,7 +143,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     onClick={() => setSelectedMode("archived")}
                     className="bg-gray-600 hover:bg-gray-900 text-white py-1.5 px-4 font-medium text-left w-64"
                   >
-                    🗃️ Archived Projects
+                    💃️ Archived Projects
                   </button>
                 </div>
               ) : selectedMode === "previous" ? (
@@ -146,41 +151,48 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   className="space-y-2 max-h-64 overflow-y-auto pr-2"
                   style={{ scrollbarWidth: "thin" }}
                 >
-                  {previousProjects.map((project, index) => (
-                    <div
-                      key={index}
-                      className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
-                    >
-                      <p className="font-semibold text-white text-sm">{project.idea}</p>
-                      {project.event_title && project.event_date && (
-                        <p className="text-gray-400 text-xs">
-  Event: {project.event_title} ({new Date(project.event_date).toLocaleDateString()})
-</p>
+                  {previousProjects.map((project) => {
+                    const isSameEvent = String(project.event_id) === String(eventId);
+                    const contributorNames = project.contributors
+                      ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
+                      : '';
 
-)}
+                    return (
+                      <div
+                        key={project.id}
+                        className="bg-[#0E1A2B] border border-gray-700 rounded px-4 py-2 text-left"
+                      >
+                        <p className="font-semibold text-white text-sm">{project.idea}</p>
 
-                      {project.contributors && (
-                        <p className="text-gray-400 text-xs">
-                          Contributors: {project.contributors
-                            .split(',')
-                            .map(c => c.trim().split('@')[0])
-                            .join(', ')}
+                        {project.event_title && project.event_date && (
+                          <p className="text-gray-400 text-xs">
+                            Event: {project.event_title} ({new Date(project.event_date).toLocaleDateString()})
+                          </p>
+                        )}
 
-                        </p>
-                      )}
+                        {project.contributors && (
+                          <p className="text-gray-400 text-xs">
+                            Contributors: {contributorNames}
+                          </p>
+                        )}
 
-
-                    </div>
-                  ))}
+                        {!isSameEvent && (
+                          <button
+                            onClick={() => handleAddToEvent(project.id)}
+                            className="mt-1 text-sm text-blue-400 underline hover:text-blue-300"
+                          >
+                            ➕ Add to This Event
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-
 
               ) : (
                 <form onSubmit={handleIdeaSubmit} className="space-y-4 mt-4">
                   <div>
-                    <label className="block text-sm font-bold text-white mb-1">
-                      Your Big Idea:
-                    </label>
+                    <label className="block text-sm font-bold text-white mb-1">Your Big Idea:</label>
                     <textarea
                       className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
                       value={idea}
@@ -189,9 +201,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-white mb-1">
-                      A Good Description:
-                    </label>
+                    <label className="block text-sm font-bold text-white mb-1">A Good Description:</label>
                     <MarkdownPreviewer textRef={textRef}>
                       <textarea
                         ref={textRef}
@@ -203,9 +213,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     </MarkdownPreviewer>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-white mb-1">
-                      Tech Magic:
-                    </label>
+                    <label className="block text-sm font-bold text-white mb-1">Tech Magic:</label>
                     <textarea
                       className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
                       value={technologies}
@@ -232,13 +240,9 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                   </button>
                 </form>
               )}
-
               {message && (
                 <p
-                  className={`mt-4 text-sm font-semibold ${message.includes("successfully")
-                    ? "text-green-500"
-                    : "text-red-500"
-                    }`}
+                  className={`mt-4 text-sm font-semibold ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}
                 >
                   {message}
                 </p>

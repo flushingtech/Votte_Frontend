@@ -140,21 +140,15 @@ export const deleteEvent = async (id) => {
 };
 
 export const getIdeasForEvent = async (eventId) => {
-  if (!eventId) {
-    console.error("Event ID is missing");
-    throw new Error("Event ID is required");
-  }
-
   try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/events/${eventId}/ideas`
-    );
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);
     return response.data.ideas;
   } catch (error) {
     console.error("Error fetching ideas for event:", error);
     throw error;
   }
 };
+
 
 
 export const getUserIdeas = async (email) => {
@@ -470,3 +464,16 @@ export const getPreviousProjects = async () => {
     throw error;
   }
 };
+
+export const addIdeaToEvent = async (ideaId, eventId) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/add-event-to-idea/${ideaId}`, {
+      event_id: eventId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding idea to event:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
