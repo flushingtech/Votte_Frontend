@@ -55,18 +55,30 @@ export const editIdea = async (id, idea, description, technologies) => {
   }
 };
 
-export const deleteIdea = async (id, email) => {
-  try {
-    const response = await axios.delete(
-      `${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}?email=${email}` // Pass email in query
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error deleting idea:', error);
-    throw error;
-  }
-};
+// export const deleteIdea = async (id, email) => {
+//   try {
+//     const response = await axios.delete(
+//       `${import.meta.env.VITE_BASE_URL}/api/ideas/delete-idea/${id}?email=${email}` // Pass email in query
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error deleting idea:', error);
+//     throw error;
+//   }
+// };
 
+export const deleteIdea = async (ideaId, eventId, userEmail) => {
+  const res = await fetch(
+    `${import.meta.env.VITE_BASE_URL}/api/ideas/idea/${ideaId}/${eventId}?email=${encodeURIComponent(userEmail)}`,
+    { method: 'DELETE' }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to delete idea');
+  }
+
+  return res.json();
+};
 
 // Function to like an idea
 export const likeIdea = async (ideaId, email) => {

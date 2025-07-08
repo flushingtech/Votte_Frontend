@@ -35,9 +35,9 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
   }, [eventId, userEmail]);
 
   const handleDelete = async (ideaId) => {
-    if (window.confirm("Are you sure you want to delete this idea?")) {
+    if (window.confirm("Are you sure you want to remove this idea from this event?")) {
       try {
-        await deleteIdea(ideaId, userEmail);
+        await deleteIdea(ideaId, eventId, userEmail); // now passes all required args
         setIdeas((prev) => prev.filter((idea) => idea.id !== ideaId));
         if (refreshIdeas) refreshIdeas();
       } catch (err) {
@@ -46,7 +46,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
       }
     }
   };
-
+  
   const handleEditSuccess = (updatedIdea) => {
     setIdeas((prev) =>
       prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
