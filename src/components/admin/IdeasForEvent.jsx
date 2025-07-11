@@ -1,3 +1,4 @@
+// ... all your imports remain unchanged
 import { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -12,7 +13,8 @@ import {
   updateAverageScores,
   setIdeaStage,
   addContributorToIdea,
-  getAllUsers
+  getAllUsers,
+  determineWinners
 } from '../../api/API';
 
 const IdeasForEvent = ({ userEmail }) => {
@@ -57,53 +59,6 @@ const IdeasForEvent = ({ userEmail }) => {
     fetchData();
   }, [event?.id]);
 
-  const handleContributorChange = (ideaId, email) => {
-    setContributorInputs((prev) => ({
-      ...prev,
-      [ideaId]: email,
-    }));
-  };
-
-  const handleAddContributor = async (ideaId) => {
-    const contributorEmail = contributorInputs[ideaId]?.trim();
-    if (!contributorEmail) {
-      alert('Please select a contributor.');
-      return;
-    }
-    try {
-      await addContributorToIdea(ideaId, contributorEmail);
-      alert('Contributor added successfully!');
-      setContributorInputs((prev) => ({
-        ...prev,
-        [ideaId]: '',
-      }));
-    } catch (error) {
-      console.error('Error adding contributor:', error);
-      alert('Failed to add contributor.');
-    }
-  };
-
-  const handleToggleIdeaSelection = async (ideaId, currentStage) => {
-    if (eventStage !== 1 || eventSubStage !== "2") {
-      alert("You can only select ideas when the event is in Locked Submissions (Stage 1.2).");
-      return;
-    }
-
-    const newStage = currentStage === 2 ? 1 : 2;
-
-    try {
-      const updatedIdea = await setIdeaStage(ideaId, newStage);
-      setIdeas((prevIdeas) =>
-        prevIdeas.map((idea) =>
-          idea.id === ideaId ? updatedIdea : idea
-        )
-      );
-    } catch (error) {
-      console.error("Error updating idea stage:", error);
-      alert("Failed to update idea stage.");
-    }
-  };
-
   const handleToggleSubStage = async () => {
     try {
       const newSubStage = eventSubStage === "1" ? "2" : "1";
@@ -131,98 +86,14 @@ const IdeasForEvent = ({ userEmail }) => {
     }
   };
 
-  const handleBackToSubmissionsLocked = async () => {
+  const handleStartVoting = async () => {
     try {
-      if (eventStage !== 1) {
-        const updatedEvent = await setEventStage(event.id, 1);
-        setEventStageState(updatedEvent.stage);
-      }
-      const updatedEventSubStage = await setEventSubStage(event.id, "2");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now back in Stage 1.2 (Locked Submissions)!`);
-    } catch (error) {
-      console.error("Error moving back to Locked Submissions:", error);
-      alert("Failed to move back to Locked Submissions.");
-    }
-  };
-
-  const handleStartMostCreativeVoting = async () => {
-    try {
-      if (eventStage !== 2) {
-        const updatedEvent = await setEventStage(event.id, 2);
-        setEventStageState(updatedEvent.stage);
-      }
-      const updatedEventSubStage = await setEventSubStage(event.id, "1");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now in Stage 2.1 (Most Creative Voting)!`);
-    } catch (error) {
-      console.error("Error transitioning to Most Creative Voting:", error);
-      alert("Failed to transition to Most Creative Voting.");
-    }
-  };
-
-  const handleStartMostTechnicalVoting = async () => {
-    try {
-      if (eventStage !== 2) {
-        const updatedEvent = await setEventStage(event.id, 2);
-        setEventStageState(updatedEvent.stage);
-      }
-      const updatedEventSubStage = await setEventSubStage(event.id, "2");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now in Stage 2.2 (Most Technical Voting)!`);
-    } catch (error) {
-      console.error("Error transitioning to Most Technical Voting:", error);
-      alert("Failed to transition to Most Technical Voting.");
-    }
-  };
-
-  const handleStartMostImpactfulVoting = async () => {
-    try {
-      if (eventStage !== 2) {
-        const updatedEvent = await setEventStage(event.id, 2);
-        setEventStageState(updatedEvent.stage);
-      }
-      const updatedEventSubStage = await setEventSubStage(event.id, "3");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now in Stage 2.3 (Most Impactful Voting)!`);
-    } catch (error) {
-      console.error("Error transitioning to Most Impactful Voting:", error);
-      alert("Failed to transition to Most Impactful Voting.");
-    }
-  };
-
-  const handleBackToMostCreativeVoting = async () => {
-    try {
-      const updatedEventSubStage = await setEventSubStage(event.id, "1");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now back in Stage 2.1 (Most Creative Voting)!`);
-    } catch (error) {
-      console.error("Error moving back to Most Creative Voting:", error);
-      alert("Failed to move back to Most Creative Voting.");
-    }
-  };
-
-  const handleBackToMostTechnicalVoting = async () => {
-    try {
-      const updatedEventSubStage = await setEventSubStage(event.id, "2");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEventSubStage.title}" is now back in Stage 2.2 (Most Technical Voting)!`);
-    } catch (error) {
-      console.error("Error moving back to Most Technical Voting:", error);
-      alert("Failed to move back to Most Technical Voting.");
-    }
-  };
-
-  const handleStartResultsPhase = async () => {
-    try {
-      const updatedEvent = await setEventStage(event.id, 3);
+      const updatedEvent = await setEventStage(event.id, 2);
       setEventStageState(updatedEvent.stage);
-      const updatedEventSubStage = await setEventSubStage(event.id, "1");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEvent.title}" is now in Results Phase (Sub-Stage 3.1)!`);
+      alert(`Event "${updatedEvent.title}" is now in Stage 2 (Voting Started)!`);
     } catch (error) {
-      console.error("Error transitioning to Results Phase:", error);
-      alert("Failed to transition to Results Phase.");
+      console.error("Error starting voting:", error);
+      alert("Failed to start voting.");
     }
   };
 
@@ -230,12 +101,64 @@ const IdeasForEvent = ({ userEmail }) => {
     try {
       const updatedEvent = await setEventStage(event.id, 2);
       setEventStageState(updatedEvent.stage);
-      const updatedEventSubStage = await setEventSubStage(event.id, "1");
-      setEventSubStageState(updatedEventSubStage.current_sub_stage);
-      alert(`Event "${updatedEvent.title}" is now back to Stage 2 (Voting Phase)!`);
+      alert(`Event "${updatedEvent.title}" is now back in Stage 2 (Voting)!`);
     } catch (error) {
-      console.error("Error transitioning back to Voting Phase:", error);
-      alert("Failed to go back to Voting Phase.");
+      console.error("Error moving back to voting:", error);
+      alert("Failed to move back to voting.");
+    }
+  };
+
+  const handleShowResults = async () => {
+    if (window.confirm("Are you sure you want to show the results? This will finalize the event.")) {
+      try {
+        await determineWinners(event.id);
+        const updated = await setEventToResultsTime(event.id);
+        setEventStageState(updated.stage);
+        alert("Event has been moved to Results Time!");
+      } catch (error) {
+        console.error("Error showing results:", error);
+        alert("Failed to show results.");
+      }
+    }
+  };
+
+  const handleToggleIdeaSelection = async (ideaId, currentStage) => {
+    if (eventStage !== 1 || eventSubStage !== "2") {
+      alert("You can only select ideas when the event is in Locked Submissions (Stage 1.2).");
+      return;
+    }
+
+    const newStage = currentStage === 2 ? 1 : 2;
+
+    try {
+      const updatedIdea = await setIdeaStage(ideaId, newStage);
+      setIdeas((prevIdeas) =>
+        prevIdeas.map((idea) =>
+          idea.id === ideaId ? updatedIdea : idea
+        )
+      );
+    } catch (error) {
+      console.error("Error updating idea stage:", error);
+      alert("Failed to update idea stage.");
+    }
+  };
+
+  const handleAddContributor = async (ideaId) => {
+    const contributorEmail = contributorInputs[ideaId]?.trim();
+    if (!contributorEmail) {
+      alert('Please select a contributor.');
+      return;
+    }
+    try {
+      await addContributorToIdea(ideaId, contributorEmail);
+      alert('Contributor added successfully!');
+      setContributorInputs((prev) => ({
+        ...prev,
+        [ideaId]: '',
+      }));
+    } catch (error) {
+      console.error('Error adding contributor:', error);
+      alert('Failed to add contributor.');
     }
   };
 
@@ -251,9 +174,8 @@ const IdeasForEvent = ({ userEmail }) => {
           <p className="text-white text-lg font-semibold">
             Current Stage: {eventStage}
             {eventStage === 1 && ` (Sub-Stage ${eventSubStage})`}
-            {eventStage === 2 && ` (${eventSubStage === "1" ? "Most Creative Voting"
-              : eventSubStage === "2" ? "Most Technical Voting"
-                : "Most Impactful Voting"})`}
+            {eventStage === 2 && " (Voting Phase)"}
+            {eventStage === 3 && " (Results Time)"}
           </p>
 
           {eventStage === 1 && (
@@ -269,10 +191,10 @@ const IdeasForEvent = ({ userEmail }) => {
               {eventSubStage === "2" && (
                 <>
                   <button
-                    onClick={handleStartMostCreativeVoting}
-                    className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white"
+                    onClick={handleStartVoting}
+                    className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white"
                   >
-                    Start Most Creative Voting
+                    Start Voting
                   </button>
                   <button
                     onClick={handleBackToSubmissionsOpen}
@@ -287,54 +209,18 @@ const IdeasForEvent = ({ userEmail }) => {
 
           {eventStage === 2 && (
             <div className="flex space-x-4 mt-2">
-              {eventSubStage === "1" && (
-                <>
-                  <button
-                    onClick={handleStartMostTechnicalVoting}
-                    className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white"
-                  >
-                    Start Most Technical Voting
-                  </button>
-                  <button
-                    onClick={handleBackToSubmissionsLocked}
-                    className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white"
-                  >
-                    Back to Locked Submissions
-                  </button>
-                </>
-              )}
-              {eventSubStage === "2" && (
-                <>
-                  <button
-                    onClick={handleStartMostImpactfulVoting}
-                    className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
-                  >
-                    Start Most Impactful Voting
-                  </button>
-                  <button
-                    onClick={handleBackToMostCreativeVoting}
-                    className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white"
-                  >
-                    Back to Most Creative Voting
-                  </button>
-                </>
-              )}
-              {eventSubStage === "3" && (
-                <>
-                  <button
-                    onClick={handleStartResultsPhase}
-                    className="px-4 py-2 rounded bg-purple-500 hover:bg-purple-600 text-white"
-                  >
-                    Start Results Phase
-                  </button>
-                  <button
-                    onClick={handleBackToMostTechnicalVoting}
-                    className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white"
-                  >
-                    Back to Most Technical Voting
-                  </button>
-                </>
-              )}
+              <button
+                onClick={handleShowResults}
+                className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Show Results
+              </button>
+              <button
+                onClick={handleBackToSubmissionsOpen}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              >
+                Back to Submissions
+              </button>
             </div>
           )}
 
@@ -342,9 +228,9 @@ const IdeasForEvent = ({ userEmail }) => {
             <div className="flex space-x-4 mt-2">
               <button
                 onClick={handleBackToVoting}
-                className="px-4 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white"
+                className="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white"
               >
-                Back to Voting Phase
+                Back to Voting
               </button>
             </div>
           )}
@@ -360,88 +246,84 @@ const IdeasForEvent = ({ userEmail }) => {
               No ideas have been submitted for this event yet.
             </p>
           ) : (
-<ul className="space-y-4">
-  {ideas.map((idea) => (
-    <li
-      key={idea.id}
-      className={`p-4 border border-gray-500 bg-[#1E2A3A] transition-all duration-300 space-y-3 ${
-        idea.stage === 2 ? "border-green-500 shadow-green-glow" : ""
-      }`}
-    >
-      {/* Contributor Dropdown Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <Select
-          className="w-full sm:w-2/3 text-sm"
-          styles={{
-            control: (base) => ({
-              ...base,
-              backgroundColor: '#0F172A',
-              borderColor: '#3B82F6',
-              color: 'white',
-            }),
-            menu: (base) => ({
-              ...base,
-              backgroundColor: 'white', // Make dropdown background white
-              color: 'black',
-            }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor: state.isFocused ? '#E5E7EB' : 'white', // Light gray on hover
-              color: 'black',
-              cursor: 'pointer',
-            }),
-            singleValue: (base) => ({ ...base, color: 'white' }),
-            input: (base) => ({ ...base, color: 'white' }),
-          }}
-          
-          options={users.map(user => ({
-            label: `${user.name} (${user.email})`,
-            value: user.email
-          }))}
-          placeholder="Select contributor..."
-          value={users
-            .map(user => ({
-              label: `${user.name} (${user.email})`,
-              value: user.email
-            }))
-            .find(opt => opt.value === contributorInputs[idea.id]) || null}
-          onChange={(selectedOption) =>
-            handleContributorChange(idea.id, selectedOption?.value || '')
-          }
-        />
-        <button
-          onClick={() => handleAddContributor(idea.id)}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-sm transition-all"
-        >
-          Add
-        </button>
-      </div>
+            <ul className="space-y-4">
+              {ideas.map((idea) => (
+                <li
+                  key={idea.id}
+                  className={`p-4 border border-gray-500 bg-[#1E2A3A] transition-all duration-300 space-y-3 ${idea.stage === 2 ? "border-green-500 shadow-green-glow" : ""}`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <Select
+                      className="w-full sm:w-2/3 text-sm"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: '#0F172A',
+                          borderColor: '#3B82F6',
+                          color: 'white',
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          backgroundColor: 'white',
+                          color: 'black',
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isFocused ? '#E5E7EB' : 'white',
+                          color: 'black',
+                          cursor: 'pointer',
+                        }),
+                        singleValue: (base) => ({ ...base, color: 'white' }),
+                        input: (base) => ({ ...base, color: 'white' }),
+                      }}
+                      options={users.map(user => ({
+                        label: `${user.name} (${user.email})`,
+                        value: user.email
+                      }))}
+                      placeholder="Select contributor..."
+                      value={users
+                        .map(user => ({
+                          label: `${user.name} (${user.email})`,
+                          value: user.email
+                        }))
+                        .find(opt => opt.value === contributorInputs[idea.id]) || null}
+                      onChange={(selectedOption) =>
+                        setContributorInputs(prev => ({
+                          ...prev,
+                          [idea.id]: selectedOption?.value || ''
+                        }))
+                      }
+                    />
+                    <button
+                      onClick={() => handleAddContributor(idea.id)}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-sm transition-all"
+                    >
+                      Add
+                    </button>
+                  </div>
 
-      {/* Idea Title & Description */}
-      <div>
-        <h3 className="text-xl font-semibold text-white">{idea.idea}</h3>
-        <p className="text-gray-300 text-sm">{idea.description}</p>
-      </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">{idea.idea}</h3>
+                    <p className="text-gray-300 text-sm">{idea.description}</p>
+                  </div>
 
-      {/* Bottom Row: Badge + Toggle */}
-      <div className="flex justify-between items-center mt-2">
-        {idea.stage === 2 && (
-          <span className="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-sm">
-            In Voting Stage
-          </span>
-        )}
-        <button
-          onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
-          className={`px-4 py-2 rounded-sm text-white transition-all 
-            ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
-        >
-          {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
-        </button>
-      </div>
-    </li>
-  ))}
-</ul>
-
+                  <div className="flex justify-between items-center mt-2">
+                    {idea.stage === 2 && (
+                      <span className="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-sm">
+                        In Voting Stage
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+                      className={`px-4 py-2 rounded-sm text-white transition-all 
+                        ${idea.stage === 2 ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
+                    >
+                      {idea.stage === 2 ? "Deselect Idea" : "Select for Voting"}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

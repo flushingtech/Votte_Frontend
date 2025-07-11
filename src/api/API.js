@@ -233,7 +233,10 @@ export const setEventStage = async (eventId, stage) => {
 export const getEventStage = async (eventId) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/events/get-stage/${eventId}`);
-    return response.data; // Returns { stage: <number> }
+    return {
+      stage: response.data.stage,
+      current_sub_stage: response.data.current_sub_stage || '1',
+    };
   } catch (error) {
     console.error('Error fetching event stage:', error);
     throw error;

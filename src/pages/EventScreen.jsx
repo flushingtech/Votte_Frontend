@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getEvents, getEventStage, checkAdminStatus } from '../api/API';
+import {
+  getEvents,
+  getEventStage,
+  checkAdminStatus
+} from '../api/API';
 import Navbar from '../components/Navbar';
 import IdeaSubmission from '../components/IdeaSubmission';
 import Stage_1_Ideas from '../components/Stage_1_Ideas';
-import Stage_2_Ideas from '../components/Stage_2_Ideas';
-import Stage_2_2_Ideas from '../components/Stage_2-2_Ideas';
-import Stage_2_3_Ideas from '../components/Stage_2-3_Ideas';
+import Stage_2 from '../components/Stage_2';
 import Stage_3_Ideas from '../components/Stage_3_Ideas';
 import ButtonUploadEvent from '../components/ButtonUploadEvent';
 
@@ -15,7 +17,7 @@ function EventScreen() {
   const email = localStorage.getItem('userEmail');
   const [isAdmin, setIsAdmin] = useState(false);
   const [event, setEvent] = useState(null);
-  const [eventStage, setEventStage] = useState(1);
+  const [eventStage, setEventStage] = useState('1');
   const [subStage, setSubStage] = useState('1');
   const [ideasRefreshKey, setIdeasRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,13 +27,26 @@ function EventScreen() {
     const fetchEventDetails = async () => {
       try {
         const events = await getEvents();
-        const eventDetails = events.find((evt) => evt.id === parseInt(eventId, 10));
+        const eventDetails = events.find(evt => evt.id === parseInt(eventId, 10));
         if (!eventDetails) throw new Error('Event not found');
         setEvent(eventDetails);
 
         const stageData = await getEventStage(eventId);
-        setEventStage(stageData.stage);
-        setSubStage(stageData.current_sub_stage || '1');
+        console.log('✅ Raw stageData from backend:', stageData);
+
+        let rawStage = stageData?.stage;
+        let rawSubStage = stageData?.current_sub_stage;
+
+        console.log('🧪 BEFORE conversion – rawStage:', rawStage, 'typeof:', typeof rawStage);
+        console.log('🧪 BEFORE conversion – rawSubStage:', rawSubStage, 'typeof:', typeof rawSubStage);
+
+        rawStage = rawStage?.toString();
+        rawSubStage = rawSubStage?.toString();
+
+        console.log('🎯 AFTER conversion – eventStage:', rawStage, 'subStage:', rawSubStage);
+
+        setEventStage(rawStage || '1');
+        setSubStage(rawSubStage || '1');
 
         const isAdminStatus = await checkAdminStatus(email);
         setIsAdmin(isAdminStatus);
@@ -47,7 +62,7 @@ function EventScreen() {
     fetchEventDetails();
   }, [eventId, email]);
 
-  const refreshIdeas = () => setIdeasRefreshKey((prevKey) => prevKey + 1);
+  const refreshIdeas = () => setIdeasRefreshKey(prevKey => prevKey + 1);
 
   if (loading) {
     return (
@@ -67,11 +82,14 @@ function EventScreen() {
     );
   }
 
+  console.log('🔥 Final render stage:', eventStage, 'subStage:', subStage);
+
   return (
     <div style={{ backgroundColor: '#030C18', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
         <Navbar userName={email} backToHome={true} />
       </div>
+
       <div style={{ flex: 1, overflowY: 'auto', marginTop: '60px' }}>
         <div className="p-3">
           <style>
@@ -181,10 +199,10 @@ function EventScreen() {
 
             <div className="submissions-container">
               <div className="submission-left">
-                {eventStage === 1 && subStage === '1' && <p className="submissions-open">Submissions Open</p>}
-                {eventStage === 1 && subStage === '2' && <p className="submissions-open locked">🔒 Submissions Locked</p>}
-                {eventStage === 2 && <p className="votte-time">Votte Time</p>}
-                {eventStage === 3 && <p className="our-winners">Our Winners!</p>}
+                {eventStage === '1' && subStage === '1' && <p className="submissions-open">Submissions Open</p>}
+                {eventStage === '1' && subStage === '2' && <p className="submissions-open locked">🔒 Submissions Locked</p>}
+                {eventStage === '2' && <p className="votte-time">Votte Time</p>}
+                {eventStage === '3' && <p className="our-winners">Our Winners!</p>}
 
                 {(event?.checked_in || '').split(',').includes(email) && (
                   <span className="checked-in-badge">✅ CHECKED IN</span>
@@ -197,7 +215,7 @@ function EventScreen() {
                     <ButtonUploadEvent eventId={eventId} />
                   </div>
                 )}
-                {eventStage === 1 && subStage === '1' && (
+                {eventStage === '1' && subStage === '1' && (
                   <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
                 )}
               </div>
@@ -205,16 +223,14 @@ function EventScreen() {
           </div>
 
           <div className="max-w-3xl mx-auto mt-3 mb-8">
-            {eventStage === 1 ? (
+            {eventStage === '1' ? (
               <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
-            ) : eventStage === 2 && subStage === '1' ? (
-              <Stage_2_Ideas key={ideasRefreshKey} eventId={eventId} />
-            ) : eventStage === 2 && subStage === '2' ? (
-              <Stage_2_2_Ideas key={ideasRefreshKey} eventId={eventId} />
-            ) : eventStage === 2 && subStage === '3' ? (
-              <Stage_2_3_Ideas key={ideasRefreshKey} eventId={eventId} />
-            ) : (
+            ) : eventStage === '2' ? (
+              <Stage_2 key={ideasRefreshKey} eventId={eventId} />
+            ) : eventStage === '3' ? (
               <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
+            ) : (
+              <p className="text-white text-center">Unknown event stage: {eventStage}</p>
             )}
           </div>
         </div>
