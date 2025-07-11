@@ -224,7 +224,13 @@ function EventScreen() {
 
           <div className="max-w-3xl mx-auto mt-3 mb-8">
             {eventStage === '1' ? (
-              <Stage_1_Ideas key={ideasRefreshKey} eventId={eventId} refreshIdeas={refreshIdeas} />
+              <Stage_1_Ideas
+              key={ideasRefreshKey}
+              eventId={eventId}
+              refreshIdeas={refreshIdeas}
+              isAdmin={isAdmin} // ✅ pass this down
+            />
+            
             ) : eventStage === '2' ? (
               <Stage_2 key={ideasRefreshKey} eventId={eventId} />
             ) : eventStage === '3' ? (

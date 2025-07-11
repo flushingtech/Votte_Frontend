@@ -4,7 +4,7 @@ import { getIdeasByEvent, getLikedIdeas, deleteIdea } from "../api/API";
 import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
-function Stage_1_Ideas({ eventId, refreshIdeas }) {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin })  {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,7 +37,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
   const handleDelete = async (ideaId) => {
     if (window.confirm("Are you sure you want to remove this idea from this event?")) {
       try {
-        await deleteIdea(ideaId, eventId, userEmail); // now passes all required args
+        await deleteIdea(ideaId, eventId, userEmail);
         setIdeas((prev) => prev.filter((idea) => idea.id !== ideaId));
         if (refreshIdeas) refreshIdeas();
       } catch (err) {
@@ -46,7 +46,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
       }
     }
   };
-  
+
   const handleEditSuccess = (updatedIdea) => {
     setIdeas((prev) =>
       prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
@@ -190,12 +190,12 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                       <button
                         className="font-semibold bg-black text-white px-2 py-1 hover:bg-gray-800 transition-all"
                         onClick={() => navigate(`/idea/${idea.id}`)}
-                        style={{ fontSize:"10px", border: "1px solid #666", borderRadius: "2px" }}
+                        style={{ fontSize: "10px", border: "1px solid #666", borderRadius: "2px" }}
                       >
                         View More
                       </button>
 
-                      {isYourIdea && (
+                      {(isYourIdea || isAdmin) && (
                         <>
                           <div
                             className="menu-button"
@@ -207,7 +207,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas }) {
                           </div>
                           {menuOpenId === idea.id && (
                             <div className="dropdown-menu">
-                              <button onClick={() => setEditingIdea(idea)}>Edit</button>
+                              {isYourIdea && <button onClick={() => setEditingIdea(idea)}>Edit</button>}
                               <button onClick={() => handleDelete(idea.id)}>Delete</button>
                             </div>
                           )}
