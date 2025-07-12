@@ -81,17 +81,9 @@ function IdeaScreen() {
               text-transform: uppercase;
             }
 
-            .event-details {
-              text-align: right;
-              font-size: 0.875rem;
-              color: #D1D5DB;
-            }
-
             .idea-details-container {
-              max-height: 70vh;
-              overflow-y: auto;
               max-width: 700px;
-              margin: auto;
+              margin: 12px auto;
               background-color: #1E2A3A;
               padding: 16px;
               border: 1px solid white;
@@ -138,52 +130,51 @@ function IdeaScreen() {
           `}
         </style>
 
-        {/* Title + Event Section */}
+        {/* Title Only */}
         <div className="idea-header-container">
           <div className="idea-title">{idea?.idea}</div>
-          <div className="event-details">
-            {idea?.event_title && <div>{idea.event_title}</div>}
-            {idea?.event_date && (
-              <div>{new Date(idea.event_date).toLocaleDateString()}</div>
-            )}
-          </div>
         </div>
 
-        {/* Details */}
-        <div className="idea-details-container">
-          <p className="idea-info">
-            <span className="idea-label">Description:</span> {idea?.description}
-          </p>
-          <p className="idea-info">
-            <span className="idea-label">Tech Stack:</span> {idea?.technologies}
-          </p>
-          <p className="idea-info">
-            <span className="idea-label">Contributors:</span>{' '}
-            {idea?.contributors ? idea.contributors.split(',').join(', ') : 'None'}
-          </p>
+        {/* For each event_id */}
+        {idea?.events?.map((event) => (
+          <div key={event.event_id} className="idea-details-container">
+            <p className="idea-info">
+              <span className="idea-label">Event Date:</span>{' '}
+              {new Date(event.event_date).toLocaleDateString()}
+            </p>
+            <p className="idea-info">
+              <span className="idea-label">Description:</span> {idea?.description}
+            </p>
+            <p className="idea-info">
+              <span className="idea-label">Tech Stack:</span> {idea?.technologies}
+            </p>
+            <p className="idea-info">
+              <span className="idea-label">Contributors:</span>{' '}
+              {idea?.contributors ? idea.contributors.split(',').join(', ') : 'None'}
+            </p>
 
-          {idea?.image_url && (
-            <img
-              src={idea.image_url}
-              alt="Uploaded for this idea"
-              className="idea-image"
-            />
-          )}
-
-          <div className="bottom-row">
-            {isAdmin ? (
-              <div>
-                {/* <p className="text-white text-sm mb-2">Upload an image for this idea:</p> */}
-                <ButtonUpload ideaId={idea?.id} />
-              </div>
-            ) : (
-              <div />
+            {idea?.image_url && (
+              <img
+                src={idea.image_url}
+                alt="Uploaded for this idea"
+                className="idea-image"
+              />
             )}
-            <div className="submitted-by">
-              Submitted by: {idea?.email || 'Unknown'}
+
+            <div className="bottom-row">
+              {isAdmin ? (
+                <div>
+                  <ButtonUpload ideaId={idea?.id} />
+                </div>
+              ) : (
+                <div />
+              )}
+              <div className="submitted-by">
+                Submitted by: {idea?.email || 'Unknown'}
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
