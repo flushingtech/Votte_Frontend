@@ -51,18 +51,24 @@ function EventScreen() {
 
   const refreshIdeas = () => setIdeasRefreshKey((prevKey) => prevKey + 1);
 
-  // ===== Participants (from event.checked_in) =====
+  const usernameOnly = (s = '') => s.split('@')[0] || '';
+
+  // ===== Participants (from event.checked_in) — display usernames only =====
   const participants = useMemo(() => {
     const raw = (event?.checked_in || '')
       .replace(/{}/g, '')
       .split(',')
       .map((e) => e.trim())
       .filter(Boolean);
-    return Array.from(new Set(raw)).sort((a, b) => a.localeCompare(b));
+
+    // unique by full email (source of truth), but sort by username
+    const unique = Array.from(new Set(raw));
+    unique.sort((a, b) => usernameOnly(a).localeCompare(usernameOnly(b)));
+    return unique;
   }, [event]);
 
   const getInitials = (emailStr) => {
-    const prefix = (emailStr || '').split('@')[0] || '';
+    const prefix = usernameOnly(emailStr);
     if (!prefix) return '•';
     const parts = prefix.split(/[._-]+/).filter(Boolean);
     const first = parts[0]?.[0] || prefix[0];
@@ -70,7 +76,7 @@ function EventScreen() {
     return (first + second).toUpperCase();
   };
 
-  // Flattened, full-height participants panel
+  // Flattened, full-height participants panel (no rounded corners)
   const ParticipantsPanel = () => (
     <aside
       className="border border-white/40 shadow-lg p-4 w-64 h-full flex flex-col rounded-none"
@@ -95,6 +101,7 @@ function EventScreen() {
       ) : (
         <ul className="participants-scroll space-y-2 flex-1 overflow-auto pr-1">
           {participants.map((p) => {
+            const uname = usernameOnly(p);
             const isYou = p.toLowerCase() === (email || '').toLowerCase();
             return (
               <li
@@ -110,12 +117,11 @@ function EventScreen() {
                       color: 'white',
                       boxShadow: '0 0 6px rgba(255,255,255,0.15)',
                     }}
-                    title={p}
                   >
                     {getInitials(p)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white text-sm truncate">{p}</p>
+                    <p className="text-white text-sm truncate">{uname}</p>
                     {isYou && (
                       <span
                         className="text-[11px] font-semibold px-1.5 py-0.5"
