@@ -8,14 +8,22 @@ function EventsList({ today }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false); // 👈 NEW
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
+  // 👇 NEW: listen for viewport changes (mobile < md = 768px)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handle = () => setIsMobile(mq.matches);
+    handle();
+    mq.addEventListener?.('change', handle);
+    return () => mq.removeEventListener?.('change', handle);
+  }, []);
+
   const toEasternDate = (dateString) => {
     const eastern = new Date(
-      new Date(dateString).toLocaleString('en-US', {
-        timeZone: 'America/New_York',
-      })
+      new Date(dateString).toLocaleString('en-US', { timeZone: 'America/New_York' })
     );
     eastern.setHours(0, 0, 0, 0);
     return eastern;
@@ -44,27 +52,32 @@ function EventsList({ today }) {
   if (loading) return <p className="text-center text-sm">Loading events...</p>;
   if (error) return <p className="text-center text-sm text-red-500">{error}</p>;
 
+  // --- pick candidates ---
   const recentPastEvent = events
-    .filter((event) => toEasternDate(event.event_date) < today)
-    .reduce((latest, event) => {
-      return !latest || toEasternDate(event.event_date) > toEasternDate(latest.event_date)
-        ? event
-        : latest;
-    }, null);
+    .filter((e) => toEasternDate(e.event_date) < today)
+    .reduce((latest, e) =>
+      !latest || toEasternDate(e.event_date) > toEasternDate(latest.event_date) ? e : latest
+    , null);
 
   const nextUpcomingEvent = events
-    .filter((event) => toEasternDate(event.event_date) >= today)
-    .reduce((closest, event) => {
-      return !closest || toEasternDate(event.event_date) < toEasternDate(closest.event_date)
-        ? event
-        : closest;
-    }, null);
+    .filter((e) => toEasternDate(e.event_date) >= today)
+    .reduce((closest, e) =>
+      !closest || toEasternDate(e.event_date) < toEasternDate(closest.event_date) ? e : closest
+    , null);
 
-  const filteredEvents = [];
-  if (recentPastEvent) filteredEvents.push(recentPastEvent);
+  const eventToday = events.find((e) => isSameDay(e.event_date)) || null;
+
+  // --- desktop (2 cards) vs mobile (1 card) ---
+  const filteredEventsDesktop = [];
+  if (recentPastEvent) filteredEventsDesktop.push(recentPastEvent);
   if (nextUpcomingEvent && (!recentPastEvent || nextUpcomingEvent.id !== recentPastEvent.id)) {
-    filteredEvents.push(nextUpcomingEvent);
+    filteredEventsDesktop.push(nextUpcomingEvent);
   }
+
+  const selectedOneMobile = eventToday ?? nextUpcomingEvent ?? recentPastEvent ?? null;
+  const filteredEvents = isMobile
+    ? (selectedOneMobile ? [selectedOneMobile] : [])
+    : filteredEventsDesktop;
 
   return (
     <div className="events-container relative flex flex-col h-full">
@@ -73,12 +86,17 @@ function EventsList({ today }) {
         <h2 className="text-xl sm:text-lg font-bold text-white text-center">Events</h2>
       </div>
 
-      {/* Scrollable Events List */}
-      <div className="overflow-y-auto max-h-[30vh] pt-2">
+      {/* Scrollable on desktop, auto height on mobile so first card is fully visible */}
+      <div className={isMobile ? 'pt-2' : 'overflow-y-auto max-h-[30vh] pt-2'}>
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
-          const isNextUpcoming = nextUpcomingEvent && event.id === nextUpcomingEvent.id;
           const isEventToday = isSameDay(event.event_date);
+          // Recompute "next" flag relative to the chosen list
+          const isNextUpcoming =
+            !isEventToday &&
+            nextUpcomingEvent &&
+            event.id === nextUpcomingEvent.id;
+
           const isCheckedIn = (event.checked_in || '').split(',').includes(userEmail);
 
           let buttonText = '';
@@ -118,11 +136,7 @@ function EventsList({ today }) {
               key={event.id}
               className="shadow-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between relative bg-white border-2 mb-4"
               style={{
-                borderColor: isEventToday
-                  ? 'green'
-                  : isNextUpcoming
-                  ? 'white'
-                  : '#1E2A3A',
+                borderColor: isEventToday ? 'green' : isNextUpcoming ? 'white' : '#1E2A3A',
                 boxShadow: isEventToday
                   ? '0 0 15px 3px green'
                   : isNextUpcoming
@@ -152,10 +166,7 @@ function EventsList({ today }) {
                 <button
                   className="text-sm sm:text-xs font-semibold text-white px-4 py-2 sm:py-1 hover:opacity-90 transition-all truncate min-w-0"
                   onClick={handleButtonClick}
-                  style={{
-                    backgroundColor: buttonColor,
-                    borderRadius: '3px',
-                  }}
+                  style={{ backgroundColor: buttonColor, borderRadius: '3px' }}
                 >
                   {buttonText}
                 </button>
