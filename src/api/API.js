@@ -219,10 +219,12 @@ export const setIdeaStage = async (ideaId, stage) => {
 // Function to set the stage of an event
 export const setEventStage = async (eventId, stage) => {
   try {
+      console.log('setEventStage called with:', { eventId, stage });
       const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
           stage,
       });
-      return response.data.event; // Return the updated event
+      console.log('setEventStage response.data:', response.data);
+      return response.data.event || response.data; // Return the updated event
   } catch (error) {
       console.error('Error setting event stage:', error);
       throw error;

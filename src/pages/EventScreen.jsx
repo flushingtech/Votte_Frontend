@@ -28,6 +28,8 @@ function EventScreen() {
   const [ideasRefreshKey, setIdeasRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [showResultsConfirm, setShowResultsConfirm] = useState(false);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -40,8 +42,10 @@ function EventScreen() {
         setEvent(eventDetails);
 
         const stageData = await getEventStage(eventId);
+        console.log("Initial getEventStage response:", stageData);
         const rawStage = stageData?.stage?.toString?.();
         const rawSubStage = stageData?.current_sub_stage?.toString?.();
+        console.log("rawStage:", rawStage, "rawSubStage:", rawSubStage);
 
         setEventStage(rawStage || "1");
         setSubStage(rawSubStage || "1");
@@ -62,6 +66,28 @@ function EventScreen() {
 
   const refreshIdeas = () => setIdeasRefreshKey((prevKey) => prevKey + 1);
   const usernameOnly = (s = "") => s.split("@")[0] || "";
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const confirmShowResults = async () => {
+    setShowResultsConfirm(false);
+    try {
+      const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-results-time/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await apiResponse.json();
+      const updatedEvent = data.event || data;
+      setEventStage(updatedEvent.stage.toString());
+      showNotification("🏆 Results are now live!", "success");
+    } catch (error) {
+      console.error("Error showing results:", error);
+      showNotification("Failed to show results.", "error");
+    }
+  };
 
   const participants = useMemo(() => {
     const raw = (event?.checked_in || "")
@@ -136,28 +162,115 @@ function EventScreen() {
   );
 
   const AdminControlPanel = () => {
-    const handleStageChange = async (nextStage, nextSubStage) => {
+    const handleToggleSubStage = async () => {
       try {
-        if (nextStage !== null) await setEventStage(eventId, nextStage);
-        if (nextSubStage !== null) await setEventSubStage(eventId, nextSubStage);
-        window.location.reload();
+        const newSubStage = subStage === "1" ? "2" : "1";
+
+        const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_sub_stage: newSubStage })
+        });
+
+        const data = await apiResponse.json();
+        console.log("Toggle substage response:", data);
+        const updatedEvent = data.event || data;
+        console.log("updatedEvent:", updatedEvent);
+        console.log("updatedEvent.current_sub_stage:", updatedEvent.current_sub_stage);
+
+        setSubStage(updatedEvent.current_sub_stage || newSubStage);
+        showNotification(`Event is now in Sub-Stage ${newSubStage === "1" ? "1.1 (Open)" : "1.2 (Locked)"}`, "success");
       } catch (error) {
-        console.error("Error changing stage:", error);
-        alert("Failed to change event stage.");
+        console.error("Error toggling sub-stage:", error);
+        showNotification("Failed to toggle event sub-stage.", "error");
       }
     };
 
-    const handleShowResults = async () => {
-      if (window.confirm("Are you sure you want to show results?")) {
-        try {
-          await determineWinners(eventId);
-          await setEventToResultsTime(eventId);
-          window.location.reload();
-        } catch (error) {
-          console.error("Error finalizing results:", error);
-          alert("Failed to show results.");
+    const handleStartVoting = async () => {
+      try {
+        console.log("Starting voting for eventId:", eventId);
+
+        // Call API directly to see full response
+        const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: 2 })
+        });
+
+        console.log("API response status:", apiResponse.status);
+        const data = await apiResponse.json();
+        console.log("API response data:", data);
+
+        // Extract event from response
+        const updatedEvent = data.event || data;
+        console.log("updatedEvent:", updatedEvent);
+
+        if (!updatedEvent || updatedEvent.stage === undefined) {
+          console.error("Invalid response structure. Full data:", data);
+          alert("Failed to start voting - invalid response from server");
+          return;
         }
+
+        console.log("Setting stage to:", updatedEvent.stage);
+        setEventStage(updatedEvent.stage.toString());
+        showNotification("🗳️ Voting has started!", "success");
+      } catch (error) {
+        console.error("Error starting voting:", error);
+        showNotification("Failed to start voting. Check console for details.", "error");
       }
+    };
+
+    const handleBackToSubmissionsOpen = async () => {
+      try {
+        // First set to Stage 1
+        const stageResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: 1 })
+        });
+        const stageData = await stageResponse.json();
+        const updatedEvent = stageData.event || stageData;
+        setEventStage(updatedEvent.stage.toString());
+
+        // Then set to SubStage 1
+        const subStageResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_sub_stage: "1" })
+        });
+        const subStageData = await subStageResponse.json();
+        const updatedEventSubStage = subStageData.event || subStageData;
+
+        console.log("SubStage response:", updatedEventSubStage);
+        console.log("Setting substage to:", updatedEventSubStage.current_sub_stage);
+
+        setSubStage(updatedEventSubStage.current_sub_stage || "1");
+        showNotification("📝 Back to Open Submissions!", "success");
+      } catch (error) {
+        console.error("Error moving back to Open Submissions:", error);
+        showNotification("Failed to move back to Open Submissions.", "error");
+      }
+    };
+
+    const handleBackToVoting = async () => {
+      try {
+        const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: 2 })
+        });
+        const data = await apiResponse.json();
+        const updatedEvent = data.event || data;
+        setEventStage(updatedEvent.stage.toString());
+        showNotification("🗳️ Back to Voting!", "success");
+      } catch (error) {
+        console.error("Error moving back to voting:", error);
+        showNotification("Failed to move back to voting.", "error");
+      }
+    };
+
+    const handleShowResults = () => {
+      setShowResultsConfirm(true);
     };
 
     return (
@@ -168,14 +281,14 @@ function EventScreen() {
             ⚙️ Admin Controls
           </h2>
           <span className="bg-orange-600/50 text-orange-200 px-3 py-1 rounded-full text-xs font-bold border border-orange-500/50">
-            Stage {eventStage}.{subStage}
+            Stage {eventStage}{eventStage === "1" && `.${subStage}`}
           </span>
         </div>
 
         {/* Stage 1.1 controls */}
         {eventStage === "1" && subStage === "1" && (
           <button
-            onClick={() => handleStageChange("1", "2")}
+            onClick={handleToggleSubStage}
             className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-sm"
           >
             🔒 Lock Submissions
@@ -186,13 +299,13 @@ function EventScreen() {
         {eventStage === "1" && subStage === "2" && (
           <>
             <button
-              onClick={() => handleStageChange("2", null)}
+              onClick={handleStartVoting}
               className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-sm"
             >
               🗳️ Start Voting
             </button>
             <button
-              onClick={() => handleStageChange("1", "1")}
+              onClick={handleBackToSubmissionsOpen}
               className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
             >
               🔓 Unlock Submissions
@@ -210,7 +323,7 @@ function EventScreen() {
               🏆 Show Results
             </button>
             <button
-              onClick={() => handleStageChange("1", "1")}
+              onClick={handleBackToSubmissionsOpen}
               className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
             >
               ← Back to Submissions
@@ -221,7 +334,7 @@ function EventScreen() {
         {/* Stage 3 controls */}
         {eventStage === "3" && (
           <button
-            onClick={() => handleStageChange("2", null)}
+            onClick={handleBackToVoting}
             className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-sm"
           >
             ← Back to Voting
@@ -335,10 +448,10 @@ function EventScreen() {
                     .split(",")
                     .map((e) => e.trim())
                     .includes(email) && (
-                    <span className="bg-emerald-600/50 text-emerald-200 px-4 py-2 rounded-lg font-semibold text-sm border border-emerald-500/50">
-                      ✅ Checked In
-                    </span>
-                  )}
+                      <span className="bg-emerald-600/50 text-emerald-200 px-4 py-2 rounded-lg font-semibold text-sm border border-emerald-500/50">
+                        ✅ Checked In
+                      </span>
+                    )}
                 </div>
 
                 {/* Add New Idea inside header, bottom-right */}
@@ -358,7 +471,7 @@ function EventScreen() {
             {isAdmin && (
               <div className="lg:col-span-1">
                 {/* self-start ensures no extra vertical stretch */}
-                <div className="sticky top-6 self-start">
+                <div className="sticky top-6 self-start" style={{ zIndex: 20 }}>
                   <AdminControlPanel />
                 </div>
               </div>
@@ -396,6 +509,66 @@ function EventScreen() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Show Results */}
+      {showResultsConfirm && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
+            onClick={() => setShowResultsConfirm(false)}
+          ></div>
+          <div className="fixed inset-0 flex items-start justify-center pt-20 p-4 z-[9999]">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 max-w-md w-full animate-slide-down">
+              <div className="text-center mb-6">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h2 className="text-2xl font-bold text-white mb-3">Show Results?</h2>
+                <p className="text-gray-300 text-base">
+                  Are you sure you want to show the results? This will finalize the event and display the winners.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowResultsConfirm(false)}
+                  className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 text-white px-4 py-3 rounded-lg font-semibold hover:from-slate-600/50 hover:to-slate-700/50 transition-all duration-200 border border-slate-600/50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmShowResults}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg"
+                  style={{
+                    boxShadow: "0 0 20px rgba(168, 85, 247, 0.4)",
+                  }}
+                >
+                  🏆 Show Results
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Toast Notification */}
+      {notification && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[9999] animate-slide-down">
+          <div
+            className={`px-6 py-4 rounded-xl border shadow-2xl backdrop-blur-sm ${
+              notification.type === "success"
+                ? "bg-gradient-to-br from-green-600/90 to-emerald-600/90 border-green-500/50 text-green-50"
+                : "bg-gradient-to-br from-red-600/90 to-rose-600/90 border-red-500/50 text-red-50"
+            }`}
+            style={{
+              boxShadow: notification.type === "success"
+                ? "0 0 30px rgba(16, 185, 129, 0.4)"
+                : "0 0 30px rgba(239, 68, 68, 0.4)",
+            }}
+          >
+            <p className="text-sm font-semibold whitespace-nowrap">
+              {notification.message}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
