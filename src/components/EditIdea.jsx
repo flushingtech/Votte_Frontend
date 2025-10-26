@@ -30,61 +30,64 @@ function EditIdea({ ideaData, onEditSuccess }) {
   };
 
   return (
-    <div className="fixed inset-x-0 top-[4em]">
-      <form
-        onSubmit={handleEdit}
-        className="p-6 border border-gray-300 space-y-4 shadow-lg"
-        style={{
-          width: "800px",
-          margin: "0 auto",
-          backgroundColor: "#030C18", // Dark blue background
-          color: "white", // White text for readability
-          borderRadius: "0px", // Remove rounded corners
-        }}
-      >
+    <div className="w-full">
+      <form onSubmit={handleEdit} className="space-y-6">
+        <h2 className="text-2xl font-bold text-white mb-6">Edit Your Idea</h2>
+
         <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            Edit Idea:
+          <label className="block text-base font-medium text-white mb-2">
+            Idea Title:
           </label>
           <textarea
-            className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+            className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-white text-base"
+            rows="2"
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
             placeholder="Edit your idea here..."
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            Edit Description:
+          <label className="block text-base font-medium text-white mb-2">
+            Description:
           </label>
           <MarkdownPreviewer textRef={textRef}>
             <textarea
               ref={textRef}
-              className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-white text-base"
+              rows="8"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Edit your description here..."
             />
           </MarkdownPreviewer>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-white mb-1">
-            Edit Technologies:
+          <label className="block text-base font-medium text-white mb-2">
+            Technologies:
           </label>
           <textarea
-            className="w-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-black"
+            className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-white text-base"
+            rows="2"
             value={technologies}
             onChange={(e) => setTechnologies(e.target.value)}
             placeholder="Edit technologies here..."
           />
         </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 font-semibold hover:bg-blue-700 focus:outline-none"
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 text-base font-semibold rounded-lg hover:from-blue-500 hover:to-purple-500 focus:outline-none transition-all duration-200 shadow-lg hover:shadow-xl"
         >
           Update Idea
         </button>
-        {message && <p className="text-sm mt-2 text-green-500">{message}</p>}
+
+        {message && (
+          <p className="text-base mt-2 text-center text-green-400 font-medium">
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );

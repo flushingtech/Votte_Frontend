@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getIdeaById, checkAdminStatus } from '../api/API';
 import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
+import MarkdownWithPlugins from './MarkdownWithPluggins';
 
 function IdeaScreen() {
   const { ideaId } = useParams();
+  const navigate = useNavigate();
   const [idea, setIdea] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -13,11 +15,6 @@ function IdeaScreen() {
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => (document.body.style.overflow = 'auto');
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,139 +39,162 @@ function IdeaScreen() {
 
   if (loading)
     return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar />
-        <p className="text-center mt-10">Loading idea details...</p>
+      <div
+        className="min-h-screen text-white"
+        style={{
+          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+          minHeight: '100vh'
+        }}
+      >
+        <Navbar userName={userEmail} backToHome={true} />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading idea details...</p>
+          </div>
+        </div>
       </div>
     );
 
   if (error)
     return (
-      <div style={{ backgroundColor: '#030C18', minHeight: '100vh', color: '#FFF' }}>
-        <Navbar />
-        <p className="text-center mt-10 text-red-500">{error}</p>
+      <div
+        className="min-h-screen text-white"
+        style={{
+          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+          minHeight: '100vh'
+        }}
+      >
+        <Navbar userName={userEmail} backToHome={true} />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <p className="text-red-500 text-lg">{error}</p>
+          </div>
+        </div>
       </div>
     );
 
   return (
-    <div style={{ backgroundColor: '#030C18', minHeight: '100vh' }}>
-      <Navbar />
-      <div className="p-3">
-        <style>
-          {`
-            .idea-header-container {
-              background-color: #1E2A3A;
-              border: 1px solid white;
-              padding: 16px;
-              max-width: 700px;
-              margin: auto;
-              margin-bottom: 10px;
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-end;
-            }
+    <div
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+        minHeight: '100vh'
+      }}
+    >
+      <div className="sticky top-0 z-50">
+        <Navbar userName={userEmail} backToHome={true} />
+      </div>
 
-            .idea-title {
-              font-size: 2rem;
-              font-weight: bold;
-              color: white;
-              text-transform: uppercase;
-            }
+      <div className="px-4 sm:px-6 py-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Title Header with Back Button */}
+          <div className="relative mb-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+              title="Go back"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
 
-            .idea-details-container {
-              max-width: 700px;
-              margin: 12px auto;
-              background-color: #1E2A3A;
-              padding: 16px;
-              border: 1px solid white;
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
-              position: relative;
-            }
-
-            .idea-info {
-              font-size: 16px;
-              color: #D1D5DB;
-            }
-
-            .idea-label {
-              font-weight: bold;
-              color: white;
-            }
-
-            .idea-image {
-              width: 100%;
-              height: auto;
-              max-height: 400px;
-              object-fit: cover;
-              border: 1px solid white;
-              display: block;
-              margin-top: 12px;
-              margin-bottom: 16px;
-            }
-
-            .bottom-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-end;
-              margin-top: 20px;
-              width: 100%;
-            }
-
-            .submitted-by {
-              font-size: 0.75rem;
-              color: #9CA3AF;
-              text-align: right;
-            }
-          `}
-        </style>
-
-        {/* Title Only */}
-        <div className="idea-header-container">
-          <div className="idea-title">{idea?.idea}</div>
-        </div>
-
-        {/* For each event_id */}
-        {idea?.events?.map((event) => (
-          <div key={event.event_id} className="idea-details-container">
-            <p className="idea-info">
-              <span className="idea-label">Event Date:</span>{' '}
-              {new Date(event.event_date).toLocaleDateString()}
-            </p>
-            <p className="idea-info">
-              <span className="idea-label">Description:</span> {idea?.description}
-            </p>
-            <p className="idea-info">
-              <span className="idea-label">Tech Stack:</span> {idea?.technologies}
-            </p>
-            <p className="idea-info">
-              <span className="idea-label">Contributors:</span>{' '}
-              {idea?.contributors ? idea.contributors.split(',').join(', ') : 'None'}
-            </p>
-
-            {idea?.image_url && (
-              <img
-                src={idea.image_url}
-                alt="Uploaded for this idea"
-                className="idea-image"
-              />
-            )}
-
-            <div className="bottom-row">
-              {isAdmin ? (
-                <div>
-                  <ButtonUpload ideaId={idea?.id} />
-                </div>
-              ) : (
-                <div />
-              )}
-              <div className="submitted-by">
-                Submitted by: {idea?.email || 'Unknown'}
-              </div>
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                {idea?.idea}
+              </h1>
+              <p className="text-sm text-gray-400">
+                Submitted by: {idea?.email?.split('@')[0] || 'Unknown'}
+              </p>
             </div>
           </div>
-        ))}
+
+          {/* Event Details Cards */}
+          {idea?.events?.map((event) => (
+            <div
+              key={event.event_id}
+              className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6"
+            >
+              {/* Event Date Badge */}
+              <div className="flex items-center gap-2 mb-6">
+                <span className="bg-blue-600/50 text-blue-200 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-500/50">
+                  📅 {new Date(event.event_date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+
+              {/* Description Section */}
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-3">📝 Description</h3>
+                <div className="text-gray-200 leading-relaxed">
+                  <MarkdownWithPlugins className="prose prose-invert max-w-none">
+                    {idea?.description || 'No description provided'}
+                  </MarkdownWithPlugins>
+                </div>
+              </div>
+
+              {/* Tech Stack Section */}
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-3">⚡ Tech Stack</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(idea?.technologies || 'No tech stack listed')
+                    .split(',')
+                    .map((tech, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-slate-700/50 text-gray-200 px-3 py-1.5 rounded-lg text-sm border border-slate-600/50"
+                      >
+                        {tech.trim()}
+                      </span>
+                    ))}
+                </div>
+              </div>
+
+              {/* Contributors Section */}
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-3">👥 Contributors</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(idea?.contributors
+                    ? idea.contributors.split(',')
+                    : ['None']
+                  ).map((contributor, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50"
+                    >
+                      {contributor.trim().split('@')[0]}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Image Section */}
+              {idea?.image_url && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-white mb-3">🖼️ Project Image</h3>
+                  <img
+                    src={idea.image_url}
+                    alt="Project"
+                    className="w-full h-auto max-h-96 object-cover rounded-lg shadow-lg border border-slate-600/50"
+                  />
+                </div>
+              )}
+
+              {/* Admin Upload Button */}
+              {isAdmin && (
+                <div className="mt-6 pt-6 border-t border-slate-700/50">
+                  <ButtonUpload ideaId={idea?.id} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

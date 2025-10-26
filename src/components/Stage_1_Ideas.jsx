@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getIdeasByEvent, getLikedIdeas, deleteIdea } from "../api/API";
+import { createPortal } from "react-dom";
+import { getIdeasByEvent, deleteIdea } from "../api/API";
 import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
-function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin })  {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,10 +18,14 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin })  {
     const fetchIdeas = async () => {
       try {
         const eventIdeas = await getIdeasByEvent(eventId);
-        const sortedIdeas = eventIdeas.sort((a, b) => {
-          if (a.email === userEmail && b.email !== userEmail) return -1;
-          if (a.email !== userEmail && b.email === userEmail) return 1;
-          return b.likes - a.likes;
+        const sortedIdeas = (eventIdeas || []).sort((a, b) => {
+          const aIsYours = a?.email === userEmail;
+          const bIsYours = b?.email === userEmail;
+          if (aIsYours && !bIsYours) return -1;
+          if (!aIsYours && bIsYours) return 1;
+          const aLikes = typeof a?.likes === "number" ? a.likes : 0;
+          const bLikes = typeof b?.likes === "number" ? b.likes : 0;
+          return bLikes - aLikes;
         });
         setIdeas(sortedIdeas);
       } catch (err) {
@@ -48,9 +53,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin })  {
   };
 
   const handleEditSuccess = (updatedIdea) => {
-    setIdeas((prev) =>
-      prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea))
-    );
+    setIdeas((prev) => prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea)));
     setEditingIdea(null);
   };
 
@@ -58,182 +61,132 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin })  {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <>
-      <style>
-        {`
-          .glowing-border {
-            border: 2px solid white;
-            box-shadow: 0 0 2px white, 0 0 4px white;
-          }
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-2 h-[500px] overflow-y-auto">
+      {ideas.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className="text-6xl mb-4">💡</div>
+          <h3 className="text-xl font-semibold text-white mb-2">No Ideas Yet</h3>
+          <p className="text-gray-400">Be the first to share your innovative concept!</p>
+        </div>
+      ) : (
+        <ul className="space-y-1.5">
+          {ideas.map((idea) => {
+            const isYourIdea = idea?.email === userEmail;
+            const techLabel = Array.isArray(idea?.technologies)
+              ? idea.technologies.join(", ")
+              : (idea?.technologies ?? "No tech listed");
 
-          .idea-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            position: relative;
-          }
-
-          .content-section {
-            width: calc(100% - 100px);
-          }
-
-          .your-idea-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            text-align: right;
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            width: 100px;
-          }
-
-          .your-idea-container {
-            background-color: white;
-            color: black;
-            padding: 2px 5px;
-            font-weight: bold;
-            font-size: 10px;
-            margin-bottom: 4px;
-            border-radius: 1px;
-          }
-
-          .menu-button {
-            position: absolute;
-            top: 45px;
-            right: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            color: white;
-            background: none;
-            border: none;
-            z-index: 10;
-          }
-
-          .dropdown-menu {
-            position: absolute;
-            top: -5px;
-            right: 5px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 70px;
-            padding: 5px 0;
-            z-index: 20;
-            text-align: center;
-          }
-
-          .dropdown-menu button {
-            width: 100%;
-            padding: 6px 0;
-            border: none;
-            background: none;
-            font-size: 12px;
-            color: #333;
-            cursor: pointer;
-          }
-
-          .dropdown-menu button:hover {
-            background-color: #f5f5f5;
-            color: #000;
-          }
-        `}
-      </style>
-
-      <div
-        className="ideas-list max-w-3xl mx-auto mt-3 p-3 space-y-2 border border-white"
-        style={{
-          backgroundColor: "transparent",
-          height: "60vh",
-          overflowY: "auto",
-          overflowX: "hidden",
-        }}
-      >
-        {ideas.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-center text-gray-500">No ideas have been submitted yet.</p>
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {ideas.map((idea) => {
-              const isYourIdea = idea.email === userEmail;
-
-              return (
-                <li
-                  key={idea.id}
-                  className={`relative p-2 shadow ${
-                    isYourIdea ? "glowing-border" : "border-gray-500"
-                  }`}
-                  style={{ backgroundColor: "#1E2A3A" }}
-                >
-                  <div className="idea-container">
-                    <div className="content-section">
-                      <h3
-                        className="text-sm font-bold text-white cursor-pointer"
-                        onClick={() => navigate(`/idea/${idea.id}`)}
-                      >
-                        {idea.idea}
-                      </h3>
-                      <div className="text-sm text-gray-100 mt-1">
-                        <MarkdownWithPlugins className="prose prose-invert prose-sm">
-                          {idea.description}
-                        </MarkdownWithPlugins>
+            return (
+              <li
+                key={idea.id}
+                className={`relative p-2 rounded-md border transition-all duration-300 hover:scale-[1.01] ${
+                  isYourIdea
+                    ? "bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-500/50 shadow-blue-500/20"
+                    : "bg-gradient-to-br from-slate-700/30 to-slate-800/20 border-slate-600/50"
+                } shadow-lg hover:shadow-xl backdrop-blur-sm`}
+              >
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1">
+                    {isYourIdea && (
+                      <div className="inline-flex items-center gap-1 mb-1">
+                        <span className="bg-blue-600/50 text-blue-200 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border border-blue-500/50">
+                          ✨ Your Idea
+                        </span>
                       </div>
-                      <p className="text-xs text-gray-300">
-                        Tech Magic: {idea.technologies}
-                      </p>
+                    )}
+
+                    <h3
+                      className="text-sm font-bold text-white cursor-pointer hover:text-blue-300 transition-colors mb-1 leading-tight"
+                      onClick={() => navigate(`/idea/${idea.id}`)}
+                    >
+                      {idea?.idea}
+                    </h3>
+
+                    <div className="text-xs text-gray-200 mb-1.5 line-clamp-2 leading-tight">
+                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-xs">
+                        {idea?.description ?? ""}
+                      </MarkdownWithPlugins>
                     </div>
 
-                    <div className="your-idea-section">
-                      {isYourIdea && <div className="your-idea-container">Your Idea</div>}
-
-                      <button
-                        className="font-semibold bg-black text-white px-2 py-1 hover:bg-gray-800 transition-all"
-                        onClick={() => navigate(`/idea/${idea.id}`)}
-                        style={{ fontSize: "10px", border: "1px solid #666", borderRadius: "2px" }}
-                      >
-                        View More
-                      </button>
-
-                      {(isYourIdea || isAdmin) && (
-                        <>
-                          <div
-                            className="menu-button"
-                            onClick={() =>
-                              setMenuOpenId(menuOpenId === idea.id ? null : idea.id)
-                            }
-                          >
-                            ...
-                          </div>
-                          {menuOpenId === idea.id && (
-                            <div className="dropdown-menu">
-                              {isYourIdea && <button onClick={() => setEditingIdea(idea)}>Edit</button>}
-                              <button onClick={() => handleDelete(idea.id)}>Delete</button>
-                            </div>
-                          )}
-                        </>
-                      )}
+                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                      <span className="bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-600/50">
+                        ⚡ {techLabel}
+                      </span>
                     </div>
                   </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
 
-        {editingIdea && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
-            <button
-              className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => setEditingIdea(null)}
-            >
-              Close
-            </button>
+                  <div className="flex flex-col justify-between sm:items-end h-full">
+                    <button
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-medium px-2 py-1 rounded hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+                      onClick={() => navigate(`/idea/${idea.id}`)}
+                    >
+                      👁️ View
+                    </button>
+
+                    {(isYourIdea || isAdmin) && (
+                      <div className="relative mt-auto">
+                        <button
+                          className="text-gray-400 hover:text-white transition-colors p-0.5 hover:bg-slate-700/50 rounded"
+                          onClick={() => setMenuOpenId(menuOpenId === idea.id ? null : idea.id)}
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                            />
+                          </svg>
+                        </button>
+
+                        {menuOpenId === idea.id && (
+                          <div className="absolute right-0 top-full mt-0.5 bg-slate-800 border border-slate-600 rounded shadow-xl py-0.5 min-w-[80px] z-20">
+                            {isYourIdea && (
+                              <button
+                                onClick={() => setEditingIdea(idea)}
+                                className="w-full px-2 py-1 text-left text-[10px] text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                              >
+                                ✏️ Edit
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDelete(idea.id)}
+                              className="w-full px-2 py-1 text-left text-[10px] text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {editingIdea && createPortal(
+        <>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: '2147483647', position: 'fixed' }}></div>
+          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: '2147483647', position: 'fixed', isolation: 'isolate' }}>
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+                onClick={() => setEditingIdea(null)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <EditIdea ideaData={editingIdea} onEditSuccess={handleEditSuccess} />
+            </div>
           </div>
-        )}
-      </div>
-    </>
+        </>,
+        document.body
+      )}
+    </div>
   );
 }
 

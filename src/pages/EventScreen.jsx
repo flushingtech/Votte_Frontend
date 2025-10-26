@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getEvents, getEventStage, checkAdminStatus } from '../api/API';
 import Navbar from '../components/Navbar';
 import IdeaSubmission from '../components/IdeaSubmission';
@@ -10,6 +10,7 @@ import ButtonUploadEvent from '../components/ButtonUploadEvent';
 
 function EventScreen() {
   const { eventId } = useParams();
+  const navigate = useNavigate();
   const email = localStorage.getItem('userEmail');
 
   const [isAdmin, setIsAdmin] = useState(false);
@@ -236,15 +237,26 @@ function EventScreen() {
 
           {/* ===== Main centered column (header + ideas) — same width ===== */}
           <div className="relative max-w-5xl mx-auto">
-            {/* Event Header Card */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-4">
-                {event?.title}
-              </h1>
-              <p className="text-lg text-gray-300 text-center mb-6">
+            {/* Event Header Card with Back Button */}
+            <div className="relative mb-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+                title="Go back"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8">
+                <h1 className="text-3xl sm:text-4xl font-bold text-white text-left mb-4">
+                  {event?.title}
+                </h1>
+              <p className="text-lg text-gray-300 text-left mb-6">
                 {new Date(event?.event_date).toLocaleDateString('en-US', {
                   weekday: 'long',
-                  month: 'long', 
+                  month: 'long',
                   day: 'numeric',
                   year: 'numeric'
                 })}
@@ -303,6 +315,7 @@ function EventScreen() {
                     <IdeaSubmission email={email} eventId={eventId} refreshIdeas={refreshIdeas} />
                   )}
                 </div>
+              </div>
               </div>
             </div>
 
