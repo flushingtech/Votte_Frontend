@@ -48,63 +48,97 @@ function Home() {
 
   return (
     <div
-      className="home-page flex flex-col"
-      style={{ backgroundColor: '#030C18', minHeight: '100vh' }}
+      className="home-page flex flex-col min-h-screen"
+      style={{ 
+        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+        minHeight: '100vh' 
+      }}
     >
       <Navbar userName={userName} />
 
-      {/* Flex container for the main content */}
-      <div
-        className="flex flex-col md:flex-row flex-grow mx-auto p-4 gap-4"
-        style={{ maxWidth: '100%', width: '100%' }}
-      >
-        {/* Events Section (Appears first on mobile, left on desktop) */}
-        <div className="w-full md:w-[70%] flex flex-col gap-6">
-          <div
-            className="flex-1 border border-white shadow-sm overflow-y-auto"
-            style={{
-              padding: '0.5rem',
-              width: '100%',
-            }}
-          >
-            {/* Today's Date in bottom right */}
-            <div className="text-white text-xs text-right mt-2" style={{ position: 'absolute', bottom: 10, right: 10 }}>
-              Today is {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-                timeZone: 'America/New_York',
-              })}
-            </div>
+      {/* Welcome Header */}
+      <div className="px-4 sm:px-6 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
+            Welcome back, {userName.split('@')[0] || 'Guest'}! 👋
+          </h1>
+          <p className="text-gray-400 text-sm sm:text-base lg:text-lg">
+            Your innovation dashboard • {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+              timeZone: 'America/New_York',
+            })}
+          </p>
+        </div>
+      </div>
 
-
-            <EventsList today={todayEastern} />
-          </div>
-
-
-          <div
-            className="flex-1 border border-white shadow-sm overflow-y-auto"
-            style={{
-              padding: '0.5rem',
-              width: '100%',
-            }}
-          >
-            <Profile user={{ email: userEmail }} />
+      {/* Main Content Grid */}
+      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative">
+        {/* Left Decorative Lines */}
+        <div className="fixed left-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
+          <div className="space-y-4">
+            <div className="w-16 h-px bg-gradient-to-r from-transparent to-blue-500/50"></div>
+            <div className="w-24 h-px bg-gradient-to-r from-transparent to-purple-500/40"></div>
+            <div className="w-12 h-px bg-gradient-to-r from-transparent to-cyan-500/30"></div>
+            <div className="w-20 h-px bg-gradient-to-r from-transparent to-blue-400/60"></div>
+            <div className="w-8 h-px bg-gradient-to-r from-transparent to-indigo-500/35"></div>
           </div>
         </div>
 
-        {/* Right Section: My Projects (only contributed ideas) */}
-        <div className="w-full md:w-[50%] flex flex-col gap-6">
-          <div
-            className="flex-1 border border-white shadow-sm overflow-y-auto"
-            style={{
-              padding: '0.5rem',
-              width: '100%',
-            }}
-          >
-            <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
+        {/* Right Decorative Lines */}
+        <div className="fixed right-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
+          <div className="space-y-4">
+            <div className="w-16 h-px bg-gradient-to-l from-transparent to-blue-500/50"></div>
+            <div className="w-24 h-px bg-gradient-to-l from-transparent to-purple-500/40"></div>
+            <div className="w-12 h-px bg-gradient-to-l from-transparent to-cyan-500/30"></div>
+            <div className="w-20 h-px bg-gradient-to-l from-transparent to-blue-400/60"></div>
+            <div className="w-8 h-px bg-gradient-to-l from-transparent to-indigo-500/35"></div>
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+          
+          {/* Top Row - Events and Projects */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+            {/* Events Section - Takes up 2 columns on desktop */}
+            <div className="xl:col-span-2">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
+                <div className="h-[400px] sm:h-[450px] lg:h-[500px]">
+                  <EventsList today={todayEastern} />
+                </div>
+              </div>
+            </div>
+
+            {/* Projects Section */}
+            <div className="xl:col-span-1">
+              <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-blue-700/50 shadow-2xl overflow-hidden">
+                <div className="h-[400px] sm:h-[450px] lg:h-[500px]">
+                  <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Row - Profile Section (Full Width) */}
+          <div className="w-full">
+            <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-purple-700/50 shadow-2xl overflow-hidden">
+              <div className="h-[350px] sm:h-[400px] lg:h-[450px] overflow-y-auto">
+                <Profile user={{ email: userEmail }} />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Floating Action Elements */}
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
         </div>
       </div>
     </div>

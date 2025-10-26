@@ -76,22 +76,12 @@ function EventScreen() {
     return (first + second).toUpperCase();
   };
 
-  // Flattened, full-height participants panel (no rounded corners)
+  // Modern participants panel
   const ParticipantsPanel = () => (
-    <aside
-      className="border border-white/40 shadow-lg p-4 w-64 h-full flex flex-col rounded-none"
-      style={{ backgroundColor: '#1E2A3A' }}
-    >
+    <aside className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl border border-purple-700/50 shadow-2xl p-4 w-full max-h-96 lg:max-h-[600px] flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-white text-lg font-bold">Participants</h2>
-        <span
-          className="px-2 py-1 text-xs font-semibold"
-          style={{
-            color: '#28A745',
-            backgroundColor: '#2A2F3C',
-            boxShadow: '0 0 5px #28A745, 0 0 10px #28A745',
-          }}
-        >
+        <span className="bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/50">
           {participants.length}
         </span>
       </div>
@@ -106,31 +96,16 @@ function EventScreen() {
             return (
               <li
                 key={p}
-                className="flex items-center justify-between gap-3 px-3 py-2"
-                style={{ backgroundColor: '#2A2F3C' }}
+                className="flex items-center justify-between gap-3 px-3 py-3 bg-purple-800/20 rounded-lg border border-purple-700/30 hover:bg-purple-800/30 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className="flex items-center justify-center w-8 h-8 text-sm font-bold shrink-0"
-                    style={{
-                      backgroundColor: '#0F1724',
-                      color: 'white',
-                      boxShadow: '0 0 6px rgba(255,255,255,0.15)',
-                    }}
-                  >
+                  <div className="flex items-center justify-center w-9 h-9 text-sm font-bold shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg text-white shadow-lg">
                     {getInitials(p)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white text-sm truncate">{uname}</p>
+                    <p className="text-white text-sm font-medium truncate">{uname}</p>
                     {isYou && (
-                      <span
-                        className="text-[11px] font-semibold px-1.5 py-0.5"
-                        style={{
-                          color: '#00bfff',
-                          backgroundColor: '#182030',
-                          boxShadow: '0 0 5px #fff, 0 0 5px #fff',
-                        }}
-                      >
+                      <span className="bg-blue-600/50 text-blue-200 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-500/50">
                         You
                       </span>
                     )}
@@ -138,12 +113,7 @@ function EventScreen() {
                 </div>
                 {isYou && (
                   <span
-                    className="text-xs font-bold px-2 py-1"
-                    style={{
-                      color: '#28a745',
-                      backgroundColor: '#263044',
-                      boxShadow: '0 0 5px #28a745, 0 0 10px #28a745',
-                    }}
+                    className="bg-green-600/50 text-green-200 text-xs font-bold px-2 py-1 rounded-lg border border-green-500/50"
                     title="Checked in"
                   >
                     ✓
@@ -159,30 +129,56 @@ function EventScreen() {
 
   if (loading) {
     return (
-      <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
+      <div 
+        className="min-h-screen text-white"
+        style={{ 
+          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+          minHeight: '100vh' 
+        }}
+      >
         <Navbar userName={email} backToHome={true} />
-        <p className="text-center mt-10 text-white">Loading event details...</p>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading event details...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ backgroundColor: '#030C18', height: '100vh', overflow: 'hidden' }}>
+      <div 
+        className="min-h-screen text-white"
+        style={{ 
+          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+          minHeight: '100vh' 
+        }}
+      >
         <Navbar userName={email} backToHome={true} />
-        <p className="text-center mt-10 text-red-500">{error}</p>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <p className="text-red-500 text-lg">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ backgroundColor: '#030C18', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{ 
+        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+        minHeight: '100vh' 
+      }}
+    >
       {/* Fixed Navbar */}
-      <div style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
-        <Navbar userName={email} backToHome={true} />
-      </div>
+      <Navbar userName={email} backToHome={true} />
 
-      <div style={{ flex: 1, overflowY: 'auto', marginTop: '60px' }}>
+      <div className="flex-1 px-4 sm:px-6 py-6">
         <div className="p-3">
           <style>
             {`
@@ -239,50 +235,67 @@ function EventScreen() {
           </style>
 
           {/* ===== Main centered column (header + ideas) — same width ===== */}
-          <div className="relative max-w-3xl mx-auto">
+          <div className="relative max-w-5xl mx-auto">
             {/* Event Header Card */}
-            <div
-              className="p-4 border border-white shadow-md"
-              style={{ backgroundColor: '#1E2A3A', position: 'relative' }}
-            >
-              <h1 className="event-title">{event?.title}</h1>
-              <p className="text-lg font-bold text-left text-gray-400 mb-2">
-                {new Date(event?.event_date).toLocaleDateString()}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-4">
+                {event?.title}
+              </h1>
+              <p className="text-lg text-gray-300 text-center mb-6">
+                {new Date(event?.event_date).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
               </p>
 
               {event?.image_url && (
-                <img
-                  src={event.image_url}
-                  alt="Event Banner"
-                  style={{
-                    width: '100%',
-                    height: '200px',
-                    objectFit: 'cover',
-                    marginBottom: '1rem',
-                  }}
-                />
+                <div className="mb-6">
+                  <img
+                    src={event.image_url}
+                    alt="Event Banner"
+                    className="w-full h-48 sm:h-56 object-cover rounded-lg shadow-lg"
+                  />
+                </div>
               )}
 
-              <div className="submissions-container">
-                <div className="submission-left">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   {eventStage === '1' && subStage === '1' && (
-                    <p className="submissions-open">Submissions Open</p>
+                    <span className="bg-blue-600/50 text-blue-200 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-500/50">
+                      📝 Submissions Open
+                    </span>
                   )}
                   {eventStage === '1' && subStage === '2' && (
-                    <p className="submissions-open locked">🔒 Submissions Locked</p>
+                    <span className="bg-orange-600/50 text-orange-200 px-4 py-2 rounded-lg font-semibold text-sm border border-orange-500/50">
+                      🔒 Submissions Locked
+                    </span>
                   )}
-                  {eventStage === '2' && <p className="votte-time">Votte Time</p>}
-                  {eventStage === '3' && <p className="our-winners">Our Winners!</p>}
+                  {eventStage === '2' && (
+                    <span className="bg-green-600/50 text-green-200 px-4 py-2 rounded-lg font-semibold text-sm border border-green-500/50">
+                      🗳️ Voting Time
+                    </span>
+                  )}
+                  {eventStage === '3' && (
+                    <span className="bg-yellow-600/50 text-yellow-200 px-4 py-2 rounded-lg font-semibold text-sm border border-yellow-500/50">
+                      🏆 Our Winners!
+                    </span>
+                  )}
 
                   {(event?.checked_in || '')
                     .split(',')
                     .map((e) => e.trim())
-                    .includes(email) && <span className="checked-in-badge">✅ CHECKED IN</span>}
+                    .includes(email) && (
+                    <span className="bg-emerald-600/50 text-emerald-200 px-4 py-2 rounded-lg font-semibold text-sm border border-emerald-500/50">
+                      ✅ Checked In
+                    </span>
+                  )}
                 </div>
 
-                <div className="add-idea-button-container">
+                <div className="flex flex-col gap-3">
                   {isAdmin && (
-                    <div className="event-upload-wrapper">
+                    <div className="transform scale-90">
                       <ButtonUploadEvent eventId={eventId} />
                     </div>
                   )}
@@ -293,34 +306,31 @@ function EventScreen() {
               </div>
             </div>
 
-            {/* ===== Ideas + permanently LEFT-HANGING Participants (same height) ===== */}
-            <div className="mt-3 mb-8 relative">
-              {/* LEFT hanging panel (desktop) – full height of the ideas wrapper */}
-              <div className="hidden md:block absolute right-full top-0 mr-3 z-20 h-full">
-                <div className="w-64 h-full">
-                  <ParticipantsPanel />
-                </div>
+            {/* ===== Ideas + Participants Layout ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Ideas column - takes 3 columns on large screens */}
+              <div className="lg:col-span-3">
+                {eventStage === '1' ? (
+                  <Stage_1_Ideas
+                    key={ideasRefreshKey}
+                    eventId={eventId}
+                    refreshIdeas={refreshIdeas}
+                    isAdmin={isAdmin}
+                  />
+                ) : eventStage === '2' ? (
+                  <Stage_2 key={ideasRefreshKey} eventId={eventId} />
+                ) : eventStage === '3' ? (
+                  <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
+                ) : (
+                  <p className="text-white text-center">Unknown event stage: {eventStage}</p>
+                )}
               </div>
 
-              {/* Ideas column (centered; same width as header) */}
-              {eventStage === '1' ? (
-                <Stage_1_Ideas
-                  key={ideasRefreshKey}
-                  eventId={eventId}
-                  refreshIdeas={refreshIdeas}
-                  isAdmin={isAdmin}
-                />
-              ) : eventStage === '2' ? (
-                <Stage_2 key={ideasRefreshKey} eventId={eventId} />
-              ) : eventStage === '3' ? (
-                <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
-              ) : (
-                <p className="text-white text-center">Unknown event stage: {eventStage}</p>
-              )}
-
-              {/* Mobile: participants stacked below */}
-              <div className="md:hidden mt-3">
-                <ParticipantsPanel />
+              {/* Participants panel - takes 1 column on large screens, full width on smaller */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-6" style={{ zIndex: 10 }}>
+                  <ParticipantsPanel />
+                </div>
               </div>
             </div>
             {/* ===== /Ideas + permanently LEFT-HANGING Participants ===== */}

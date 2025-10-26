@@ -9,6 +9,7 @@ import IdeasForEvent from './components/admin/IdeasForEvent'; // Admin Event Scr
 import IdeaScreen from './components/IdeaScreen';
 import Profile from './components/Profile';
 import PastEvents from './components/PastEvents';
+import UpcomingEvents from './components/UpcomingEvents';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -61,6 +62,11 @@ function App() {
           <Route
             path="/past-events"
             element={<PastEvents />}
+          />
+
+          <Route
+            path="/upcoming-events"
+            element={<UpcomingEvents />}
           />
 
           {/* Admin routes */}

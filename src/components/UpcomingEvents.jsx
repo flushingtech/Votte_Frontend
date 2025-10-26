@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getEvents } from '../api/API';
 import Navbar from './Navbar';
 
-function PastEvents() {
+function UpcomingEvents() {
   const [events, setEvents] = useState([]);
   const [dateEvents, setDateEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
@@ -20,37 +20,38 @@ function PastEvents() {
   const todayEastern = getEasternDate();
 
   useEffect(() => {
-    const fetchPastEvents = async () => {
+    const fetchUpcomingEvents = async () => {
       try {
         const all = await getEvents();
-        const past = all.filter(e => {
+        const upcoming = all.filter(e => {
           const eventDate = new Date(new Date(e.event_date).toLocaleString('en-US', { timeZone: 'America/New_York' }));
           eventDate.setHours(0, 0, 0, 0);
-          return eventDate < todayEastern;
+          return eventDate >= todayEastern;
         });
 
         const map = {};
-        past.forEach(event => {
+        upcoming.forEach(event => {
           const date = new Date(event.event_date).toDateString();
           if (!map[date]) map[date] = [];
           map[date].push(event);
         });
 
-        setEvents(past.reverse()); // Show most recent first
+        setEvents(upcoming);
         setDateEvents(map);
       } catch (err) {
-        console.error('Error loading past events:', err);
+        console.error('Error loading upcoming events:', err);
       }
     };
 
-    fetchPastEvents();
+    fetchUpcomingEvents();
   }, []);
 
   const tileClassName = ({ date }) => {
     const key = date.toDateString();
+    const today = new Date().toDateString();
     
     if (dateEvents[key]) {
-      return 'highlighted-date-past';
+      return key === today ? 'highlighted-date-today' : 'highlighted-date-upcoming';
     }
     return null;
   };
@@ -73,15 +74,15 @@ function PastEvents() {
       <div className="px-6 py-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="bg-orange-500 p-3 rounded-xl">
+            <div className="bg-blue-500 p-3 rounded-xl">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold">Past Events</h1>
+            <h1 className="text-4xl font-bold">Upcoming Events</h1>
           </div>
           <p className="text-gray-400 text-lg">
-            Explore event history and memories • {events.length} events completed
+            Explore future events and mark your calendar • {events.length} events scheduled
           </p>
         </div>
       </div>
@@ -100,7 +101,7 @@ function PastEvents() {
                   onClickDay={handleDateClick}
                   tileClassName={tileClassName}
                   className="rounded-lg shadow-lg p-4 bg-white text-black"
-                  maxDate={new Date()}
+                  minDate={new Date()}
                 />
               </div>
 
@@ -112,8 +113,15 @@ function PastEvents() {
                     transition: all 0.2s ease !important;
                   }
 
-                  .highlighted-date-past {
-                    background: linear-gradient(135deg, #F97316, #EA580C) !important;
+                  .highlighted-date-today {
+                    background: linear-gradient(135deg, #10B981, #059669) !important;
+                    color: white !important;
+                    font-weight: bold;
+                    animation: pulse 2s infinite;
+                  }
+
+                  .highlighted-date-upcoming {
+                    background: linear-gradient(135deg, #3B82F6, #1D4ED8) !important;
                     color: white !important;
                     font-weight: bold;
                   }
@@ -126,43 +134,52 @@ function PastEvents() {
                   .react-calendar__navigation button {
                     color: black !important;
                   }
+
+                  @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                  }
                 `}
               </style>
             </div>
 
             {/* Events List Section */}
             <div className="space-y-6">
-              <div className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-2xl border border-orange-700/50 shadow-2xl overflow-hidden">
-                <div className="p-4 bg-gradient-to-r from-orange-700/50 to-red-700/50 border-b border-orange-600/50">
-                  <h2 className="text-xl font-bold">All Past Events</h2>
+              <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-2xl border border-blue-700/50 shadow-2xl overflow-hidden">
+                <div className="p-4 bg-gradient-to-r from-blue-700/50 to-indigo-700/50 border-b border-blue-600/50">
+                  <h2 className="text-xl font-bold">All Upcoming Events</h2>
                 </div>
                 
                 <div className="p-4 max-h-[400px] overflow-y-auto">
                   {events.length === 0 ? (
                     <div className="text-center py-8">
-                      <div className="text-6xl mb-4">📚</div>
-                      <h3 className="text-lg font-semibold mb-2">No past events</h3>
-                      <p className="text-gray-400">Event history will appear here!</p>
+                      <div className="text-6xl mb-4">📅</div>
+                      <h3 className="text-lg font-semibold mb-2">No upcoming events</h3>
+                      <p className="text-gray-400">Check back later for new events!</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {events.map(event => {
                         const eventDate = new Date(event.event_date);
-                        const daysAgo = Math.floor((new Date() - eventDate) / (1000 * 60 * 60 * 24));
+                        const isToday = eventDate.toDateString() === new Date().toDateString();
                         
                         return (
                           <div
                             key={event.id}
-                            className="p-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-gradient-to-r from-white/5 to-gray-100/5 border-orange-500/50 hover:border-orange-400"
+                            className={`p-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer ${
+                              isToday 
+                                ? 'bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500 ring-2 ring-green-400/50' 
+                                : 'bg-gradient-to-r from-white/5 to-gray-100/5 border-blue-500/50 hover:border-blue-400'
+                            }`}
                             onClick={() => navigate(`/event/${event.id}`)}
                           >
-                            <div className="flex items-center space-x-2 mb-3">
-                              <div className="bg-orange-500/20 border border-orange-400/50 text-orange-300 text-xs font-bold px-3 py-1 rounded-full">
-                                {daysAgo === 0 ? 'Today' : 
-                                 daysAgo === 1 ? 'Yesterday' : 
-                                 `${daysAgo} days ago`}
+                            {isToday && (
+                              <div className="flex items-center space-x-2 mb-3">
+                                <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                                  🔥 LIVE TODAY
+                                </div>
                               </div>
-                            </div>
+                            )}
                             
                             <h3 className="text-lg font-bold text-white mb-2">{event.title}</h3>
                             <div className="flex items-center space-x-4 text-sm text-gray-300">
@@ -187,11 +204,11 @@ function PastEvents() {
                                 event.stage === 3 ? 'bg-green-600/50 text-green-200' :
                                 'bg-gray-600/50 text-gray-200'
                               }`}>
-                                {event.stage === 3 ? 'Completed' : `Stage ${event.stage || 'TBD'}`}
+                                Stage {event.stage || 'TBD'}
                               </span>
                               
-                              <button className="bg-orange-600 hover:bg-orange-700 text-white text-sm px-4 py-2 rounded-lg transition-colors">
-                                View Results →
+                              <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                                View Event →
                               </button>
                             </div>
                           </div>
@@ -238,4 +255,4 @@ function PastEvents() {
   );
 }
 
-export default PastEvents;
+export default UpcomingEvents;

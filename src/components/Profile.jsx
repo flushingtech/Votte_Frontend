@@ -40,59 +40,78 @@ const Profile = ({ user }) => {
   }, [user?.email]);
 
   const tileStyle =
-    'flex flex-col items-center justify-center bg-[#10141B] border border-gray-600 p-4 w-[150px] h-[110px]';
+    'flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-600/50 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 hover:border-slate-500';
 
   return (
-    <div className="profile-container p-4 text-white">
-      <div className="text-center text-xl font-bold mb-4">My Profile</div>
+    <div className="profile-container p-6 text-white">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="bg-purple-500 p-2 rounded-lg">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold">My Profile</h2>
+      </div>
 
       {loading ? (
         <p className="text-center text-sm">Loading your stats...</p>
       ) : (
         <>
-          <div className="flex gap-2 justify-center flex-wrap md:flex-nowrap overflow-x-auto pb-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
             <div className={tileStyle}>
-              <span className="text-2xl">💡</span>
-              <div className="mt-2 text-sm">
-                <span className="font-bold">{contributedCount}</span> Ideas Submitted
+              <div className="text-3xl mb-2">💡</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-400">{contributedCount}</div>
+                <div className="text-xs text-gray-300">Ideas Submitted</div>
               </div>
             </div>
 
             <div className={tileStyle}>
-              <span className="text-2xl">🗳️</span>
-              <div className="mt-2 text-sm">
-                <span className="font-bold">{totalVotes}</span> Votes Received
+              <div className="text-3xl mb-2">🗳️</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400">{totalVotes}</div>
+                <div className="text-xs text-gray-300">Votes Received</div>
               </div>
             </div>
 
             <div className={tileStyle}>
-              <span className="text-2xl">🏆</span>
-              <div className="mt-2 text-sm">
-                <span className="font-bold">{hackathonWins}</span> Hackathon Wins
+              <div className="text-3xl mb-2">🏆</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-400">{hackathonWins}</div>
+                <div className="text-xs text-gray-300">Hackathon Wins</div>
+                {hackathonWins > 0 && (
+                  <button
+                    className="text-xs text-purple-300 hover:text-purple-200 underline mt-1 transition-colors"
+                    onClick={() => setShowWins(prev => !prev)}
+                  >
+                    {showWins ? 'Hide' : 'View Details'}
+                  </button>
+                )}
               </div>
-              {hackathonWins > 0 && (
-                <button
-                  className="text-xs text-blue-300 underline mt-1"
-                  onClick={() => setShowWins(prev => !prev)}
-                >
-                  {showWins ? 'Hide' : 'View'}
-                </button>
-              )}
             </div>
 
-            <div className={tileStyle}>
-              <span className="text-2xl">📅</span>
-              <div className="mt-2 text-sm text-gray-400 font-medium">Coming Soon – Joined On</div>
+            <div className={`${tileStyle} opacity-60 cursor-not-allowed`}>
+              <div className="text-3xl mb-2">📅</div>
+              <div className="text-center">
+                <div className="text-sm text-gray-400">Coming Soon</div>
+                <div className="text-xs text-gray-500">Join Date</div>
+              </div>
             </div>
 
-            <div className={tileStyle}>
-              <span className="text-2xl">🔥</span>
-              <div className="mt-2 text-sm text-gray-400 font-medium">Coming Soon – Streak</div>
+            <div className={`${tileStyle} opacity-60 cursor-not-allowed`}>
+              <div className="text-3xl mb-2">🔥</div>
+              <div className="text-center">
+                <div className="text-sm text-gray-400">Coming Soon</div>
+                <div className="text-xs text-gray-500">Streak</div>
+              </div>
             </div>
 
-            <div className={tileStyle}>
-              <span className="text-2xl">📦</span>
-              <div className="mt-2 text-sm text-gray-400 font-medium">Coming Soon – Projects</div>
+            <div className={`${tileStyle} opacity-60 cursor-not-allowed`}>
+              <div className="text-3xl mb-2">📊</div>
+              <div className="text-center">
+                <div className="text-sm text-gray-400">Coming Soon</div>
+                <div className="text-xs text-gray-500">Analytics</div>
+              </div>
             </div>
           </div>
 
