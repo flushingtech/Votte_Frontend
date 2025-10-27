@@ -90,7 +90,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
       ) : (
         <button
           onClick={() => setIsFormVisible(true)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 font-semibold rounded-xl border border-blue-500/50 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-blue-500/50 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
         >
           💡 Add New Idea
         </button>
