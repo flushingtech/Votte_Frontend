@@ -61,15 +61,15 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-2 h-[500px] overflow-y-auto">
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-1.5 sm:p-2 h-[500px] overflow-y-auto">
       {ideas.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center">
-          <div className="text-6xl mb-4">💡</div>
-          <h3 className="text-xl font-semibold text-white mb-2">No Ideas Yet</h3>
-          <p className="text-gray-400">Be the first to share your innovative concept!</p>
+          <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">💡</div>
+          <h3 className="text-base sm:text-xl font-semibold text-white mb-1 sm:mb-2">No Ideas Yet</h3>
+          <p className="text-sm sm:text-base text-gray-400">Be the first to share your innovative concept!</p>
         </div>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="space-y-1 sm:space-y-1.5">
           {ideas.map((idea) => {
             const isYourIdea = idea?.email === userEmail;
             const techLabel = Array.isArray(idea?.technologies)
@@ -79,57 +79,57 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
             return (
               <li
                 key={idea.id}
-                className={`relative p-2 rounded-md border transition-all duration-300 hover:scale-[1.01] ${
+                className={`relative p-1.5 sm:p-2 rounded-md border transition-all duration-300 hover:scale-[1.01] ${
                   isYourIdea
                     ? "bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-500/50 shadow-blue-500/20"
                     : "bg-gradient-to-br from-slate-700/30 to-slate-800/20 border-slate-600/50"
                 } shadow-lg hover:shadow-xl backdrop-blur-sm`}
               >
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
+                  <div className="flex-1 min-w-0">
                     {isYourIdea && (
-                      <div className="inline-flex items-center gap-1 mb-1">
-                        <span className="bg-blue-600/50 text-blue-200 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border border-blue-500/50">
+                      <div className="inline-flex items-center gap-1 mb-0.5 sm:mb-1">
+                        <span className="bg-blue-600/50 text-blue-200 text-[9px] sm:text-[10px] font-semibold px-1 sm:px-1.5 py-0.5 rounded-full border border-blue-500/50">
                           ✨ Your Idea
                         </span>
                       </div>
                     )}
 
                     <h3
-                      className="text-sm font-bold text-white cursor-pointer hover:text-blue-300 transition-colors mb-1 leading-tight"
+                      className="text-xs sm:text-sm font-bold text-white cursor-pointer hover:text-blue-300 transition-colors mb-0.5 sm:mb-1 leading-tight"
                       onClick={() => navigate(`/idea/${idea.id}`)}
                     >
                       {idea?.idea}
                     </h3>
 
-                    <div className="text-xs text-gray-200 mb-1.5 line-clamp-2 leading-tight">
-                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-xs">
+                    <div className="text-[10px] sm:text-xs text-gray-200 mb-1 sm:mb-1.5 line-clamp-2 leading-tight">
+                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-[10px] sm:text-xs">
                         {idea?.description ?? ""}
                       </MarkdownWithPlugins>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                      <span className="bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-600/50">
+                    <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-400">
+                      <span className="bg-slate-700/50 px-1 sm:px-1.5 py-0.5 rounded border border-slate-600/50">
                         ⚡ {techLabel}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col justify-between sm:items-end h-full">
+                  <div className="flex flex-row sm:flex-col justify-between sm:items-end gap-1 sm:h-full">
                     <button
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-medium px-2 py-1 rounded hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
                       onClick={() => navigate(`/idea/${idea.id}`)}
                     >
                       👁️ View
                     </button>
 
                     {(isYourIdea || isAdmin) && (
-                      <div className="relative mt-auto">
+                      <div className="relative sm:mt-auto">
                         <button
                           className="text-gray-400 hover:text-white transition-colors p-0.5 hover:bg-slate-700/50 rounded"
                           onClick={() => setMenuOpenId(menuOpenId === idea.id ? null : idea.id)}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -144,14 +144,14 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
                             {isYourIdea && (
                               <button
                                 onClick={() => setEditingIdea(idea)}
-                                className="w-full px-2 py-1 text-left text-[10px] text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                className="w-full px-2 py-1 text-left text-[9px] sm:text-[10px] text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
                               >
                                 ✏️ Edit
                               </button>
                             )}
                             <button
                               onClick={() => handleDelete(idea.id)}
-                              className="w-full px-2 py-1 text-left text-[10px] text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
+                              className="w-full px-2 py-1 text-left text-[9px] sm:text-[10px] text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
                             >
                               🗑️ Delete
                             </button>

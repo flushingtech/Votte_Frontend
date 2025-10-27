@@ -274,13 +274,13 @@ function EventScreen() {
     };
 
     return (
-      <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-xl border border-orange-700/50 shadow-2xl p-4 flex flex-col gap-3 w-full">
+      <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-xl border border-orange-700/50 shadow-2xl p-2 sm:p-3 lg:p-4 flex flex-col gap-2 lg:gap-3 w-full">
         {/* Stacked, no-wrap header */}
-        <div className="flex flex-col items-start mb-2">
-          <h2 className="text-white text-base font-bold whitespace-nowrap mb-1">
+        <div className="flex flex-col items-start mb-1 lg:mb-2">
+          <h2 className="text-white text-sm sm:text-base font-bold whitespace-nowrap mb-1">
             ⚙️ Admin Controls
           </h2>
-          <span className="bg-orange-600/50 text-orange-200 px-3 py-1 rounded-full text-xs font-bold border border-orange-500/50">
+          <span className="bg-orange-600/50 text-orange-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-orange-500/50">
             Stage {eventStage}{eventStage === "1" && `.${subStage}`}
           </span>
         </div>
@@ -289,9 +289,9 @@ function EventScreen() {
         {eventStage === "1" && subStage === "1" && (
           <button
             onClick={handleToggleSubStage}
-            className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-sm"
+            className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
           >
-            🔒 Lock Submissions
+            🔒 Lock
           </button>
         )}
 
@@ -300,15 +300,15 @@ function EventScreen() {
           <>
             <button
               onClick={handleStartVoting}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-sm"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
             >
-              🗳️ Start Voting
+              🗳️ Voting
             </button>
             <button
               onClick={handleBackToSubmissionsOpen}
-              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
+              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
             >
-              🔓 Unlock Submissions
+              🔓 Unlock
             </button>
           </>
         )}
@@ -318,15 +318,15 @@ function EventScreen() {
           <>
             <button
               onClick={handleShowResults}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg text-sm"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
             >
-              🏆 Show Results
+              🏆 Results
             </button>
             <button
               onClick={handleBackToSubmissionsOpen}
-              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
+              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
             >
-              ← Back to Submissions
+              ← Back
             </button>
           </>
         )}
@@ -335,15 +335,15 @@ function EventScreen() {
         {eventStage === "3" && (
           <button
             onClick={handleBackToVoting}
-            className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-sm"
+            className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
           >
-            ← Back to Voting
+            ← Back
           </button>
         )}
 
         {/* Divider + Upload */}
-        <hr className="border-slate-600/40 my-2" />
-        <div className="transform scale-95">
+        <hr className="border-slate-600/40 my-1 lg:my-2" />
+        <div className="transform scale-90 sm:scale-95">
           <ButtonUploadEvent eventId={eventId} />
         </div>
       </aside>
@@ -374,15 +374,15 @@ function EventScreen() {
     >
       <Navbar userName={email} backToHome={true} />
 
-      <div className="flex-1 px-4 sm:px-6 py-6">
+      <div className="flex-1 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
         <div className="relative max-w-6xl mx-auto">
           {/* ONE GRID: top-aligned header+admin (no extra gap), then ideas row */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 items-start">
             {/* HEADER (cols 1–4) */}
             <div className="lg:col-span-4 relative">
               <button
                 onClick={() => navigate(-1)}
-                className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+                className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg hidden lg:block"
                 title="Go back"
               >
                 <svg
@@ -400,11 +400,11 @@ function EventScreen() {
                 </svg>
               </button>
 
-              <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 overflow-hidden">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-slate-700/50 shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden">
+                <h1 className="text-sm sm:text-lg lg:text-2xl xl:text-3xl font-bold text-white mb-1 sm:mb-2 lg:mb-3">
                   {event?.title}
                 </h1>
-                <p className="text-gray-300 text-lg mb-6">
+                <p className="text-gray-300 text-xs sm:text-sm lg:text-base xl:text-lg mb-3 sm:mb-4 lg:mb-6">
                   {new Date(event?.event_date).toLocaleDateString("en-US", {
                     weekday: "long",
                     month: "long",
@@ -414,33 +414,33 @@ function EventScreen() {
                 </p>
 
                 {event?.image_url && (
-                  <div className="mb-6">
+                  <div className="mb-3 sm:mb-4 lg:mb-6">
                     <img
                       src={event.image_url}
                       alt="Event Banner"
-                      className="w-full h-56 object-cover rounded-lg shadow-lg"
+                      className="w-full h-32 sm:h-40 lg:h-56 object-cover rounded-lg shadow-lg"
                     />
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center gap-3 mb-12">
+                <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-6 sm:mb-8 lg:mb-12">
                   {eventStage === "1" && subStage === "1" && (
-                    <span className="bg-blue-600/50 text-blue-200 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-500/50">
+                    <span className="bg-blue-600/50 text-blue-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-blue-500/50">
                       📝 Submissions Open
                     </span>
                   )}
                   {eventStage === "1" && subStage === "2" && (
-                    <span className="bg-orange-600/50 text-orange-200 px-4 py-2 rounded-lg font-semibold text-sm border border-orange-500/50">
+                    <span className="bg-orange-600/50 text-orange-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-orange-500/50">
                       🔒 Submissions Locked
                     </span>
                   )}
                   {eventStage === "2" && (
-                    <span className="bg-green-600/50 text-green-200 px-4 py-2 rounded-lg font-semibold text-sm border border-green-500/50">
+                    <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
                       🗳️ Voting Time
                     </span>
                   )}
                   {eventStage === "3" && (
-                    <span className="bg-yellow-600/50 text-yellow-200 px-4 py-2 rounded-lg font-semibold text-sm border border-yellow-500/50">
+                    <span className="bg-yellow-600/50 text-yellow-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-yellow-500/50">
                       🏆 Our Winners!
                     </span>
                   )}
@@ -448,7 +448,7 @@ function EventScreen() {
                     .split(",")
                     .map((e) => e.trim())
                     .includes(email) && (
-                      <span className="bg-emerald-600/50 text-emerald-200 px-4 py-2 rounded-lg font-semibold text-sm border border-emerald-500/50">
+                      <span className="bg-emerald-600/50 text-emerald-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-emerald-500/50">
                         ✅ Checked In
                       </span>
                     )}
