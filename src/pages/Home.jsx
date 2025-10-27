@@ -48,21 +48,20 @@ function Home() {
 
   return (
     <div
-      className="home-page flex flex-col min-h-screen"
-      style={{ 
+      className="home-page flex flex-col h-screen overflow-hidden"
+      style={{
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
-        minHeight: '100vh' 
       }}
     >
       <Navbar userName={userName} />
 
       {/* Welcome Header */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6">
+      <div className="px-4 sm:px-6 py-2 sm:py-3 flex-shrink-0">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">
             Welcome back, {userName.split('@')[0] || 'Guest'}! 👋
           </h1>
-          <p className="text-gray-400 text-sm sm:text-base lg:text-lg">
+          <p className="text-gray-400 text-xs sm:text-sm">
             Your innovation dashboard • {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'long',
@@ -75,7 +74,7 @@ function Home() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative">
+      <div className="flex-1 px-4 sm:px-6 pb-4 relative overflow-hidden">
         {/* Left Decorative Lines */}
         <div className="fixed left-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
           <div className="space-y-4">
@@ -98,35 +97,29 @@ function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-          
+        <div className="max-w-7xl mx-auto h-full flex flex-col gap-3 sm:gap-4">
+
           {/* Top Row - Events and Projects */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4 flex-[3]">
             {/* Events Section - Takes up 2 columns on desktop */}
-            <div className="xl:col-span-2">
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
-                <div className="h-[400px] sm:h-[450px] lg:h-[500px]">
-                  <EventsList today={todayEastern} />
-                </div>
+            <div className="xl:col-span-2 h-full">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl h-full overflow-hidden">
+                <EventsList today={todayEastern} />
               </div>
             </div>
 
             {/* Projects Section */}
-            <div className="xl:col-span-1">
-              <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-blue-700/50 shadow-2xl overflow-hidden">
-                <div className="h-[400px] sm:h-[450px] lg:h-[500px]">
-                  <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
-                </div>
+            <div className="xl:col-span-1 h-full">
+              <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl border border-blue-700/50 shadow-2xl h-full overflow-hidden">
+                <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
               </div>
             </div>
           </div>
 
           {/* Bottom Row - Profile Section (Full Width) */}
-          <div className="w-full">
-            <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-purple-700/50 shadow-2xl overflow-hidden">
-              <div className="h-[350px] sm:h-[400px] lg:h-[450px] overflow-y-auto">
-                <Profile user={{ email: userEmail }} />
-              </div>
+          <div className="w-full flex-[2]">
+            <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl border border-purple-700/50 shadow-2xl h-full overflow-hidden">
+              <Profile user={{ email: userEmail }} />
             </div>
           </div>
 
