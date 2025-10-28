@@ -48,7 +48,7 @@ function Home() {
 
   return (
     <div
-      className="home-page flex flex-col min-h-screen lg:h-screen lg:overflow-hidden"
+      className="home-page flex flex-col min-h-screen"
       style={{
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}
@@ -74,7 +74,7 @@ function Home() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative lg:overflow-hidden">
+      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative">
         {/* Left Decorative Lines */}
         <div className="fixed left-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
           <div className="space-y-4">
