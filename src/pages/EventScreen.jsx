@@ -169,7 +169,7 @@ function EventScreen() {
         const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ current_sub_stage: newSubStage })
+          body: JSON.stringify({ sub_stage: newSubStage })
         });
 
         const data = await apiResponse.json();
@@ -236,7 +236,7 @@ function EventScreen() {
         const subStageResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ current_sub_stage: "1" })
+          body: JSON.stringify({ sub_stage: "1" })
         });
         const subStageData = await subStageResponse.json();
         const updatedEventSubStage = subStageData.event || subStageData;
@@ -485,6 +485,8 @@ function EventScreen() {
                   eventId={eventId}
                   refreshIdeas={refreshIdeas}
                   isAdmin={isAdmin}
+                  eventStage={eventStage}
+                  eventSubStage={subStage}
                 />
               ) : eventStage === "2" ? (
                 <Stage_2 key={ideasRefreshKey} eventId={eventId} />

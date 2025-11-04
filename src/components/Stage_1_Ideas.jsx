@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { getIdeasByEvent, deleteIdea } from "../api/API";
+import { getIdeasByEvent, deleteIdea, setIdeaStage } from "../api/API";
 import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
-function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1" }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -55,6 +55,27 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
   const handleEditSuccess = (updatedIdea) => {
     setIdeas((prev) => prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea)));
     setEditingIdea(null);
+  };
+
+  const handleToggleIdeaSelection = async (ideaId, currentStage) => {
+    if (eventStage !== "1" || eventSubStage !== "2") {
+      alert("You can only select ideas when the event is in Locked Submissions (Stage 1.2).");
+      return;
+    }
+
+    const newStage = currentStage === 2 ? 1 : 2;
+
+    try {
+      const updatedIdea = await setIdeaStage(ideaId, newStage);
+      setIdeas((prevIdeas) =>
+        prevIdeas.map((idea) =>
+          idea.id === ideaId ? updatedIdea : idea
+        )
+      );
+    } catch (error) {
+      console.error("Error updating idea stage:", error);
+      alert("Failed to update idea stage.");
+    }
   };
 
   if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
@@ -112,6 +133,11 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
                       <span className="bg-slate-700/50 px-1 sm:px-1.5 py-0.5 rounded border border-slate-600/50">
                         ⚡ {techLabel}
                       </span>
+                      {idea.stage === 2 && (
+                        <span className="bg-green-600/30 text-green-200 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-bold border border-green-500/50">
+                          ✓ Selected
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -161,6 +187,22 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin }) {
                     )}
                   </div>
                 </div>
+
+                {/* Select for Voting Button - Only visible in Stage 1.2 for admins */}
+                {isAdmin && eventStage === "1" && eventSubStage === "2" && (
+                  <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-slate-600/30">
+                    <button
+                      onClick={() => handleToggleIdeaSelection(idea.id, idea.stage)}
+                      className={`w-full px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[9px] sm:text-[10px] font-semibold transition-all duration-200 shadow-lg ${
+                        idea.stage === 2
+                          ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white'
+                          : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white'
+                      }`}
+                    >
+                      {idea.stage === 2 ? '✗ Deselect' : '✓ Select for Voting'}
+                    </button>
+                  </div>
+                )}
               </li>
             );
           })}
