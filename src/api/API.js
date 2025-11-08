@@ -482,10 +482,13 @@ export const getPreviousProjects = async () => {
   }
 };
 
-export const addIdeaToEvent = async (ideaId, eventId) => {
+export const addIdeaToEvent = async (ideaId, eventId, description, technologies, is_built) => {
   try {
     const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/add-event-to-idea/${ideaId}`, {
       event_id: eventId,
+      description,
+      technologies,
+      is_built
     });
     return response.data;
   } catch (error) {
