@@ -19,7 +19,10 @@ function IdeaScreen() {
   const [editDescription, setEditDescription] = useState('');
   const [editTechnologies, setEditTechnologies] = useState('');
   const [message, setMessage] = useState('');
+  const [uploadingEventId, setUploadingEventId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const editDescRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
@@ -82,6 +85,52 @@ function IdeaScreen() {
     } catch (error) {
       console.error('Error updating event metadata:', error);
       setMessage('Failed to update');
+    }
+  };
+
+  const handleUploadImage = async (eventId) => {
+    setUploadingEventId(eventId);
+    setMenuOpenEventId(null);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingEventId) return;
+
+    const formData = new FormData();
+    formData.append('uploadImages', file);
+
+    try {
+      setMessage('Uploading image...');
+
+      console.log('Uploading file:', { ideaId, eventId: uploadingEventId, fileName: file.name, fileSize: file.size });
+
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/images/upload-idea-event/${ideaId}/${uploadingEventId}`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      console.log('Upload response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+
+      // Refresh idea data
+      const ideaData = await getIdeaById(ideaId);
+      setIdea(ideaData);
+
+      setMessage('Image uploaded successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setMessage(error.message || 'Failed to upload image');
+      setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setUploadingEventId(null);
+      e.target.value = ''; // Reset file input
     }
   };
 
@@ -151,6 +200,13 @@ function IdeaScreen() {
                 </svg>
               </button>
 
+              {/* Message Display */}
+              {message && (
+                <div className={`mb-4 p-3 rounded-lg ${message.includes('success') || message.includes('successfully') ? 'bg-green-900/20 border border-green-500/30 text-green-200' : message.includes('Uploading') ? 'bg-blue-900/20 border border-blue-500/30 text-blue-200' : 'bg-red-900/20 border border-red-500/30 text-red-200'}`}>
+                  {message}
+                </div>
+              )}
+
               {/* Title Header */}
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6">
                 <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
@@ -180,7 +236,7 @@ function IdeaScreen() {
                       </button>
 
                       {menuOpenEventId === event.event_id && (
-                        <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[120px] z-10">
+                        <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[150px] z-10">
                           <button
                             onClick={() => {
                               setEditingEvent(event);
@@ -189,6 +245,12 @@ function IdeaScreen() {
                             className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
                           >
                             ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => handleUploadImage(event.event_id)}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                          >
+                            🖼️ Upload Image
                           </button>
                         </div>
                       )}
@@ -253,11 +315,11 @@ function IdeaScreen() {
                   </div>
 
                   {/* Image Section */}
-                  {idea?.image_url && (
+                  {event?.image_url && (
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-white mb-3">🖼️ Project Image</h3>
                       <img
-                        src={idea.image_url}
+                        src={event.image_url}
                         alt="Project"
                         className="w-full h-auto max-h-96 object-cover rounded-lg shadow-lg border border-slate-600/50"
                       />
@@ -265,6 +327,15 @@ function IdeaScreen() {
                   )}
                 </div>
               ))}
+
+              {/* Hidden file input for image upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
 
             {/* ADMIN PANEL (col 5) */}
