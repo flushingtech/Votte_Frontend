@@ -25,6 +25,7 @@ function IdeaScreen() {
   const [contributorsEvent, setContributorsEvent] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedContributor, setSelectedContributor] = useState(null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -242,215 +243,266 @@ function IdeaScreen() {
               )}
 
               {/* Title Header */}
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl p-4 mb-4">
+                <h1 className="text-2xl font-bold text-white mb-1">
                   {idea?.idea}
                 </h1>
-                <p className="text-sm text-gray-400">
+                <p className="text-xs text-gray-400">
                   Submitted by: {idea?.email?.split('@')[0] || 'Unknown'}
                 </p>
               </div>
 
               {/* Event Details Cards */}
-              {idea?.events?.map((event) => (
-                <div
-                  key={event.event_id}
-                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 mb-6 relative"
-                >
-                  {/* Edit Menu Button */}
-                  {(idea?.email === userEmail || isAdmin) && (
-                    <div className="absolute top-4 right-4">
-                      <button
-                        onClick={() => setMenuOpenEventId(menuOpenEventId === event.event_id ? null : event.event_id)}
-                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
+              {idea?.events?.map((event) => {
+                const hasAwards = event?.awards && Array.isArray(event.awards) && event.awards.length > 0;
+                const hasVotes = event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0;
 
-                      {menuOpenEventId === event.event_id && (
-                        <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[150px] z-10">
-                          <button
-                            onClick={() => {
-                              setEditingEvent(event);
-                              setMenuOpenEventId(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
-                          >
-                            ✏️ Edit
-                          </button>
-                          <button
-                            onClick={() => handleUploadImage(event.event_id)}
-                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
-                          >
-                            🖼️ Upload Image
-                          </button>
-                          <button
-                            onClick={() => {
-                              setContributorsEvent(event);
-                              setMenuOpenEventId(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
-                          >
-                            👥 Contributors
-                          </button>
+                return (
+                  <div
+                    key={event.event_id}
+                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl mb-4 overflow-hidden"
+                  >
+                    {/* Event Header */}
+                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                            <span className="text-blue-400 text-base">📅</span>
+                            {new Date(event.event_date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </h2>
+                          {event.title && (
+                            <p className="text-gray-400 text-xs">{event.title}</p>
+                          )}
+                        </div>
+
+                        {/* Edit Menu */}
+                        {(idea?.email === userEmail || isAdmin) && (
+                          <div className="relative">
+                            <button
+                              onClick={() => setMenuOpenEventId(menuOpenEventId === event.event_id ? null : event.event_id)}
+                              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                              </svg>
+                            </button>
+
+                            {menuOpenEventId === event.event_id && (
+                              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[150px] z-10">
+                                <button
+                                  onClick={() => {
+                                    setEditingEvent(event);
+                                    setMenuOpenEventId(null);
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button
+                                  onClick={() => handleUploadImage(event.event_id)}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                >
+                                  🖼️ Upload Image
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setContributorsEvent(event);
+                                    setMenuOpenEventId(null);
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                >
+                                  👥 Contributors
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Awards - Prominent Display */}
+                      {hasAwards && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {event.awards.map((award, idx) => {
+                            const awardStyles = {
+                              'Hackathon Winner': {
+                                bg: 'from-yellow-600/40 to-yellow-800/30',
+                                border: 'border-yellow-500/60',
+                                text: 'text-yellow-200',
+                                icon: '🏆',
+                                shadow: '0 0 20px rgba(234, 179, 8, 0.4)'
+                              },
+                              'Most Creative': {
+                                bg: 'from-green-600/40 to-green-800/30',
+                                border: 'border-green-500/60',
+                                text: 'text-green-200',
+                                icon: '🎨',
+                                shadow: '0 0 15px rgba(34, 197, 94, 0.3)'
+                              },
+                              'Most Technical': {
+                                bg: 'from-purple-600/40 to-purple-800/30',
+                                border: 'border-purple-500/60',
+                                text: 'text-purple-200',
+                                icon: '⚡',
+                                shadow: '0 0 15px rgba(168, 85, 247, 0.3)'
+                              },
+                              'Most Impactful': {
+                                bg: 'from-red-600/40 to-red-800/30',
+                                border: 'border-red-500/60',
+                                text: 'text-red-200',
+                                icon: '🚀',
+                                shadow: '0 0 15px rgba(239, 68, 68, 0.3)'
+                              }
+                            };
+                            const style = awardStyles[award] || awardStyles['Most Creative'];
+                            return (
+                              <span
+                                key={idx}
+                                className={`bg-gradient-to-r ${style.bg} ${style.text} px-2 py-1 rounded text-xs border ${style.border} flex items-center gap-1.5 font-semibold`}
+                                style={{ boxShadow: style.shadow }}
+                              >
+                                <span className="text-sm">{style.icon}</span>
+                                {award}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {/* Event Date Badge */}
-                  <div className="flex items-center gap-2 mb-6">
-                    <span className="bg-blue-600/50 text-blue-200 px-4 py-2 rounded-lg font-semibold text-sm border border-blue-500/50">
-                      📅 {new Date(event.event_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </span>
-                  </div>
+                    {/* Content Grid */}
+                    <div className="p-3">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                        {/* Left Column - Main Content (2/3 width) */}
+                        <div className="lg:col-span-2 space-y-3">
+                          {/* Description */}
+                          <div>
+                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+                              <span className="text-blue-400 text-xs">📝</span>
+                              Description
+                            </h3>
+                            <div className="bg-slate-900/30 rounded-lg p-3 border border-slate-700/30">
+                              <MarkdownWithPlugins className="prose prose-invert prose-sm max-w-none text-gray-200 text-sm">
+                                {event?.description || 'No description provided'}
+                              </MarkdownWithPlugins>
+                            </div>
+                          </div>
 
-                  {/* Awards Section */}
-                  {event?.awards && Array.isArray(event.awards) && event.awards.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-white mb-3">🏆 Awards</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {event.awards.map((award, idx) => {
-                          const awardStyles = {
-                            'Hackathon Winner': {
-                              bg: 'from-yellow-600/40 to-yellow-800/30',
-                              border: 'border-yellow-500/60',
-                              text: 'text-yellow-200',
-                              icon: '🏆',
-                              shadow: '0 0 20px rgba(234, 179, 8, 0.4)'
-                            },
-                            'Most Creative': {
-                              bg: 'from-green-600/40 to-green-800/30',
-                              border: 'border-green-500/60',
-                              text: 'text-green-200',
-                              icon: '🎨',
-                              shadow: '0 0 15px rgba(34, 197, 94, 0.3)'
-                            },
-                            'Most Technical': {
-                              bg: 'from-purple-600/40 to-purple-800/30',
-                              border: 'border-purple-500/60',
-                              text: 'text-purple-200',
-                              icon: '⚡',
-                              shadow: '0 0 15px rgba(168, 85, 247, 0.3)'
-                            },
-                            'Most Impactful': {
-                              bg: 'from-red-600/40 to-red-800/30',
-                              border: 'border-red-500/60',
-                              text: 'text-red-200',
-                              icon: '🚀',
-                              shadow: '0 0 15px rgba(239, 68, 68, 0.3)'
-                            }
-                          };
-                          const style = awardStyles[award] || awardStyles['Most Creative'];
-                          return (
-                            <span
-                              key={idx}
-                              className={`bg-gradient-to-r ${style.bg} ${style.text} px-4 py-2 rounded-lg font-bold text-sm border ${style.border} flex items-center gap-2`}
-                              style={{ boxShadow: style.shadow }}
-                            >
-                              <span className="text-lg">{style.icon}</span>
-                              {award}
-                            </span>
-                          );
-                        })}
+                          {/* Image */}
+                          {event?.image_url && (
+                            <div>
+                              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+                                <span className="text-purple-400 text-xs">🖼️</span>
+                                Project Image
+                              </h3>
+                              <img
+                                src={event.image_url}
+                                alt="Project"
+                                className="w-full h-auto max-h-80 object-cover rounded-lg shadow-lg border border-slate-600/50"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right Column - Meta Info (1/3 width) */}
+                        <div className="space-y-3">
+                          {/* Votes */}
+                          {hasVotes && (
+                            <div>
+                              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+                                <span className="text-blue-400 text-xs">🗳️</span>
+                                Votes
+                              </h3>
+                              <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30 space-y-1.5">
+                                {event?.votes > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-300 text-xs">📊 Total</span>
+                                    <span className="bg-blue-600/30 text-blue-200 px-2 py-0.5 rounded font-bold text-xs border border-blue-500/50">
+                                      {event.votes}
+                                    </span>
+                                  </div>
+                                )}
+                                {event?.most_creative_votes > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-300 text-xs">🎨 Creative</span>
+                                    <span className="bg-green-600/30 text-green-200 px-2 py-0.5 rounded font-bold text-xs border border-green-500/50">
+                                      {event.most_creative_votes}
+                                    </span>
+                                  </div>
+                                )}
+                                {event?.most_technical_votes > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-300 text-xs">⚡ Technical</span>
+                                    <span className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded font-bold text-xs border border-purple-500/50">
+                                      {event.most_technical_votes}
+                                    </span>
+                                  </div>
+                                )}
+                                {event?.most_impactful_votes > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-300 text-xs">🚀 Impactful</span>
+                                    <span className="bg-red-600/30 text-red-200 px-2 py-0.5 rounded font-bold text-xs border border-red-500/50">
+                                      {event.most_impactful_votes}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Tech Stack */}
+                          <div>
+                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+                              <span className="text-green-400 text-xs">⚡</span>
+                              Tech Stack
+                            </h3>
+                            <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30">
+                              <div className="flex flex-wrap gap-1">
+                                {(event?.technologies || 'No tech stack listed')
+                                  .split(',')
+                                  .map((tech, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="bg-slate-700/50 text-gray-200 px-2 py-1 rounded text-xs border border-slate-600/50"
+                                    >
+                                      {tech.trim()}
+                                    </span>
+                                  ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Contributors */}
+                          <div>
+                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+                              <span className="text-purple-400 text-xs">👥</span>
+                              Contributors
+                            </h3>
+                            <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30">
+                              <div className="flex flex-wrap gap-1">
+                                {(event?.contributors
+                                  ? event.contributors.split(',').filter(c => c.trim())
+                                  : ['None']
+                                ).map((contributor, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50"
+                                  >
+                                    {contributor.trim().split('@')[0] || 'None'}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  )}
-
-                  {/* Description Section */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-white mb-3">📝 Description</h3>
-                    <div className="text-gray-200 leading-relaxed">
-                      <MarkdownWithPlugins className="prose prose-invert max-w-none">
-                        {event?.description || 'No description provided'}
-                      </MarkdownWithPlugins>
-                    </div>
                   </div>
-
-                  {/* Tech Stack Section */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-white mb-3">⚡ Tech Stack</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(event?.technologies || 'No tech stack listed')
-                        .split(',')
-                        .map((tech, idx) => (
-                          <span
-                            key={idx}
-                            className="bg-slate-700/50 text-gray-200 px-3 py-1.5 rounded-lg text-sm border border-slate-600/50"
-                          >
-                            {tech.trim()}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-
-                  {/* Contributors Section */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-white mb-3">👥 Contributors</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(event?.contributors
-                        ? event.contributors.split(',').filter(c => c.trim())
-                        : ['None']
-                      ).map((contributor, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50"
-                        >
-                          {contributor.trim().split('@')[0] || 'None'}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Votes Section */}
-                  {(event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0) && (
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-white mb-3">🗳️ Votes for this Event</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {event?.votes > 0 && (
-                          <span className="bg-blue-600/30 text-blue-200 px-3 py-1.5 rounded-lg text-sm border border-blue-500/50">
-                            📊 Total: {event.votes}
-                          </span>
-                        )}
-                        {event?.most_creative_votes > 0 && (
-                          <span className="bg-green-600/30 text-green-200 px-3 py-1.5 rounded-lg text-sm border border-green-500/50">
-                            🎨 Most Creative: {event.most_creative_votes}
-                          </span>
-                        )}
-                        {event?.most_technical_votes > 0 && (
-                          <span className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50">
-                            ⚡ Most Technical: {event.most_technical_votes}
-                          </span>
-                        )}
-                        {event?.most_impactful_votes > 0 && (
-                          <span className="bg-red-600/30 text-red-200 px-3 py-1.5 rounded-lg text-sm border border-red-500/50">
-                            🚀 Most Impactful: {event.most_impactful_votes}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Image Section */}
-                  {event?.image_url && (
-                    <div className="mb-6">
-                      <h3 className="text-xl font-bold text-white mb-3">🖼️ Project Image</h3>
-                      <img
-                        src={event.image_url}
-                        alt="Project"
-                        className="w-full h-auto max-h-96 object-cover rounded-lg shadow-lg border border-slate-600/50"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
 
               {/* Hidden file input for image upload */}
               <input
@@ -462,21 +514,180 @@ function IdeaScreen() {
               />
             </div>
 
-            {/* ADMIN PANEL (col 5) */}
-            {isAdmin && (
-              <div className="lg:col-span-1">
-                <div className="sticky top-6 self-start" style={{ zIndex: 20 }}>
-                  <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-xl border border-orange-700/50 shadow-2xl p-4">
-                    <div className="flex flex-col items-start mb-4">
-                      <h2 className="text-white text-base font-bold whitespace-nowrap mb-1">
+            {/* SIDEBAR (col 5) - Summary + Admin */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6 self-start space-y-4" style={{ zIndex: 20 }}>
+                {/* SUMMARY PANEL */}
+                <aside className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 backdrop-blur-sm rounded-lg border border-blue-700/50 shadow-xl p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-white text-lg font-bold flex items-center gap-2">
+                      <span className="text-blue-400">📊</span>
+                      Summary
+                    </h2>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setShowAdminPanel(!showAdminPanel)}
+                        className="text-orange-400 hover:text-orange-300 transition-colors p-1 hover:bg-slate-700/50 rounded"
+                        title={showAdminPanel ? 'Hide admin controls' : 'Show admin controls'}
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Total Votes */}
+                  {(() => {
+                    const totalVotes = idea?.events?.reduce((sum, event) => sum + (event.votes || 0), 0) || 0;
+                    const totalCreative = idea?.events?.reduce((sum, event) => sum + (event.most_creative_votes || 0), 0) || 0;
+                    const totalTechnical = idea?.events?.reduce((sum, event) => sum + (event.most_technical_votes || 0), 0) || 0;
+                    const totalImpactful = idea?.events?.reduce((sum, event) => sum + (event.most_impactful_votes || 0), 0) || 0;
+
+                    return totalVotes > 0 && (
+                      <div className="mb-4">
+                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+                          <span className="text-blue-400 text-xs">🗳️</span>
+                          Total Votes
+                        </h3>
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-300 text-xs">📊 All Events</span>
+                            <span className="bg-blue-600/40 text-blue-200 px-2 py-1 rounded font-bold text-sm border border-blue-500/60">
+                              {totalVotes}
+                            </span>
+                          </div>
+                          {totalCreative > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-400 text-xs">🎨 Creative</span>
+                              <span className="text-green-200 text-xs font-semibold">{totalCreative}</span>
+                            </div>
+                          )}
+                          {totalTechnical > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-400 text-xs">⚡ Technical</span>
+                              <span className="text-purple-200 text-xs font-semibold">{totalTechnical}</span>
+                            </div>
+                          )}
+                          {totalImpactful > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-400 text-xs">🚀 Impactful</span>
+                              <span className="text-red-200 text-xs font-semibold">{totalImpactful}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Total Awards */}
+                  {(() => {
+                    const allAwards = idea?.events?.flatMap(event => event.awards || []) || [];
+                    const uniqueAwards = [...new Set(allAwards)];
+                    const awardCounts = {};
+                    allAwards.forEach(award => {
+                      awardCounts[award] = (awardCounts[award] || 0) + 1;
+                    });
+
+                    return uniqueAwards.length > 0 && (
+                      <div className="mb-4">
+                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+                          <span className="text-yellow-400 text-xs">🏆</span>
+                          Awards ({allAwards.length})
+                        </h3>
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30 space-y-2">
+                          {uniqueAwards.map((award, idx) => {
+                            const awardStyles = {
+                              'Hackathon Winner': { icon: '🏆', color: 'text-yellow-200' },
+                              'Most Creative': { icon: '🎨', color: 'text-green-200' },
+                              'Most Technical': { icon: '⚡', color: 'text-purple-200' },
+                              'Most Impactful': { icon: '🚀', color: 'text-red-200' }
+                            };
+                            const style = awardStyles[award] || { icon: '🏆', color: 'text-yellow-200' };
+                            return (
+                              <div key={idx} className="flex items-center justify-between">
+                                <span className={`text-xs ${style.color} flex items-center gap-1`}>
+                                  <span>{style.icon}</span>
+                                  {award}
+                                </span>
+                                {awardCounts[award] > 1 && (
+                                  <span className="bg-slate-700/50 text-gray-300 px-1.5 py-0.5 rounded text-xs font-semibold">
+                                    ×{awardCounts[award]}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* All Contributors */}
+                  {(() => {
+                    const allContributors = idea?.events
+                      ?.flatMap(event =>
+                        event.contributors
+                          ? event.contributors.split(',').map(c => c.trim()).filter(Boolean)
+                          : []
+                      ) || [];
+                    const uniqueContributors = [...new Set(allContributors)];
+
+                    return uniqueContributors.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+                          <span className="text-purple-400 text-xs">👥</span>
+                          Contributors ({uniqueContributors.length})
+                        </h3>
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30">
+                          <div className="flex flex-wrap gap-1">
+                            {uniqueContributors.map((contributor, idx) => (
+                              <span
+                                key={idx}
+                                className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded text-xs border border-purple-500/50"
+                              >
+                                {contributor.split('@')[0]}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Empty state */}
+                  {!idea?.events?.some(e => e.votes > 0) &&
+                   !idea?.events?.some(e => e.awards?.length > 0) &&
+                   !idea?.events?.some(e => e.contributors) && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 text-xs">No data yet</p>
+                    </div>
+                  )}
+                </aside>
+
+                {/* ADMIN PANEL */}
+                {isAdmin && showAdminPanel && (
+                  <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-lg border border-orange-700/50 shadow-xl p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-white text-base font-bold whitespace-nowrap">
                         ⚙️ Admin Controls
                       </h2>
+                      <button
+                        onClick={() => setShowAdminPanel(false)}
+                        className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-slate-700/50 rounded"
+                        title="Hide admin controls"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                     <ButtonUpload ideaId={idea?.id} />
                   </aside>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
