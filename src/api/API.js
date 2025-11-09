@@ -400,6 +400,20 @@ export const addContributorToIdea = async (ideaId, contributorEmail) => {
   }
 };
 
+export const addContributorToIdeaEvent = async (ideaId, eventId, contributorEmail) => {
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api/ideas/${ideaId}/add-contributor-event/${eventId}`;
+    console.log("📢 Sending request to:", url, "with data:", { contributor_email: contributorEmail });
+
+    const response = await axios.put(url, { contributor_email: contributorEmail });
+    console.log("✅ Contributor added to event successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error adding contributor to event:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 // Function to get ideas where the user is a contributor
 export const getContributedIdeas = async (email) => {
   try {

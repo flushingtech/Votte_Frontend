@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { getIdeaById, checkAdminStatus } from '../api/API';
+import Select from 'react-select';
+import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent } from '../api/API';
 import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
@@ -21,6 +22,9 @@ function IdeaScreen() {
   const [message, setMessage] = useState('');
   const [uploadingEventId, setUploadingEventId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [contributorsEvent, setContributorsEvent] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [selectedContributor, setSelectedContributor] = useState(null);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -30,8 +34,12 @@ function IdeaScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const ideaData = await getIdeaById(ideaId);
+        const [ideaData, allUsers] = await Promise.all([
+          getIdeaById(ideaId),
+          getAllUsers()
+        ]);
         setIdea(ideaData);
+        setUsers(allUsers);
 
         if (userEmail) {
           const status = await checkAdminStatus(userEmail);
@@ -131,6 +139,32 @@ function IdeaScreen() {
     } finally {
       setUploadingEventId(null);
       e.target.value = ''; // Reset file input
+    }
+  };
+
+  const handleAddContributor = async () => {
+    if (!selectedContributor || !contributorsEvent) {
+      setMessage('Please select a contributor');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    try {
+      setMessage('Adding contributor...');
+
+      await addContributorToIdeaEvent(ideaId, contributorsEvent.event_id, selectedContributor);
+
+      // Refresh idea data
+      const ideaData = await getIdeaById(ideaId);
+      setIdea(ideaData);
+
+      setMessage('Contributor added successfully!');
+      setSelectedContributor(null);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error adding contributor:', error);
+      setMessage(error.response?.data?.message || 'Failed to add contributor');
+      setTimeout(() => setMessage(''), 5000);
     }
   };
 
@@ -251,6 +285,15 @@ function IdeaScreen() {
                             className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
                           >
                             🖼️ Upload Image
+                          </button>
+                          <button
+                            onClick={() => {
+                              setContributorsEvent(event);
+                              setMenuOpenEventId(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                          >
+                            👥 Contributors
                           </button>
                         </div>
                       )}
@@ -438,6 +481,136 @@ function IdeaScreen() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* Contributors Modal */}
+      {contributorsEvent && createPortal(
+        <>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: '2147483647', position: 'fixed' }} onClick={() => setContributorsEvent(null)}></div>
+          <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: '2147483647', position: 'fixed', isolation: 'isolate' }}>
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+              <button
+                onClick={() => setContributorsEvent(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">
+                  Manage Contributors
+                </h2>
+                <p className="text-gray-400">
+                  {new Date(contributorsEvent.event_date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              {message && (
+                <div className={`mb-4 p-3 rounded-lg ${message.includes('success') || message.includes('successfully') ? 'bg-green-900/20 border border-green-500/30 text-green-200' : message.includes('Adding') ? 'bg-blue-900/20 border border-blue-500/30 text-blue-200' : 'bg-red-900/20 border border-red-500/30 text-red-200'}`}>
+                  {message}
+                </div>
+              )}
+
+              {/* Current Contributors */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-3">Current Contributors</h3>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {(contributorsEvent?.contributors
+                    ? contributorsEvent.contributors.split(',').filter(c => c.trim())
+                    : []
+                  ).length > 0 ? (
+                    contributorsEvent.contributors.split(',').filter(c => c.trim()).map((contributor, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50"
+                      >
+                        {contributor.trim().split('@')[0]}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-sm">No contributors yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Add Contributor Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-white">Add Contributor</h3>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Select
+                    className="flex-1 text-sm"
+                    menuPortalTarget={document.body}
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        backgroundColor: '#334155',
+                        borderColor: '#475569',
+                        color: 'white',
+                        minHeight: '42px',
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        backgroundColor: '#1e293b',
+                        color: 'white',
+                        zIndex: 2147483650,
+                      }),
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 2147483650,
+                      }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isFocused ? '#334155' : '#1e293b',
+                        color: 'white',
+                        cursor: 'pointer',
+                      }),
+                      singleValue: (base) => ({ ...base, color: 'white' }),
+                      input: (base) => ({ ...base, color: 'white' }),
+                      placeholder: (base) => ({ ...base, color: '#9ca3af' }),
+                    }}
+                    options={users.map(user => ({
+                      label: `${user.name} (${user.email})`,
+                      value: user.email
+                    }))}
+                    placeholder="Select contributor..."
+                    value={users
+                      .map(user => ({
+                        label: `${user.name} (${user.email})`,
+                        value: user.email
+                      }))
+                      .find(opt => opt.value === selectedContributor) || null}
+                    onChange={(selectedOption) =>
+                      setSelectedContributor(selectedOption?.value || null)
+                    }
+                  />
+                  <button
+                    onClick={handleAddContributor}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg whitespace-nowrap"
+                  >
+                    👥 Add Contributor
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  onClick={() => setContributorsEvent(null)}
+                  className="w-full bg-slate-700/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-600/50 transition-all duration-200 border border-slate-600/50"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </>,
