@@ -287,11 +287,15 @@ export const getUserVote = async (userEmail, eventId, voteType) => {
   }
 };
 
-// Function to get all votes for a specific idea
-export const getVotesForIdea = async (ideaId, voteType = null) => {
+// Function to get all votes for a specific idea (with optional event filter)
+export const getVotesForIdea = async (ideaId, voteType = null, eventId = null) => {
   try {
+    const params = {};
+    if (voteType) params.vote_type = voteType;
+    if (eventId) params.event_id = eventId;
+
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/votes/idea/${ideaId}`, {
-      params: voteType ? { vote_type: voteType } : {}, // Filter by vote_type if provided
+      params,
     });
 
     return response.data.votes;

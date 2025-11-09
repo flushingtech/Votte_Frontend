@@ -312,6 +312,58 @@ function IdeaScreen() {
                     </span>
                   </div>
 
+                  {/* Awards Section */}
+                  {event?.awards && Array.isArray(event.awards) && event.awards.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-white mb-3">🏆 Awards</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {event.awards.map((award, idx) => {
+                          const awardStyles = {
+                            'Hackathon Winner': {
+                              bg: 'from-yellow-600/40 to-yellow-800/30',
+                              border: 'border-yellow-500/60',
+                              text: 'text-yellow-200',
+                              icon: '🏆',
+                              shadow: '0 0 20px rgba(234, 179, 8, 0.4)'
+                            },
+                            'Most Creative': {
+                              bg: 'from-green-600/40 to-green-800/30',
+                              border: 'border-green-500/60',
+                              text: 'text-green-200',
+                              icon: '🎨',
+                              shadow: '0 0 15px rgba(34, 197, 94, 0.3)'
+                            },
+                            'Most Technical': {
+                              bg: 'from-purple-600/40 to-purple-800/30',
+                              border: 'border-purple-500/60',
+                              text: 'text-purple-200',
+                              icon: '⚡',
+                              shadow: '0 0 15px rgba(168, 85, 247, 0.3)'
+                            },
+                            'Most Impactful': {
+                              bg: 'from-red-600/40 to-red-800/30',
+                              border: 'border-red-500/60',
+                              text: 'text-red-200',
+                              icon: '🚀',
+                              shadow: '0 0 15px rgba(239, 68, 68, 0.3)'
+                            }
+                          };
+                          const style = awardStyles[award] || awardStyles['Most Creative'];
+                          return (
+                            <span
+                              key={idx}
+                              className={`bg-gradient-to-r ${style.bg} ${style.text} px-4 py-2 rounded-lg font-bold text-sm border ${style.border} flex items-center gap-2`}
+                              style={{ boxShadow: style.shadow }}
+                            >
+                              <span className="text-lg">{style.icon}</span>
+                              {award}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Description Section */}
                   <div className="mb-6">
                     <h3 className="text-xl font-bold text-white mb-3">📝 Description</h3>
@@ -356,6 +408,35 @@ function IdeaScreen() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Votes Section */}
+                  {(event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0) && (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-white mb-3">🗳️ Votes for this Event</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {event?.votes > 0 && (
+                          <span className="bg-blue-600/30 text-blue-200 px-3 py-1.5 rounded-lg text-sm border border-blue-500/50">
+                            📊 Total: {event.votes}
+                          </span>
+                        )}
+                        {event?.most_creative_votes > 0 && (
+                          <span className="bg-green-600/30 text-green-200 px-3 py-1.5 rounded-lg text-sm border border-green-500/50">
+                            🎨 Most Creative: {event.most_creative_votes}
+                          </span>
+                        )}
+                        {event?.most_technical_votes > 0 && (
+                          <span className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50">
+                            ⚡ Most Technical: {event.most_technical_votes}
+                          </span>
+                        )}
+                        {event?.most_impactful_votes > 0 && (
+                          <span className="bg-red-600/30 text-red-200 px-3 py-1.5 rounded-lg text-sm border border-red-500/50">
+                            🚀 Most Impactful: {event.most_impactful_votes}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Image Section */}
                   {event?.image_url && (
