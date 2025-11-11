@@ -497,3 +497,28 @@ export const addIdeaToEvent = async (ideaId, eventId, description, technologies,
   }
 };
 
+export const getJoinDate = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/join-date/${email}`);
+    return _formatDate(response.data.joinDate);
+  } catch (error) {
+    console.error('Error fetching start date: ', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+function _formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { month: 'long', day: 'numeric', year: 'numeric' };
+  const formatted = date.toLocaleDateString('en-US', options);
+
+  const day = date.getDate();
+  const ordinal = 
+    day % 10 === 1 && day !== 11 ? 'st' :
+    day % 10 === 2 && day !== 12 ? 'nd' :
+    day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+
+    return formatted.replace(/\b(\d{1,2})\b/,
+    `${day}${ordinal}`
+  );
+}
