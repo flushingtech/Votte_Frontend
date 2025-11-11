@@ -4,6 +4,7 @@ import {
   getTotalVotesForUser,
   getHackathonWins,
   getHackathonWinsDetails,
+  getJoinDate
 } from '../api/API';
 
 const Profile = ({ user }) => {
@@ -13,22 +14,25 @@ const Profile = ({ user }) => {
   const [detailedWins, setDetailedWins] = useState([]);
   const [showWins, setShowWins] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [joinedDate, setJoinDate] = useState(0);
 
   useEffect(() => {
     if (!user?.email) return;
 
     const fetchStats = async () => {
       try {
-        const [count, votes, wins, winDetails] = await Promise.all([
+        const [count, votes, wins, winDetails, joinedDate] = await Promise.all([
           getContributedIdeaCount(user.email),
           getTotalVotesForUser(user.email),
           getHackathonWins(user.email),
           getHackathonWinsDetails(user.email),
+          getJoinDate(user.email),
         ]);
         setContributedCount(count);
         setTotalVotes(votes);
         setHackathonWins(wins);
         setDetailedWins(winDetails);
+        setJoinDate(joinedDate);
       } catch (error) {
         console.error('Error fetching profile stats:', error);
       } finally {
@@ -93,7 +97,7 @@ const Profile = ({ user }) => {
             <div className={`${tileStyle} opacity-60 cursor-not-allowed`}>
               <div className="text-3xl mb-2">📅</div>
               <div className="text-center">
-                <div className="text-sm text-gray-400">Coming Soon</div>
+                <div className="text-2xl font-bold text-purple-400">{joinedDate}</div>
                 <div className="text-xs text-gray-500">Join Date</div>
               </div>
             </div>
