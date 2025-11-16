@@ -540,10 +540,10 @@ function IdeaScreen() {
 
                   {/* Total Votes */}
                   {(() => {
-                    const totalVotes = idea?.events?.reduce((sum, event) => sum + (event.votes || 0), 0) || 0;
-                    const totalCreative = idea?.events?.reduce((sum, event) => sum + (event.most_creative_votes || 0), 0) || 0;
-                    const totalTechnical = idea?.events?.reduce((sum, event) => sum + (event.most_technical_votes || 0), 0) || 0;
-                    const totalImpactful = idea?.events?.reduce((sum, event) => sum + (event.most_impactful_votes || 0), 0) || 0;
+                    const totalVotes = idea?.events?.reduce((sum, event) => sum + Number(event.votes || 0), 0) || 0;
+                    const totalCreative = idea?.events?.reduce((sum, event) => sum + Number(event.most_creative_votes || 0), 0) || 0;
+                    const totalTechnical = idea?.events?.reduce((sum, event) => sum + Number(event.most_technical_votes || 0), 0) || 0;
+                    const totalImpactful = idea?.events?.reduce((sum, event) => sum + Number(event.most_impactful_votes || 0), 0) || 0;
 
                     return totalVotes > 0 && (
                       <div className="mb-4">
