@@ -151,6 +151,17 @@ export const deleteEvent = async (id) => {
   }
 };
 
+// Function to sync events from Meetup (admin only)
+export const syncMeetupEvents = async (email) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/sync-meetup-events`, { email });
+    return response.data;
+  } catch (error) {
+    console.error('Error syncing Meetup events:', error);
+    throw error;
+  }
+};
+
 export const getIdeasForEvent = async (eventId) => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/${eventId}`);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getEvents, deleteEvent, getIdeasForEvent } from '../../api/API';
+import { getEvents, deleteEvent, getIdeasForEvent, syncMeetupEvents } from '../../api/API';
 
 const EventsList = ({ onEventSelect }) => {
   const [events, setEvents] = useState([]);
@@ -8,6 +8,8 @@ const EventsList = ({ onEventSelect }) => {
   const [error, setError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [selectedView, setSelectedView] = useState('upcoming'); // 'upcoming' or 'past'
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -48,6 +50,49 @@ const EventsList = ({ onEventSelect }) => {
     } catch (err) {
       console.error('Error deleting event:', err);
       setDeleteConfirm(null);
+    }
+  };
+
+  const handleSync = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const userEmail = user?.email || '';
+
+    if (!userEmail) {
+      setSyncMessage({ type: 'error', text: 'User email not found' });
+      return;
+    }
+
+    setSyncing(true);
+    setSyncMessage(null);
+
+    try {
+      await syncMeetupEvents(userEmail);
+      setSyncMessage({ type: 'success', text: 'Events synced successfully!' });
+
+      // Refresh events list
+      const eventsData = await getEvents();
+      setEvents(eventsData);
+
+      // Refresh idea counts
+      const counts = {};
+      for (const event of eventsData) {
+        try {
+          const ideas = await getIdeasForEvent(event.id);
+          counts[event.id] = ideas.length;
+        } catch (err) {
+          console.error(`Error fetching ideas for event ${event.id}:`, err);
+        }
+      }
+      setIdeasCounts(counts);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSyncMessage(null), 3000);
+    } catch (err) {
+      console.error('Error syncing events:', err);
+      setSyncMessage({ type: 'error', text: 'Failed to sync events' });
+      setTimeout(() => setSyncMessage(null), 5000);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -128,10 +173,44 @@ const EventsList = ({ onEventSelect }) => {
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
         <h2 className="text-2xl font-bold text-white">📅 Events</h2>
-        <span className="bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/50">
-          {events.length} Total
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/50">
+            {events.length} Total
+          </span>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+              syncing
+                ? 'bg-slate-600/50 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-500 hover:to-green-500 shadow-lg hover:shadow-xl'
+            }`}
+            title="Sync events from Meetup"
+          >
+            {syncing ? (
+              <>
+                <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></div>
+                Syncing...
+              </>
+            ) : (
+              <>
+                🔄 Sync
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Sync Message */}
+      {syncMessage && (
+        <div className={`mb-3 px-3 py-2 rounded-lg text-xs font-semibold ${
+          syncMessage.type === 'success'
+            ? 'bg-green-600/20 text-green-200 border border-green-500/50'
+            : 'bg-red-600/20 text-red-200 border border-red-500/50'
+        }`}>
+          {syncMessage.text}
+        </div>
+      )}
 
       {/* Tab Buttons */}
       <div className="flex gap-3 mb-4">
