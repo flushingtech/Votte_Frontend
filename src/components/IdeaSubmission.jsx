@@ -4,6 +4,7 @@ import {
   submitIdea,
   getEventStage,
   getPreviousProjects,
+  getArchivedProjects,
   addIdeaToEvent,
 } from "../api/API";
 import MarkdownPreviewer from "./MarkdownPreviewer";
@@ -19,6 +20,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [eventStage, setEventStage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [previousProjects, setPreviousProjects] = useState([]);
+  const [archivedProjects, setArchivedProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [eventSpecificDescription, setEventSpecificDescription] = useState("");
   const textRef = useRef(null);
@@ -170,7 +172,15 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     <p className="text-gray-400 text-sm">Reuse ideas from past events</p>
                   </button>
                   <button
-                    onClick={() => setSelectedMode("archived")}
+                    onClick={async () => {
+                      try {
+                        const data = await getArchivedProjects();
+                        setArchivedProjects(data || []);
+                        setSelectedMode("archived");
+                      } catch (err) {
+                        console.error("Failed to load archived projects:", err);
+                      }
+                    }}
                     className="bg-gradient-to-br from-purple-600/30 to-purple-800/20 backdrop-blur-sm rounded-xl border border-purple-500/50 p-6 hover:from-purple-500/40 hover:to-purple-700/30 transition-all duration-200 hover:scale-105 text-center group"
                   >
                     <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🗃️</div>
@@ -284,6 +294,119 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     );
                   })}
                 </div>
+                )
+              ) : selectedMode === "archived" ? (
+                selectedProject ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <button
+                        onClick={() => setSelectedProject(null)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <h3 className="text-xl font-semibold text-white">Add "{selectedProject.idea}" to This Event</h3>
+                    </div>
+
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+                      <p className="text-blue-200 text-sm">
+                        ℹ️ Provide a description specific to what you'll work on for this event.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleConfirmAddToEvent} className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-3">
+                          📝 What will you work on for this event?
+                        </label>
+                        <MarkdownPreviewer textRef={eventDescRef}>
+                          <textarea
+                            ref={eventDescRef}
+                            className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
+                            value={eventSpecificDescription}
+                            onChange={(e) => setEventSpecificDescription(e.target.value)}
+                            placeholder="Describe what you'll build or improve for this event..."
+                            rows={6}
+                          />
+                        </MarkdownPreviewer>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProject(null)}
+                          className="flex-1 bg-slate-700/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-600/50 transition-all duration-200 border border-slate-600/50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
+                        >
+                          ✅ Add to Event
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="flex items-center gap-2 mb-4">
+                      <button
+                        onClick={() => setSelectedMode(null)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <h3 className="text-xl font-semibold text-white">Archived Projects (Stage 1)</h3>
+                    </div>
+
+                    {archivedProjects.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-400">No archived projects found.</p>
+                      </div>
+                    ) : (
+                      archivedProjects.map((project) => {
+                        const isSameEvent = String(project.event_id) === String(eventId);
+                        const contributorNames = project.contributors
+                          ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
+                          : '';
+
+                        return (
+                          <div
+                            key={project.id}
+                            className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
+                          >
+                            <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
+
+                            {project.event_title && project.event_date && (
+                              <p className="text-gray-400 text-sm mb-1">
+                                📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString()}
+                              </p>
+                            )}
+
+                            {project.contributors && (
+                              <p className="text-gray-400 text-sm mb-3">
+                                👥 {contributorNames}
+                              </p>
+                            )}
+
+                            {!isSameEvent && (
+                              <button
+                                onClick={() => handleSelectProjectToAdd(project)}
+                                className="bg-purple-600/50 text-purple-200 hover:bg-purple-500/50 px-3 py-1.5 rounded-lg text-sm font-medium border border-purple-500/50 transition-colors"
+                              >
+                                ➕ Add to This Event
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 )
               ) : (
                 <div className="space-y-6">

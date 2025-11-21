@@ -511,6 +511,16 @@ export const getPreviousProjects = async () => {
   }
 };
 
+export const getArchivedProjects = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/archived-projects`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching archived projects:', error);
+    throw error;
+  }
+};
+
 export const addIdeaToEvent = async (ideaId, eventId, description, technologies, is_built) => {
   try {
     const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/add-event-to-idea/${ideaId}`, {
