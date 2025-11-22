@@ -24,6 +24,8 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
   const [archivedProjects, setArchivedProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [eventSpecificDescription, setEventSpecificDescription] = useState("");
+  const [previousProjectsSearch, setPreviousProjectsSearch] = useState("");
+  const [archivedProjectsSearch, setArchivedProjectsSearch] = useState("");
   const textRef = useRef(null);
   const eventDescRef = useRef(null);
 
@@ -246,7 +248,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     </form>
                   </div>
                 ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
                     <button
                       onClick={() => setSelectedMode(null)}
@@ -258,43 +260,75 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     </button>
                     <h3 className="text-xl font-semibold text-white">Previous Projects</h3>
                   </div>
-                  
-                  {previousProjects.map((project) => {
-                    const isSameEvent = String(project.event_id) === String(eventId);
-                    const contributorNames = project.contributors
-                      ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
-                      : '';
 
-                    return (
-                      <div
-                        key={project.id}
-                        className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
-                      >
-                        <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
+                  {/* Search Bar */}
+                  <div className="relative mb-4">
+                    <input
+                      type="text"
+                      value={previousProjectsSearch}
+                      onChange={(e) => setPreviousProjectsSearch(e.target.value)}
+                      placeholder="Search projects by title..."
+                      className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                    />
+                    <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
 
-                        {project.event_title && project.event_date && (
-                          <p className="text-gray-400 text-sm mb-1">
-                            📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString()}
-                          </p>
-                        )}
-
-                        {project.contributors && (
-                          <p className="text-gray-400 text-sm mb-3">
-                            👥 {contributorNames}
-                          </p>
-                        )}
-
-                        {!isSameEvent && (
-                          <button
-                            onClick={() => handleSelectProjectToAdd(project)}
-                            className="bg-blue-600/50 text-blue-200 hover:bg-blue-500/50 px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-500/50 transition-colors"
-                          >
-                            ➕ Add to This Event
-                          </button>
-                        )}
-                      </div>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {(() => {
+                    const filteredProjects = previousProjects.filter(project =>
+                      project.idea.toLowerCase().includes(previousProjectsSearch.toLowerCase())
                     );
-                  })}
+
+                    if (filteredProjects.length === 0) {
+                      return (
+                        <div className="text-center py-8">
+                          <p className="text-gray-400">
+                            {previousProjectsSearch ? 'No projects found matching your search.' : 'No previous projects available.'}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return filteredProjects.map((project) => {
+                      const isSameEvent = String(project.event_id) === String(eventId);
+                      const contributorNames = project.contributors
+                        ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
+                        : '';
+
+                      return (
+                        <div
+                          key={project.id}
+                          className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
+                        >
+                          <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
+
+                          {project.event_title && project.event_date && (
+                            <p className="text-gray-400 text-sm mb-1">
+                              📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString()}
+                            </p>
+                          )}
+
+                          {project.contributors && (
+                            <p className="text-gray-400 text-sm mb-3">
+                              👥 {contributorNames}
+                            </p>
+                          )}
+
+                          {!isSameEvent && (
+                            <button
+                              onClick={() => handleSelectProjectToAdd(project)}
+                              className="bg-blue-600/50 text-blue-200 hover:bg-blue-500/50 px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-500/50 transition-colors"
+                            >
+                              ➕ Add to This Event
+                            </button>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
                 </div>
                 )
               ) : selectedMode === "archived" ? (
@@ -353,7 +387,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                     </form>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-3">
                     <div className="flex items-center gap-2 mb-4">
                       <button
                         onClick={() => setSelectedMode(null)}
@@ -366,12 +400,37 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                       <h3 className="text-xl font-semibold text-white">Archived Projects (Stage 1)</h3>
                     </div>
 
-                    {archivedProjects.length === 0 ? (
-                      <div className="text-center py-8">
-                        <p className="text-gray-400">No archived projects found.</p>
-                      </div>
-                    ) : (
-                      archivedProjects.map((project) => {
+                    {/* Search Bar */}
+                    <div className="relative mb-4">
+                      <input
+                        type="text"
+                        value={archivedProjectsSearch}
+                        onChange={(e) => setArchivedProjectsSearch(e.target.value)}
+                        placeholder="Search projects by title..."
+                        className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm"
+                      />
+                      <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {(() => {
+                      const filteredProjects = archivedProjects.filter(project =>
+                        project.idea.toLowerCase().includes(archivedProjectsSearch.toLowerCase())
+                      );
+
+                      if (filteredProjects.length === 0) {
+                        return (
+                          <div className="text-center py-8">
+                            <p className="text-gray-400">
+                              {archivedProjectsSearch ? 'No projects found matching your search.' : 'No archived projects available.'}
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      return filteredProjects.map((project) => {
                         const isSameEvent = String(project.event_id) === String(eventId);
                         const contributorNames = project.contributors
                           ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
@@ -406,8 +465,9 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                             )}
                           </div>
                         );
-                      })
-                    )}
+                      });
+                    })()}
+                    </div>
                   </div>
                 )
               ) : (
