@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Function to submit an idea associated with a specific event
-export const submitIdea = async (email, idea, description, technologies, event_id, is_built = false) => {
+export const submitIdea = async (email, idea, description, technologies, event_id, is_built = false, github_repo = '') => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/submitIdea`, {
       email,
@@ -10,6 +10,7 @@ export const submitIdea = async (email, idea, description, technologies, event_i
       technologies,
       event_id,
       is_built,  // Include is_built field
+      github_repo,  // Include github_repo field
     });
     return response;
   } catch (error) {
@@ -42,12 +43,13 @@ export const getIdeasByEvent = async (eventId) => {
 };
 
 // Function to edit an idea
-export const editIdea = async (id, idea, description, technologies) => {
+export const editIdea = async (id, idea, description, technologies, github_repo = '') => {
   try {
     const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/editIdea/${id}`, {
       idea,
       description,
       technologies,
+      github_repo,
     });
     return response.data;
   } catch (error) {
