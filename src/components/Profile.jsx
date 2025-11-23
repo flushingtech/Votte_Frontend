@@ -413,47 +413,6 @@ const Profile = ({ user }) => {
         </div>
       </div>
 
-      {/* Social Links Card */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6 mb-4">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl">🔗</span>
-          <h3 className="text-lg font-semibold text-white">Social Links</h3>
-          <div className="flex gap-3 ml-auto text-xs">
-            {githubUrl ? (
-              <a href={githubUrl} target="_blank" rel="noreferrer" className="text-blue-200 hover:text-white underline">GitHub</a>
-            ) : null}
-            {linkedinUrl ? (
-              <a href={linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-200 hover:text-white underline">LinkedIn</a>
-            ) : null}
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input
-            type="url"
-            placeholder="GitHub profile URL"
-            value={githubUrl}
-            onChange={(e) => setGithubUrl(e.target.value)}
-            className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <input
-            type="url"
-            placeholder="LinkedIn profile URL"
-            value={linkedinUrl}
-            onChange={(e) => setLinkedinUrl(e.target.value)}
-            className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-        <div className="flex justify-end mt-3">
-          <button
-            onClick={handleSaveSocialLinks}
-            disabled={savingSocials}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-colors"
-          >
-            {savingSocials ? 'Saving...' : 'Save Links'}
-          </button>
-        </div>
-      </div>
-
       {/* Projects & Wins Section - Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
         {/* Left Column: My Projects */}
