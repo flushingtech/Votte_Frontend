@@ -119,7 +119,8 @@ function IdeaScreen() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update');
+        console.error('Backend error details:', errorData);
+        throw new Error(errorData.error || errorData.message || 'Failed to update');
       }
 
       // Refresh idea data
@@ -131,8 +132,9 @@ function IdeaScreen() {
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error updating GitHub repos:', error);
-      setMessage(error.message || 'Failed to update repositories');
-      setTimeout(() => setMessage(''), 5000);
+      console.error('Full error:', error.message);
+      setMessage(`Failed: ${error.message}`);
+      setTimeout(() => setMessage(''), 8000);
     }
   };
 
