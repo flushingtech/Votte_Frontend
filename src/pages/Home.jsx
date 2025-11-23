@@ -3,6 +3,7 @@ import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
 import Profile from '../components/Profile';
+import FeaturedProjects from '../components/FeaturedProjects';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -25,6 +26,7 @@ const decodeToken = (token) => {
 function Home() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [activeTab, setActiveTab] = useState('community');
 
   const getEasternDate = () => {
     const eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
@@ -73,6 +75,32 @@ function Home() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="px-4 sm:px-6 pb-4">
+        <div className="max-w-7xl mx-auto flex gap-2 border-b border-slate-700/50">
+          <button
+            onClick={() => setActiveTab('community')}
+            className={`px-6 py-3 font-semibold transition-all border-b-2 ${
+              activeTab === 'community'
+                ? 'border-purple-500 text-purple-400 bg-purple-500/10'
+                : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-slate-800/50'
+            } rounded-t-lg`}
+          >
+            🌐 Community
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-6 py-3 font-semibold transition-all border-b-2 ${
+              activeTab === 'profile'
+                ? 'border-purple-500 text-purple-400 bg-purple-500/10'
+                : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-slate-800/50'
+            } rounded-t-lg`}
+          >
+            👤 Profile
+          </button>
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative">
         {/* Left Decorative Lines */}
@@ -99,35 +127,59 @@ function Home() {
 
         <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-3 xl:gap-4">
 
-          {/* Top Row - Events and Projects */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-3 xl:gap-4 lg:flex-[3]">
-            {/* Events Section - Takes up 2 columns on desktop */}
-            <div className="xl:col-span-2 lg:h-full">
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
-                <div className="h-[400px] sm:h-[450px] lg:h-full">
-                  <EventsList today={todayEastern} />
+          {activeTab === 'community' ? (
+            <>
+              {/* Community Tab - Top Row: Events and Featured Projects */}
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-3 xl:gap-4 lg:flex-[3]">
+                {/* Events Section - Takes up 2 columns on desktop */}
+                <div className="xl:col-span-2 lg:h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
+                    <div className="h-[400px] sm:h-[450px] lg:h-full">
+                      <EventsList today={todayEastern} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Featured Projects Section */}
+                <div className="xl:col-span-1 lg:h-full">
+                  <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
+                    <div className="h-[400px] sm:h-[450px] lg:h-full overflow-hidden">
+                      <FeaturedProjects />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Projects Section */}
-            <div className="xl:col-span-1 lg:h-full">
-              <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
-                <div className="h-[400px] sm:h-[450px] lg:h-full">
-                  <MyIdeas email={userEmail} showContributedOnly={true} title="My Projects" />
+              {/* Community Tab - Bottom Row: Leaderboard */}
+              <div className="w-full lg:flex-[2]">
+                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                  <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">🏆</span>
+                        <h2 className="text-xl font-bold text-white">Leaderboard</h2>
+                      </div>
+                      {/* Placeholder - content will be added later */}
+                      <div className="flex items-center justify-center h-64 text-gray-400">
+                        <p>Coming soon...</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Bottom Row - Profile Section (Full Width) */}
-          <div className="w-full lg:flex-[2]">
-            <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
-              <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
-                <Profile user={{ email: userEmail }} />
+            </>
+          ) : (
+            <>
+              {/* Profile Tab */}
+              <div className="w-full lg:h-full">
+                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                  <div className="h-[600px] sm:h-[650px] lg:h-full overflow-y-auto">
+                    <Profile user={{ email: userEmail }} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
         </div>
       </div>

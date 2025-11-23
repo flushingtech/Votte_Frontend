@@ -602,3 +602,21 @@ export const mergeIdeas = async (ideaIds, adminEmail) => {
     throw error;
   }
 };
+
+// Admin: Get all projects
+export const getAllProjects = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/admin/all-projects`);
+  return response.data.projects;
+};
+
+// Admin: Toggle featured status
+export const toggleFeatured = async (id, featured) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/ideas/admin/toggle-featured/${id}`, { featured });
+  return response.data;
+};
+
+// Get featured projects
+export const getFeaturedProjects = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/featured-projects`);
+  return response.data.projects;
+};
