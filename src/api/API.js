@@ -431,6 +431,20 @@ export const addContributorToIdeaEvent = async (ideaId, eventId, contributorEmai
   }
 };
 
+export const removeContributorFromIdeaEvent = async (ideaId, eventId, contributorEmail) => {
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api/ideas/${ideaId}/remove-contributor-event/${eventId}`;
+    console.log("📢 Removing contributor from event:", url, "with data:", { contributor_email: contributorEmail });
+
+    const response = await axios.delete(url, { data: { contributor_email: contributorEmail } });
+    console.log("✅ Contributor removed from event successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error removing contributor from event:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 // Function to get ideas where the user is a contributor
 export const getContributedIdeas = async (email) => {
   try {

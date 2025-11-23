@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
-import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent } from '../api/API';
+import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent } from '../api/API';
 import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
@@ -231,6 +231,29 @@ function IdeaScreen() {
     } catch (error) {
       console.error('Error adding contributor:', error);
       setMessage(error.response?.data?.message || 'Failed to add contributor');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const handleRemoveContributor = async (eventId, contributorEmail) => {
+    if (!confirm(`Remove ${contributorEmail.split('@')[0]} as a contributor?`)) {
+      return;
+    }
+
+    try {
+      setMessage('Removing contributor...');
+
+      await removeContributorFromIdeaEvent(ideaId, eventId, contributorEmail);
+
+      // Refresh idea data
+      const ideaData = await getIdeaById(ideaId);
+      setIdea(ideaData);
+
+      setMessage('Contributor removed successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error removing contributor:', error);
+      setMessage(error.response?.data?.message || 'Failed to remove contributor');
       setTimeout(() => setMessage(''), 5000);
     }
   };
@@ -552,14 +575,30 @@ function IdeaScreen() {
                                 {(event?.contributors
                                   ? event.contributors.split(',').filter(c => c.trim())
                                   : ['None']
-                                ).map((contributor, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50"
-                                  >
-                                    {contributor.trim().split('@')[0] || 'None'}
-                                  </span>
-                                ))}
+                                ).map((contributor, idx) => {
+                                  const contributorEmail = contributor.trim();
+                                  const isNone = contributorEmail === 'None';
+
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50 flex items-center gap-1.5"
+                                    >
+                                      <span>{contributorEmail.split('@')[0] || 'None'}</span>
+                                      {!isNone && isAdmin && (
+                                        <button
+                                          onClick={() => handleRemoveContributor(event.event_id, contributorEmail)}
+                                          className="text-red-400 hover:text-red-300 transition-colors"
+                                          title="Remove contributor"
+                                        >
+                                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           </div>
