@@ -80,7 +80,7 @@ function EventsList({ today }) {
     : filteredEventsDesktop;
 
   return (
-    <div className="events-container relative flex flex-col h-full">
+    <div className="events-container relative flex flex-col">
       {/* Enhanced Header */}
       <div className="p-3 sm:p-4 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 sticky top-0 z-10">
         <div className="flex items-center justify-between">
@@ -96,10 +96,32 @@ function EventsList({ today }) {
             <span className="text-xs sm:text-sm text-gray-200">{filteredEvents.length} active</span>
           </div>
         </div>
+        <div className="mt-2 flex gap-2 sm:gap-3">
+          <button
+            onClick={() => navigate('/past-events')}
+            className="flex-1 sm:flex-none bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-orange-500 hover:from-orange-500 hover:to-red-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
+          >
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:-rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Past Events</span>
+          </button>
+          
+          <button
+            onClick={() => navigate('/upcoming-events')}
+            className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-blue-500 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
+          >
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>Upcoming Events</span>
+          </button>
+        </div>
       </div>
 
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-3">
+      <div className="overflow-y-auto p-1 sm:p-3">
+        <div className="space-y-2 sm:space-y-3">
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
           const isEventToday = isSameDay(event.event_date);
@@ -146,7 +168,7 @@ function EventsList({ today }) {
           return (
             <div
               key={event.id}
-              className="mb-3 sm:mb-4 p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between relative bg-gradient-to-r from-white to-gray-50 border-2 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              className="p-3 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between relative bg-gradient-to-r from-white to-gray-50 border-2 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
               style={{
                 borderColor: isEventToday ? '#10B981' : isNextUpcoming ? '#3B82F6' : '#64748B',
                 boxShadow: isEventToday
@@ -167,7 +189,7 @@ function EventsList({ today }) {
                 </div>
               )}
 
-              <div className="flex-1 pt-6 sm:pt-8 lg:pt-2 min-w-0">
+              <div className="flex-1 pt-3 sm:pt-8 lg:pt-2 min-w-0">
                 <h3 className="text-base sm:text-lg lg:text-base font-bold text-black truncate">{event.title}</h3>
                 <p className="text-gray-700 text-sm mt-1">
                   {dateTimeFormatter.format(easternDate)}
@@ -187,29 +209,9 @@ function EventsList({ today }) {
             </div>
           );
         })}
+        </div>
       </div>
 
-      <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 px-3 sm:px-4 pb-3 sm:pb-4">
-        <button
-          onClick={() => navigate('/past-events')}
-          className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-sm px-4 py-2 sm:px-6 sm:py-3 rounded-xl border border-orange-500 hover:from-orange-500 hover:to-red-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group w-full sm:w-auto"
-        >
-          <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:-rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Past Events</span>
-        </button>
-        
-        <button
-          onClick={() => navigate('/upcoming-events')}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-4 py-2 sm:px-6 sm:py-3 rounded-xl border border-blue-500 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group w-full sm:w-auto"
-        >
-          <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span>Upcoming Events</span>
-        </button>
-      </div>
     </div>
   );
 }

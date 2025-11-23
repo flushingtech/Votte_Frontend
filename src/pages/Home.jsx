@@ -150,7 +150,7 @@ function Home() {
                 {/* Events Section - Takes up 2 columns on desktop */}
                 <div className="xl:col-span-2 lg:h-full">
                   <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
-                    <div className="h-[400px] sm:h-[450px] lg:h-full">
+                    <div className="h-auto lg:h-full">
                       <EventsList today={todayEastern} />
                     </div>
                   </div>

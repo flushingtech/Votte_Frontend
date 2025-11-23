@@ -113,35 +113,28 @@ const Leaderboard = () => {
       </div>
 
       {/* Top 3 row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 text-center">
         {topThree.map((user, index) => (
           <div
             key={user.email}
-            className={`bg-gradient-to-br ${getMedalColor(index)} backdrop-blur-sm border rounded-xl p-4 flex flex-col gap-3 hover:scale-[1.02] transition-transform`}
+            className={`bg-gradient-to-br ${getMedalColor(index)} backdrop-blur-sm border rounded-xl p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3 hover:scale-[1.02] transition-transform`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="text-3xl">{getMedalEmoji(index)}</div>
-                <div className="text-sm text-gray-300">Rank {index + 1}</div>
-              </div>
-              <div className="text-2xl font-bold text-white/80">{user.total_wins}</div>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-200">
+              <span className="text-2xl">{getMedalEmoji(index)}</span>
+              <span className="font-semibold">Rank {index + 1}</span>
             </div>
-            <div className="text-white font-semibold text-lg truncate">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/60 ring-2 ring-white/30 bg-white/10 flex items-center justify-center text-base font-bold text-white/80">
+              {user.profile_picture ? (
+                <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
+              ) : (
+                getInitials(user.display_name, user.email)
+              )}
+            </div>
+            <div className="text-white font-semibold text-sm sm:text-base truncate w-full">
               {user.display_name}
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/50 ring-2 ring-white/30 bg-white/10 flex items-center justify-center text-base font-bold text-white/80">
-                {user.profile_picture ? (
-                  <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
-                ) : (
-                  getInitials(user.display_name, user.email)
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-200">
-                <span className="px-2 py-1 rounded-full bg-black/20">
-                  {user.total_wins === 1 ? '1 Win' : `${user.total_wins} Wins`}
-                </span>
-              </div>
+            <div className="px-3 py-1 rounded-full bg-black/30 text-white text-xs sm:text-sm font-semibold">
+              {user.total_wins === 1 ? '1 Win' : `${user.total_wins} Wins`}
             </div>
           </div>
         ))}
@@ -158,10 +151,10 @@ const Leaderboard = () => {
             return (
               <div
                 key={user.email}
-                className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform`}
+                className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-3 sm:p-4 flex items-center gap-3 sm:gap-4 hover:scale-[1.01] transition-transform`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-2xl font-bold text-white/40 w-8 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-white/40 w-8 text-center">
                     {index + 1}
                   </div>
                   <div className="text-xl">
@@ -169,7 +162,7 @@ const Leaderboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-sm font-bold text-white/80">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-sm font-bold text-white/80">
                     {user.profile_picture ? (
                       <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
                     ) : (
@@ -181,7 +174,7 @@ const Leaderboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
-                  <span className="text-yellow-400 font-bold text-lg">
+                  <span className="text-yellow-400 font-bold text-base sm:text-lg">
                     {user.total_wins}
                   </span>
                   <span className="text-gray-200 text-sm">
