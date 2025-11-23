@@ -12,6 +12,8 @@ import {
   updateSocialLinks
 } from '../api/API';
 import { clearNameCache } from '../utils/displayNames';
+import githubLogo from '../assets/github-logo.png';
+import linkedinLogo from '../assets/linkedin-logo.png';
 
 const Profile = ({ user }) => {
   const [contributedCount, setContributedCount] = useState(0);
@@ -303,18 +305,18 @@ const Profile = ({ user }) => {
                         href={githubUrl || undefined}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-center gap-1 px-2 py-1 rounded-md ${githubUrl ? 'bg-slate-800/70 text-white hover:bg-slate-700' : 'bg-slate-800/40 text-gray-500'}`}
+                        className={`flex items-center gap-2 px-2 py-1 rounded-md border ${githubUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'}`}
                       >
-                        <span>🐙</span>
+                        <img src={githubLogo} alt="GitHub" className="w-4 h-4 object-contain" />
                         <span>GitHub</span>
                       </a>
                       <a
                         href={linkedinUrl || undefined}
                         target="_blank"
                         rel="noreferrer"
-                        className={`flex items-center gap-1 px-2 py-1 rounded-md ${linkedinUrl ? 'bg-slate-800/70 text-white hover:bg-slate-700' : 'bg-slate-800/40 text-gray-500'}`}
+                        className={`flex items-center gap-2 px-2 py-1 rounded-md border ${linkedinUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'}`}
                       >
-                        <span>🔗</span>
+                        <img src={linkedinLogo} alt="LinkedIn" className="w-4 h-4 object-contain" />
                         <span>LinkedIn</span>
                       </a>
                       <button
