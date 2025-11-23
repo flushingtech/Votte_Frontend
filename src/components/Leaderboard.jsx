@@ -100,7 +100,7 @@ const Leaderboard = () => {
         <span className="ml-auto text-sm text-gray-400">Top {leaderboard.length}</span>
       </div>
 
-      <div className="flex-1 overflow-y-scroll overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
+      <div className="max-h-[420px] overflow-y-scroll overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
         {leaderboard.map((user, index) => (
           <div
             key={user.email}
