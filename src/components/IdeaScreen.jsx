@@ -575,30 +575,14 @@ function IdeaScreen() {
                                 {(event?.contributors
                                   ? event.contributors.split(',').filter(c => c.trim())
                                   : ['None']
-                                ).map((contributor, idx) => {
-                                  const contributorEmail = contributor.trim();
-                                  const isNone = contributorEmail === 'None';
-
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50 flex items-center gap-1.5"
-                                    >
-                                      <span>{contributorEmail.split('@')[0] || 'None'}</span>
-                                      {!isNone && isAdmin && (
-                                        <button
-                                          onClick={() => handleRemoveContributor(event.event_id, contributorEmail)}
-                                          className="text-red-400 hover:text-red-300 transition-colors"
-                                          title="Remove contributor"
-                                        >
-                                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                          </svg>
-                                        </button>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                                ).map((contributor, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50"
+                                  >
+                                    {contributor.trim().split('@')[0] || 'None'}
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           </div>
@@ -1045,12 +1029,21 @@ function IdeaScreen() {
                     : []
                   ).length > 0 ? (
                     contributorsEvent.contributors.split(',').filter(c => c.trim()).map((contributor, idx) => (
-                      <span
+                      <div
                         key={idx}
-                        className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50"
+                        className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50 flex items-center gap-2"
                       >
-                        {contributor.trim().split('@')[0]}
-                      </span>
+                        <span>{contributor.trim().split('@')[0]}</span>
+                        <button
+                          onClick={() => handleRemoveContributor(contributorsEvent.event_id, contributor.trim())}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                          title="Remove contributor"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     ))
                   ) : (
                     <p className="text-gray-400 text-sm">No contributors yet</p>
