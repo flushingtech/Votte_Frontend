@@ -2,14 +2,34 @@ import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useNavigate } from 'react-router-dom';
-import { getEvents } from '../api/API';
+import { getEvents, getUserProfile } from '../api/API';
 import Navbar from './Navbar';
 
 function UpcomingEvents() {
   const [events, setEvents] = useState([]);
   const [dateEvents, setDateEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const [userName, setUserName] = useState('');
   const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userEmail = user?.email || '';
+
+  // Fetch user display name
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (userEmail) {
+        try {
+          const profile = await getUserProfile(userEmail);
+          setUserName(profile.name || userEmail.split('@')[0]);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserName(userEmail.split('@')[0]);
+        }
+      }
+    };
+    fetchUserName();
+  }, [userEmail]);
 
   const getEasternDate = () => {
     const eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
@@ -68,7 +88,7 @@ function UpcomingEvents() {
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}
     >
-      <Navbar />
+      <Navbar userName={userName || userEmail} backToHome={true} />
       
       {/* Header */}
       <div className="px-6 py-8">

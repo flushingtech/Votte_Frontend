@@ -1,19 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllProjects, toggleFeatured } from '../api/API';
+import { getAllProjects, toggleFeatured, getUserProfile } from '../api/API';
 import Navbar from '../components/Navbar';
 
 const AllProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, featured, not-featured
+  const [userName, setUserName] = useState('');
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
 
   useEffect(() => {
     fetchProjects();
+    fetchUserName();
   }, []);
+
+  const fetchUserName = async () => {
+    if (userEmail) {
+      try {
+        const profile = await getUserProfile(userEmail);
+        setUserName(profile.name || userEmail.split('@')[0]);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setUserName(userEmail.split('@')[0]);
+      }
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -49,7 +63,7 @@ const AllProjects = () => {
       <div className="min-h-screen flex flex-col" style={{
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}>
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
@@ -65,7 +79,7 @@ const AllProjects = () => {
       background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
     }}>
       <div className="sticky top-0 z-50">
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
       </div>
 
       {/* Header */}

@@ -119,10 +119,7 @@ const Leaderboard = () => {
             {/* User Info */}
             <div className="flex-1 min-w-0">
               <div className="text-white font-semibold truncate">
-                {user.email.split('@')[0]}
-              </div>
-              <div className="text-xs text-gray-400 truncate">
-                {user.email}
+                {user.display_name}
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDuplicateIdeas, mergeIdeas, checkAdminStatus, getIdeas } from '../api/API';
+import { getDuplicateIdeas, mergeIdeas, checkAdminStatus, getIdeas, getUserProfile, getDisplayNames } from '../api/API';
 import Navbar from './Navbar';
 
 function AdminDuplicates() {
@@ -14,9 +14,32 @@ function AdminDuplicates() {
   const [mode, setMode] = useState('auto'); // 'auto' or 'manual'
   const [allProjects, setAllProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userName, setUserName] = useState('');
+  const [displayNames, setDisplayNames] = useState({});
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
+
+  // Helper function to get display name
+  const getDisplayName = (email) => {
+    return displayNames[email] || email?.split('@')[0] || '';
+  };
+
+  // Fetch user display name
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (userEmail) {
+        try {
+          const profile = await getUserProfile(userEmail);
+          setUserName(profile.name || userEmail.split('@')[0]);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserName(userEmail.split('@')[0]);
+        }
+      }
+    };
+    fetchUserName();
+  }, [userEmail]);
 
   useEffect(() => {
     const verifyAdminAndFetch = async () => {
@@ -50,6 +73,15 @@ function AdminDuplicates() {
     try {
       const groups = await getDuplicateIdeas();
       setDuplicateGroups(groups);
+
+      // Fetch display names for all creators
+      // groups is an array of objects like: { title, count, ideas: [...] }
+      const allEmails = groups.flatMap(group => group.ideas.map(idea => idea.email)).filter(Boolean);
+      const uniqueEmails = [...new Set(allEmails)];
+      if (uniqueEmails.length > 0) {
+        const names = await getDisplayNames(uniqueEmails);
+        setDisplayNames(prevNames => ({ ...prevNames, ...names }));
+      }
     } catch (error) {
       console.error('Error fetching duplicates:', error);
       setMessage('Failed to load duplicates');
@@ -60,6 +92,14 @@ function AdminDuplicates() {
     try {
       const projects = await getIdeas();
       setAllProjects(projects);
+
+      // Fetch display names for all creators
+      const allEmails = projects.map(idea => idea.email).filter(Boolean);
+      const uniqueEmails = [...new Set(allEmails)];
+      if (uniqueEmails.length > 0) {
+        const names = await getDisplayNames(uniqueEmails);
+        setDisplayNames(prevNames => ({ ...prevNames, ...names }));
+      }
     } catch (error) {
       console.error('Error fetching all projects:', error);
       setMessage('Failed to load projects');
@@ -117,7 +157,7 @@ function AdminDuplicates() {
   if (loading) {
     return (
       <div>
-        <Navbar />
+        <Navbar userName={userName || userEmail} backToHome={true} />
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
           <p className="text-white text-xl">Loading...</p>
         </div>
@@ -128,7 +168,7 @@ function AdminDuplicates() {
   if (!isAdmin) {
     return (
       <div>
-        <Navbar />
+        <Navbar userName={userName || userEmail} backToHome={true} />
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
           <p className="text-red-400 text-xl">Access Denied: Admin Only</p>
         </div>
@@ -138,7 +178,7 @@ function AdminDuplicates() {
 
   return (
     <div>
-      <Navbar />
+      <Navbar userName={userName || userEmail} backToHome={true} />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -253,7 +293,7 @@ function AdminDuplicates() {
                         <div className="space-y-2 text-xs">
                           <div>
                             <span className="text-gray-500">Creator:</span>
-                            <span className="text-gray-300 ml-2">{idea.email.split('@')[0]}</span>
+                            <span className="text-gray-300 ml-2">{getDisplayName(idea.email)}</span>
                           </div>
                           {idea.contributors && (
                             <div>
@@ -356,7 +396,7 @@ function AdminDuplicates() {
                       <div className="space-y-2 text-xs">
                         <div>
                           <span className="text-gray-500">Creator:</span>
-                          <span className="text-gray-300 ml-2">{project.email.split('@')[0]}</span>
+                          <span className="text-gray-300 ml-2">{getDisplayName(project.email)}</span>
                         </div>
                         {project.contributors && (
                           <div>

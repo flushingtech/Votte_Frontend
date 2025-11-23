@@ -5,6 +5,7 @@ import MyIdeas from '../components/MyIdeas';
 import Profile from '../components/Profile';
 import FeaturedProjects from '../components/FeaturedProjects';
 import Leaderboard from '../components/Leaderboard';
+import { getUserProfile } from '../api/API';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -43,9 +44,21 @@ function Home() {
     if (token) {
       const decodedToken = decodeToken(token);
       const email = decodedToken?.email || 'Guest';
-      setUserName(email);
       setUserEmail(email);
       localStorage.setItem('userEmail', email); // Store email in local storage
+
+      // Fetch user profile to get display name
+      const fetchUserName = async () => {
+        try {
+          const profile = await getUserProfile(email);
+          setUserName(profile.name || email.split('@')[0]);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserName(email.split('@')[0]);
+        }
+      };
+
+      fetchUserName();
     }
   }, []);
 
@@ -62,7 +75,7 @@ function Home() {
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-2 lg:flex-shrink-0">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-bold text-white mb-2 lg:mb-1">
-            Welcome back, {userName.split('@')[0] || 'Guest'}! 👋
+            Welcome back, {userName || 'Guest'}! 👋
           </h1>
           <p className="text-gray-400 text-sm sm:text-base lg:text-xs xl:text-sm">
             Your innovation dashboard • {new Date().toLocaleDateString('en-US', {

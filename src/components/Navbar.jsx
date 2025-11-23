@@ -73,20 +73,20 @@ function Navbar({ userName }) {
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium text-white">
-                    {userName?.split('@')[0] || userEmail?.split('@')[0] || 'Guest'}
+                    {userName || userEmail?.split('@')[0] || 'Guest'}
                   </p>
                   <p className="text-xs text-slate-400">
                     {isAdmin ? 'Administrator' : 'Member'}
                   </p>
                 </div>
-                
+
                 {/* Avatar Button */}
                 <button
                   onClick={toggleDropdown}
                   className="flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-600 rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg group"
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    {(userName || userEmail)?.charAt(0)?.toUpperCase() || 'G'}
+                    {(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}
                   </div>
                   <svg 
                     className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
@@ -105,7 +105,7 @@ function Navbar({ userName }) {
                   {/* Dropdown Header */}
                   <div className="px-4 py-3 border-b border-slate-700/50 bg-gradient-to-r from-slate-700/50 to-slate-600/50">
                     <p className="text-sm font-medium text-white truncate">
-                      {userName || userEmail}
+                      {userName || userEmail?.split('@')[0] || 'Guest'}
                     </p>
                     <p className="text-xs text-slate-400">
                       {isAdmin ? '👑 Administrator' : '👤 Team Member'}

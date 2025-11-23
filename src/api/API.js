@@ -626,3 +626,39 @@ export const getLeaderboard = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard`);
   return response.data.leaderboard;
 };
+
+// Get user profile
+export const getUserProfile = async (email) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/profile/${email}`);
+  return response.data.user;
+};
+
+// Upload profile picture
+export const uploadProfilePicture = async (email, file) => {
+  const formData = new FormData();
+  formData.append('uploadImages', file);
+
+  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/users/upload-profile-picture/${email}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+};
+
+// Update username
+export const updateUsername = async (email, name) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/users/update-name`, {
+    email,
+    name
+  });
+  return response.data;
+};
+
+// Get display names for emails
+export const getDisplayNames = async (emails) => {
+  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/users/display-names`, {
+    emails
+  });
+  return response.data.names;
+};

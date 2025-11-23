@@ -1,15 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EventsList from '../components/admin/EventsList';
 import Navbar from '../components/Navbar';
 import AddEvent from '../components/admin/AddEvent';
+import { getUserProfile } from '../api/API';
 
 const AdminPage = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
   const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
+  const [userName, setUserName] = useState('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (userEmail) {
+        try {
+          const profile = await getUserProfile(userEmail);
+          setUserName(profile.name || userEmail.split('@')[0]);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserName(userEmail.split('@')[0]);
+        }
+      }
+    };
+    fetchUserName();
+  }, [userEmail]);
 
   const handleAddEventSuccess = () => {
     setEventsRefreshKey((prevKey) => prevKey + 1);
@@ -27,7 +44,7 @@ const AdminPage = () => {
       }}
     >
       <div className="sticky top-0 z-50">
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
       </div>
 
       {/* Welcome Header */}

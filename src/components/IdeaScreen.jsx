@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
-import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent } from '../api/API';
+import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent, getDisplayNames, getUserProfile } from '../api/API';
 import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
@@ -28,11 +28,18 @@ function IdeaScreen() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [editingGithubRepos, setEditingGithubRepos] = useState(false);
   const [githubRepos, setGithubRepos] = useState([]);
+  const [displayNames, setDisplayNames] = useState({});
+  const [userName, setUserName] = useState('');
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
+
+  // Helper function to get display name
+  const getDisplayName = (email) => {
+    return displayNames[email] || email?.split('@')[0] || '';
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +54,29 @@ function IdeaScreen() {
         if (userEmail) {
           const status = await checkAdminStatus(userEmail);
           setIsAdmin(status);
+
+          // Fetch user's display name
+          try {
+            const profile = await getUserProfile(userEmail);
+            setUserName(profile.name || userEmail.split('@')[0]);
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setUserName(userEmail.split('@')[0]);
+          }
+        }
+
+        // Fetch display names for all contributors
+        const allContributorEmails = ideaData?.events
+          ?.flatMap(event =>
+            event.contributors
+              ? event.contributors.split(',').map(c => c.trim()).filter(Boolean)
+              : []
+          ) || [];
+        const uniqueEmails = [...new Set(allContributorEmails)];
+
+        if (uniqueEmails.length > 0) {
+          const names = await getDisplayNames(uniqueEmails);
+          setDisplayNames(names);
         }
       } catch (err) {
         console.error('Error fetching idea details:', err);
@@ -267,7 +297,7 @@ function IdeaScreen() {
           minHeight: '100vh'
         }}
       >
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -286,7 +316,7 @@ function IdeaScreen() {
           minHeight: '100vh'
         }}
       >
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -305,7 +335,7 @@ function IdeaScreen() {
       }}
     >
       <div className="sticky top-0 z-50">
-        <Navbar userName={userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} backToHome={true} />
       </div>
 
       <div className="px-4 sm:px-6 py-6">
@@ -580,7 +610,7 @@ function IdeaScreen() {
                                     key={idx}
                                     className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50"
                                   >
-                                    {contributor.trim().split('@')[0] || 'None'}
+                                    {contributor !== 'None' ? getDisplayName(contributor.trim()) : 'None'}
                                   </span>
                                 ))}
                               </div>
@@ -736,7 +766,7 @@ function IdeaScreen() {
                                 key={idx}
                                 className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded text-xs border border-purple-500/50"
                               >
-                                {contributor.split('@')[0]}
+                                {getDisplayName(contributor)}
                               </span>
                             ))}
                           </div>
@@ -1033,7 +1063,7 @@ function IdeaScreen() {
                         key={idx}
                         className="bg-purple-600/30 text-purple-200 px-3 py-1.5 rounded-lg text-sm border border-purple-500/50 flex items-center gap-2"
                       >
-                        <span>{contributor.trim().split('@')[0]}</span>
+                        <span>{getDisplayName(contributor.trim())}</span>
                         <button
                           onClick={() => handleRemoveContributor(contributorsEvent.event_id, contributor.trim())}
                           className="text-red-400 hover:text-red-300 transition-colors"
