@@ -26,6 +26,7 @@ const Profile = ({ user }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [showAdvancedStats, setShowAdvancedStats] = useState(false);
+  const [activeWinsCategory, setActiveWinsCategory] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -128,6 +129,36 @@ const Profile = ({ user }) => {
   }
 
   const profileLevel = Math.floor((contributedCount + totalVotes + hackathonWins * 10) / 10);
+
+  const winCategories = [
+    { key: 'Hackathon Winner', label: 'Hackathon Wins', gradient: 'from-yellow-900/30 to-orange-900/30', border: 'border-yellow-500/30', accent: 'text-yellow-300' },
+    { key: 'Most Creative', label: 'Most Creative', gradient: 'from-pink-900/30 to-red-900/30', border: 'border-pink-500/30', accent: 'text-pink-300' },
+    { key: 'Most Impactful', label: 'Most Impactful', gradient: 'from-emerald-900/30 to-teal-900/30', border: 'border-emerald-500/30', accent: 'text-emerald-300' },
+    { key: 'Most Technical', label: 'Most Technical', gradient: 'from-blue-900/30 to-indigo-900/30', border: 'border-blue-500/30', accent: 'text-blue-300' },
+  ];
+
+  const winsByCategory = winCategories.map(cat => {
+    const items = detailedWins.filter(win =>
+      cat.key === 'Hackathon Winner'
+        ? (win.category === 'Hackathon Winner' || !win.category)
+        : win.category === cat.key
+    );
+    return { ...cat, count: items.length, items };
+  });
+
+  // Count distinct events the user participated in (as contributor/owner)
+  const participantEvents = new Set();
+  contributedIdeas.forEach(idea => {
+    if (idea.event_id) {
+      idea.event_id
+        .toString()
+        .split(',')
+        .map(id => id.trim())
+        .filter(Boolean)
+        .forEach(id => participantEvents.add(id));
+    }
+  });
+  const participantEventsCount = participantEvents.size;
 
   return (
     <div className="profile-container p-3 sm:p-4 text-white w-full h-full">
@@ -250,14 +281,14 @@ const Profile = ({ user }) => {
           </svg>
         </div>
 
-        {/* Events Went To Card */}
+        {/* Events Participated Card */}
         <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 border border-cyan-500/30 rounded-xl p-5 hover:scale-105 transition-transform relative overflow-hidden">
           <div className="flex items-start justify-between mb-1">
             <div className="text-3xl">📅</div>
-            <div className="text-4xl font-bold text-cyan-300">{totalVotes}</div>
+            <div className="text-4xl font-bold text-cyan-300">{participantEventsCount}</div>
           </div>
-          <div className="text-xs text-cyan-200/50 mb-1">Last event: 32</div>
-          <div className="text-sm font-semibold text-cyan-200 mb-2">Events Went To</div>
+          <div className="text-xs text-cyan-200/50 mb-1">Unique events</div>
+          <div className="text-sm font-semibold text-cyan-200 mb-2">Events Participated</div>
           {/* Mini trend line */}
           <svg className="w-full h-6 opacity-30" viewBox="0 0 100 30" preserveAspectRatio="none">
             <path d="M0,20 Q25,18 50,12 T100,8" fill="none" stroke="currentColor" strokeWidth="2" className="text-cyan-400"/>
@@ -392,84 +423,97 @@ const Profile = ({ user }) => {
             Hackathon Victories
             <span className="text-sm font-normal text-gray-400">({detailedWins.length})</span>
           </h3>
-          {detailedWins.length === 0 ? (
+          {winsByCategory.every(cat => cat.count === 0) ? (
             <div className="text-center py-8">
-              <div className="text-6xl mb-4">🏆</div>
+              <div className="text-6xl mb-4">🏅</div>
               <p className="text-gray-400">No wins yet</p>
               <p className="text-sm text-gray-500 mt-2">Keep participating and you'll earn your first win soon!</p>
             </div>
           ) : (
-            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-              {/* Hackathon Wins Section */}
-              <div>
-                <h4 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center gap-2">
-                  <span>👑</span>
-                  Overall Winners
-                </h4>
-                <div className="space-y-2">
-                  {detailedWins.filter(win => win.category === 'Hackathon Winner' || !win.category).map(win => (
-                    <div
-                      key={win.event_id}
-                      className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/20 rounded-lg p-3 hover:border-yellow-500/40 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-semibold text-white text-sm">{win.event_title}</div>
-                          <div className="text-xs text-gray-400 mt-1">
-                            {new Date(win.event_date).toLocaleDateString(undefined, {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </div>
-                        </div>
-                        <div className="text-2xl">🥇</div>
-                      </div>
+            <div className="space-y-3">
+              {winsByCategory.map(cat => (
+                <div
+                  key={cat.key}
+                  className={`bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-lg p-4 flex items-center justify-between`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-10 rounded-full bg-white/20" />
+                    <div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Category</div>
+                      <div className="text-sm font-semibold text-white">{cat.label}</div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Wins Section */}
-              {detailedWins.some(win => win.category && win.category !== 'Hackathon Winner') && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                    <span>🌟</span>
-                    Category Awards
-                  </h4>
-                  <div className="space-y-2">
-                    {detailedWins.filter(win => win.category && win.category !== 'Hackathon Winner').map(win => (
-                      <div
-                        key={`${win.event_id}-${win.category}`}
-                        className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/20 rounded-lg p-3 hover:border-purple-500/40 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded-full font-semibold">
-                                {win.category}
-                              </span>
-                            </div>
-                            <div className="font-semibold text-white text-sm">{win.event_title}</div>
-                            <div className="text-xs text-gray-400 mt-1">
-                              {new Date(win.event_date).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                            </div>
-                          </div>
-                          <div className="text-2xl">⭐</div>
-                        </div>
-                      </div>
-                    ))}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className={`text-3xl font-bold ${cat.accent} min-w-[3rem] text-right`}>{cat.count}</div>
+                    <button
+                      disabled={cat.count === 0}
+                      onClick={() => setActiveWinsCategory(cat)}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
+                        cat.count === 0
+                          ? 'bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>
+
       </div>
+
+      {/* Wins Detail Modal */}
+      {activeWinsCategory && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
+            onClick={() => setActiveWinsCategory(null)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] pointer-events-none">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 max-w-3xl w-full shadow-2xl pointer-events-auto animate-slide-down">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-xs text-gray-400">Category</div>
+                  <h2 className="text-2xl font-bold text-white">{activeWinsCategory.label}</h2>
+                  <p className="text-sm text-gray-400">{activeWinsCategory.count} win(s)</p>
+                </div>
+                <button
+                  onClick={() => setActiveWinsCategory(null)}
+                  className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors group"
+                >
+                  <svg className="w-6 h-6 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="max-h-[420px] overflow-y-auto space-y-2 pr-2">
+                {activeWinsCategory.items.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">No wins in this category yet.</div>
+                ) : (
+                  activeWinsCategory.items.map(item => (
+                    <div
+                      key={`${item.event_id}-${item.category || 'main'}`}
+                      className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 border border-slate-600/40 rounded-lg p-3 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-white">{item.event_title}</div>
+                        <div className="text-xs text-gray-400">
+                          {new Date(item.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </div>
+                      </div>
+                      <span className="text-xs bg-white/10 text-white px-2 py-0.5 rounded-full">{item.category || 'Hackathon Winner'}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Advanced Stats Modal */}
       {showAdvancedStats && (
