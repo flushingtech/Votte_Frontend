@@ -113,9 +113,6 @@ function IdeaScreen() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          idea: idea.idea,
-          description: idea.description,
-          technologies: idea.technologies,
           github_repos: validRepos
         })
       });
