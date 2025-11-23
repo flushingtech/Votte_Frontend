@@ -620,3 +620,9 @@ export const getFeaturedProjects = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/featured-projects`);
   return response.data.projects;
 };
+
+// Get leaderboard
+export const getLeaderboard = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard`);
+  return response.data.leaderboard;
+};

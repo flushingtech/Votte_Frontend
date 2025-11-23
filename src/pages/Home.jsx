@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
 import Profile from '../components/Profile';
 import FeaturedProjects from '../components/FeaturedProjects';
+import Leaderboard from '../components/Leaderboard';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -154,16 +155,7 @@ function Home() {
               <div className="w-full lg:flex-[2]">
                 <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
                   <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
-                    <div className="p-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-2xl">🏆</span>
-                        <h2 className="text-xl font-bold text-white">Leaderboard</h2>
-                      </div>
-                      {/* Placeholder - content will be added later */}
-                      <div className="flex items-center justify-center h-64 text-gray-400">
-                        <p>Coming soon...</p>
-                      </div>
-                    </div>
+                    <Leaderboard />
                   </div>
                 </div>
               </div>
