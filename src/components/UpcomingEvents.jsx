@@ -10,6 +10,7 @@ function UpcomingEvents() {
   const [dateEvents, setDateEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('user'));
@@ -22,6 +23,7 @@ function UpcomingEvents() {
         try {
           const profile = await getUserProfile(userEmail);
           setUserName(profile.name || userEmail.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(userEmail.split('@')[0]);
@@ -88,7 +90,7 @@ function UpcomingEvents() {
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}
     >
-      <Navbar userName={userName || userEmail} backToHome={true} />
+      <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       
       {/* Header */}
       <div className="px-6 py-8">

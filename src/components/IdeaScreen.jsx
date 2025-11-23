@@ -30,6 +30,7 @@ function IdeaScreen() {
   const [githubRepos, setGithubRepos] = useState([]);
   const [displayNames, setDisplayNames] = useState({});
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -59,6 +60,7 @@ function IdeaScreen() {
           try {
             const profile = await getUserProfile(userEmail);
             setUserName(profile.name || userEmail.split('@')[0]);
+            setProfilePicture(profile.profile_picture || '');
           } catch (error) {
             console.error('Error fetching user profile:', error);
             setUserName(userEmail.split('@')[0]);
@@ -297,7 +299,7 @@ function IdeaScreen() {
           minHeight: '100vh'
         }}
       >
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -316,7 +318,7 @@ function IdeaScreen() {
           minHeight: '100vh'
         }}
       >
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -335,7 +337,7 @@ function IdeaScreen() {
       }}
     >
       <div className="sticky top-0 z-50">
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
       <div className="px-4 sm:px-6 py-6">

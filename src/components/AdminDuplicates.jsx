@@ -15,6 +15,7 @@ function AdminDuplicates() {
   const [allProjects, setAllProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const [displayNames, setDisplayNames] = useState({});
 
   const user = JSON.parse(localStorage.getItem('user'));
@@ -32,6 +33,7 @@ function AdminDuplicates() {
         try {
           const profile = await getUserProfile(userEmail);
           setUserName(profile.name || userEmail.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(userEmail.split('@')[0]);
@@ -157,7 +159,7 @@ function AdminDuplicates() {
   if (loading) {
     return (
       <div>
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
           <p className="text-white text-xl">Loading...</p>
         </div>
@@ -168,7 +170,7 @@ function AdminDuplicates() {
   if (!isAdmin) {
     return (
       <div>
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
           <p className="text-red-400 text-xl">Access Denied: Admin Only</p>
         </div>
@@ -178,7 +180,7 @@ function AdminDuplicates() {
 
   return (
     <div>
-      <Navbar userName={userName || userEmail} backToHome={true} />
+      <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">

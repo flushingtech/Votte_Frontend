@@ -10,6 +10,7 @@ const AdminPage = () => {
   const userEmail = user?.email || '';
   const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
 
   const navigate = useNavigate();
 
@@ -19,6 +20,7 @@ const AdminPage = () => {
         try {
           const profile = await getUserProfile(userEmail);
           setUserName(profile.name || userEmail.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(userEmail.split('@')[0]);
@@ -44,7 +46,7 @@ const AdminPage = () => {
       }}
     >
       <div className="sticky top-0 z-50">
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
       {/* Welcome Header */}

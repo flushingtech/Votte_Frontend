@@ -32,6 +32,7 @@ function EventScreen() {
   const [notification, setNotification] = useState(null);
   const [showResultsConfirm, setShowResultsConfirm] = useState(false);
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
 
   // Fetch user display name
   useEffect(() => {
@@ -40,6 +41,7 @@ function EventScreen() {
         try {
           const profile = await getUserProfile(email);
           setUserName(profile.name || email.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(email.split('@')[0]);
@@ -390,7 +392,7 @@ function EventScreen() {
           "linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)",
       }}
     >
-      <Navbar userName={userName || email} backToHome={true} />
+      <Navbar userName={userName || email} profilePicture={profilePicture} backToHome={true} />
 
       <div className="flex-1 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
         <div className="relative max-w-6xl mx-auto">

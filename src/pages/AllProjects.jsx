@@ -8,6 +8,7 @@ const AllProjects = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, featured, not-featured
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
@@ -22,6 +23,7 @@ const AllProjects = () => {
       try {
         const profile = await getUserProfile(userEmail);
         setUserName(profile.name || userEmail.split('@')[0]);
+        setProfilePicture(profile.profile_picture || '');
       } catch (error) {
         console.error('Error fetching user profile:', error);
         setUserName(userEmail.split('@')[0]);
@@ -63,7 +65,7 @@ const AllProjects = () => {
       <div className="min-h-screen flex flex-col" style={{
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}>
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
@@ -79,7 +81,7 @@ const AllProjects = () => {
       background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
     }}>
       <div className="sticky top-0 z-50">
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
       {/* Header */}

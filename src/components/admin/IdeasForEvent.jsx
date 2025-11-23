@@ -28,6 +28,7 @@ const IdeasForEvent = ({ userEmail }) => {
   const [notification, setNotification] = useState(null);
   const [showResultsConfirm, setShowResultsConfirm] = useState(false);
   const [userName, setUserName] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
 
   const navigate = useNavigate();
 
@@ -38,6 +39,7 @@ const IdeasForEvent = ({ userEmail }) => {
         try {
           const profile = await getUserProfile(userEmail);
           setUserName(profile.name || userEmail.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(userEmail.split('@')[0]);
@@ -198,7 +200,7 @@ const IdeasForEvent = ({ userEmail }) => {
           background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
         }}
       >
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -217,7 +219,7 @@ const IdeasForEvent = ({ userEmail }) => {
           background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
         }}
       >
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
@@ -236,7 +238,7 @@ const IdeasForEvent = ({ userEmail }) => {
       }}
     >
       <div className="sticky top-0 z-50">
-        <Navbar userName={userName || userEmail} backToHome={true} />
+        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
       <div className="px-4 sm:px-6 py-6">
