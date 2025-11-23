@@ -141,9 +141,9 @@ function Home() {
                 </div>
 
                 {/* Featured Projects Section */}
-                <div className="xl:col-span-1 lg:h-full">
-                  <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
-                    <div className="h-[400px] sm:h-[450px] lg:h-full overflow-hidden">
+                <div className="xl:col-span-1">
+                  <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden">
+                    <div className="h-[400px] overflow-hidden">
                       <FeaturedProjects />
                     </div>
                   </div>
