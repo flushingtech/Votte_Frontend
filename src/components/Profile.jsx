@@ -97,6 +97,11 @@ const Profile = ({ user }) => {
       return;
     }
 
+    if (tempName.trim().length > 10) {
+      alert('10 characters max');
+      return;
+    }
+
     try {
       await updateUsername(user.email, tempName.trim());
       setUserName(tempName.trim());
@@ -184,13 +189,15 @@ const Profile = ({ user }) => {
   });
   const participantEventsCount = participantEvents.size;
 
+  const nameSizeClass = 'text-2xl sm:text-3xl';
+
   return (
     <div className="profile-container p-3 sm:p-4 text-white w-full h-full">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 rounded-2xl p-6 sm:p-8 mb-4">
-        <div className="flex items-start justify-between gap-6">
+      <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 rounded-2xl p-5 sm:p-8 mb-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
           {/* Left Section: Profile Picture + Info */}
-          <div className="flex items-start gap-6">
+          <div className="flex items-start gap-4 sm:gap-6 w-full sm:w-auto min-w-0">
             <div className="relative group">
               {profilePicture ? (
                 <img
@@ -228,34 +235,39 @@ const Profile = ({ user }) => {
               />
             </div>
 
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-2 sm:gap-3 mb-2">
                 {isEditingName ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={tempName}
-                      onChange={(e) => setTempName(e.target.value)}
-                      onKeyDown={handleKeyPress}
-                      className="text-3xl font-bold bg-slate-800/80 text-white border border-purple-500 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      autoFocus
-                    />
-                    <button onClick={handleSaveName} className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </button>
-                    <button onClick={handleCancelEdit} className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                  <div className="flex items-start gap-2">
+                    <div className="flex flex-col gap-1">
+                      <input
+                        type="text"
+                        value={tempName}
+                        onChange={(e) => setTempName(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        className="text-3xl font-bold bg-slate-800/80 text-white border border-purple-500 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        autoFocus
+                      />
+                      <span className="text-[10px] text-gray-400">10 characters max</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <button onClick={handleSaveName} className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                      <button onClick={handleCancelEdit} className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-4xl font-bold text-white">
-                      {userName}
-                    </h2>
+                      <h2 className={`${nameSizeClass} font-bold text-white leading-tight whitespace-nowrap`}>
+                        {userName}
+                      </h2>
                     <button
                       onClick={handleEditName}
                       className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors group"
@@ -267,85 +279,87 @@ const Profile = ({ user }) => {
                     </button>
                   </>
                 )}
-                <div className="flex items-center gap-2 ml-auto text-xs">
-                  {editingLinks ? (
-                    <>
-                      <input
-                        type="url"
-                        placeholder="GitHub URL"
-                        value={githubUrl}
-                        onChange={(e) => setGithubUrl(e.target.value)}
-                        className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-40"
-                      />
-                      <input
-                        type="url"
-                        placeholder="LinkedIn URL"
-                        value={linkedinUrl}
-                        onChange={(e) => setLinkedinUrl(e.target.value)}
-                        className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-40"
-                      />
-                      <button
-                        onClick={handleSaveSocialLinks}
-                        disabled={savingSocials}
-                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-md transition-colors"
-                      >
-                        {savingSocials ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        onClick={() => setEditingLinks(false)}
-                        className="p-2 text-gray-400 hover:text-white"
-                        title="Cancel"
-                      >
-                        ✕
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <a
-                        href={githubUrl || undefined}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`flex items-center gap-2 px-2 py-1 rounded-md border ${githubUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'}`}
-                      >
-                        <img src={githubLogo} alt="GitHub" className="w-4 h-4 object-contain" />
-                        <span>GitHub</span>
-                      </a>
-                      <a
-                        href={linkedinUrl || undefined}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`flex items-center gap-2 px-2 py-1 rounded-md border ${linkedinUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'}`}
-                      >
-                        <img src={linkedinLogo} alt="LinkedIn" className="w-4 h-4 object-contain" />
-                        <span>LinkedIn</span>
-                      </a>
-                      <button
-                        onClick={() => setEditingLinks(true)}
-                        className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
-                        title="Edit social links"
-                      >
-                        <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                </div>
               </div>
-              <p className="text-purple-300 text-base font-medium mb-1">
+              <p className="text-purple-300 text-xs sm:text-sm font-medium mb-1 truncate">
                 {hackathonWins > 0 ? 'Hackathon Champion' : 'Innovator'} • Flushing Tech
               </p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm truncate">
                 Member Since {joinedDate}
               </p>
+
+              {/* Social Links Row */}
+              <div className="mt-2 flex items-center gap-2 text-xs flex-wrap sm:flex-nowrap">
+                {editingLinks ? (
+                  <>
+                    <input
+                      type="url"
+                      placeholder="GitHub URL"
+                      value={githubUrl}
+                      onChange={(e) => setGithubUrl(e.target.value)}
+                      className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-36 sm:w-40"
+                    />
+                    <input
+                      type="url"
+                      placeholder="LinkedIn URL"
+                      value={linkedinUrl}
+                      onChange={(e) => setLinkedinUrl(e.target.value)}
+                      className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-36 sm:w-40"
+                    />
+                    <button
+                      onClick={handleSaveSocialLinks}
+                      disabled={savingSocials}
+                      className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-md transition-colors"
+                    >
+                      {savingSocials ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => setEditingLinks(false)}
+                      className="p-2 text-gray-400 hover:text-white"
+                      title="Cancel"
+                    >
+                      x
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href={githubUrl || undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${githubUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
+                  >
+                    <img src={githubLogo} alt="GitHub" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] sm:text-xs">GitHub</span>
+                  </a>
+                  <a
+                    href={linkedinUrl || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${linkedinUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
+                  >
+                    <img src={linkedinLogo} alt="LinkedIn" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] sm:text-xs">LinkedIn</span>
+                  </a>
+                  <button
+                    onClick={() => setEditingLinks(true)}
+                    className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
+                      title="Edit social links"
+                    >
+                      <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+              </div>
 
             </div>
           </div>
 
           {/* Right Section: Profile Level Badge */}
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-start sm:items-end w-full sm:w-auto">
             <div className="text-sm text-gray-400 mb-1">Profile Level</div>
-            <div className="text-5xl font-bold text-yellow-400 mb-1">
+            <div className="text-5xl font-bold text-yellow-400 mb-1 leading-none">
               {profileLevel}
             </div>
             <div className="w-32 h-1 bg-gradient-to-r from-yellow-600 to-orange-500 rounded-full mb-2"></div>
@@ -621,7 +635,7 @@ const Profile = ({ user }) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-1">Advanced Statistics</h2>
-                  <p className="text-gray-400 text-sm">Detailed insights into your performance</p>
+                  <p className="text-gray-400 text-sm truncate">Detailed insights into your performance</p>
                 </div>
                 <button
                   onClick={() => setShowAdvancedStats(false)}
