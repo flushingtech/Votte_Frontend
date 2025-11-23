@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDuplicateIdeas, mergeIdeas, checkAdminStatus } from '../api/API';
+import { getDuplicateIdeas, mergeIdeas, checkAdminStatus, getIdeas } from '../api/API';
 import Navbar from './Navbar';
 
 function AdminDuplicates() {
@@ -11,6 +11,9 @@ function AdminDuplicates() {
   const [selectedIdeas, setSelectedIdeas] = useState([]);
   const [message, setMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [mode, setMode] = useState('auto'); // 'auto' or 'manual'
+  const [allProjects, setAllProjects] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
@@ -53,6 +56,26 @@ function AdminDuplicates() {
     }
   };
 
+  const fetchAllProjects = async () => {
+    try {
+      const projects = await getIdeas();
+      setAllProjects(projects);
+    } catch (error) {
+      console.error('Error fetching all projects:', error);
+      setMessage('Failed to load projects');
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      if (mode === 'manual') {
+        fetchAllProjects();
+      } else {
+        fetchDuplicates();
+      }
+    }
+  }, [mode, isAdmin]);
+
   const handleSelectIdea = (ideaId) => {
     setSelectedIdeas(prev =>
       prev.includes(ideaId)
@@ -76,7 +99,13 @@ function AdminDuplicates() {
       setMessage(`✅ Successfully merged ${result.mergedCount} ideas!`);
       setSelectedIdeas([]);
       setSelectedGroup(null);
-      await fetchDuplicates();
+
+      // Refresh based on current mode
+      if (mode === 'manual') {
+        await fetchAllProjects();
+      } else {
+        await fetchDuplicates();
+      }
     } catch (error) {
       console.error('Error merging ideas:', error);
       console.error('Error response:', error.response?.data);
@@ -127,7 +156,41 @@ function AdminDuplicates() {
             </div>
           )}
 
-          {duplicateGroups.length === 0 ? (
+          {/* Mode Toggle */}
+          <div className="mb-6 flex gap-3">
+            <button
+              onClick={() => {
+                setMode('auto');
+                setSelectedIdeas([]);
+                setSelectedGroup(null);
+                setSearchQuery('');
+              }}
+              className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+                mode === 'auto'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                  : 'bg-slate-800/50 text-gray-400 border border-slate-700/50 hover:border-slate-600'
+              }`}
+            >
+              🔍 Auto-Detected Duplicates
+            </button>
+            <button
+              onClick={() => {
+                setMode('manual');
+                setSelectedIdeas([]);
+                setSelectedGroup(null);
+              }}
+              className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+                mode === 'manual'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                  : 'bg-slate-800/50 text-gray-400 border border-slate-700/50 hover:border-slate-600'
+              }`}
+            >
+              ✏️ Manual Search & Merge
+            </button>
+          </div>
+
+          {mode === 'auto' ? (
+            duplicateGroups.length === 0 ? (
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-12 text-center">
               <p className="text-gray-400 text-lg">No duplicate ideas found! 🎉</p>
               <p className="text-gray-500 text-sm mt-2">All ideas are unique or already merged.</p>
@@ -220,6 +283,116 @@ function AdminDuplicates() {
                   </div>
                 </div>
               ))}
+            </div>
+          )
+          ) : (
+            /* Manual Search Mode */
+            <div>
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search all projects by title..."
+                    className="w-full px-4 py-3 pl-12 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                  <svg className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+
+                {selectedIdeas.length >= 2 && (
+                  <div className="mt-4 flex items-center justify-between bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                    <p className="text-blue-200 text-sm">
+                      <strong>{selectedIdeas.length} projects selected</strong> - Ready to merge
+                    </p>
+                    <button
+                      onClick={handleMerge}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all shadow-lg"
+                    >
+                      Merge Selected ({selectedIdeas.length})
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Projects Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {allProjects
+                  .filter(project =>
+                    project.idea.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((project) => (
+                    <div
+                      key={project.id}
+                      className={`bg-slate-800/30 rounded-lg border p-4 cursor-pointer transition-all ${
+                        selectedIdeas.includes(project.id)
+                          ? 'border-blue-500 bg-blue-900/20'
+                          : 'border-slate-700/50 hover:border-slate-600'
+                      }`}
+                      onClick={() => handleSelectIdea(project.id)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-white font-bold text-base mb-1 line-clamp-2">{project.idea}</h3>
+                          <p className="text-gray-400 text-xs">
+                            📅 {project.event_date ? new Date(project.event_date).toLocaleDateString() : 'No date'}
+                          </p>
+                          {project.event_title && (
+                            <p className="text-gray-500 text-xs mt-1">{project.event_title}</p>
+                          )}
+                          <p className="text-gray-600 text-xs mt-1">ID: {project.id}</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={selectedIdeas.includes(project.id)}
+                          onChange={() => {}}
+                          className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 flex-shrink-0"
+                        />
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <span className="text-gray-500">Creator:</span>
+                          <span className="text-gray-300 ml-2">{project.email.split('@')[0]}</span>
+                        </div>
+                        {project.contributors && (
+                          <div>
+                            <span className="text-gray-500">Contributors:</span>
+                            <span className="text-gray-300 ml-2">{project.contributors.split(',').length}</span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-500">Likes:</span>
+                          <span className="text-gray-300 ml-2">{project.likes || 0}</span>
+                        </div>
+                      </div>
+
+                      {project.description && (
+                        <div className="mt-3 pt-3 border-t border-slate-600/50">
+                          <p className="text-gray-400 text-xs line-clamp-2">{project.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+
+              {allProjects.filter(project =>
+                project.idea.toLowerCase().includes(searchQuery.toLowerCase())
+              ).length === 0 && (
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-12 text-center">
+                  <p className="text-gray-400 text-lg">No projects found</p>
+                  <p className="text-gray-500 text-sm mt-2">Try a different search term</p>
+                </div>
+              )}
+
+              <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-200 text-sm">
+                  💡 <strong>Tip:</strong> Search for projects and select 2 or more to merge. The idea with the earliest event date will be kept as the primary.
+                </p>
+              </div>
             </div>
           )}
         </div>
