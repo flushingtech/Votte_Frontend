@@ -26,8 +26,8 @@ function IdeaScreen() {
   const [users, setUsers] = useState([]);
   const [selectedContributor, setSelectedContributor] = useState(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [editingGithubRepo, setEditingGithubRepo] = useState(false);
-  const [githubRepoInput, setGithubRepoInput] = useState('');
+  const [editingGithubRepos, setEditingGithubRepos] = useState(false);
+  const [githubRepos, setGithubRepos] = useState([]);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -99,11 +99,14 @@ function IdeaScreen() {
     }
   };
 
-  const handleSaveGithubRepo = async () => {
+  const handleSaveGithubRepos = async () => {
     if (!idea) {
       setMessage('Idea data not loaded');
       return;
     }
+
+    // Filter out empty repos
+    const validRepos = githubRepos.filter(repo => repo.title.trim() && repo.url.trim());
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/ideas/editIdea/${ideaId}`, {
@@ -113,7 +116,7 @@ function IdeaScreen() {
           idea: idea.idea,
           description: idea.description,
           technologies: idea.technologies,
-          github_repo: githubRepoInput
+          github_repos: validRepos
         })
       });
 
@@ -126,19 +129,39 @@ function IdeaScreen() {
       const ideaData = await getIdeaById(ideaId);
       setIdea(ideaData);
 
-      setEditingGithubRepo(false);
-      setMessage('Repository updated successfully!');
+      setEditingGithubRepos(false);
+      setMessage('Repositories updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating GitHub repo:', error);
-      setMessage(error.message || 'Failed to update repository');
+      console.error('Error updating GitHub repos:', error);
+      setMessage(error.message || 'Failed to update repositories');
       setTimeout(() => setMessage(''), 5000);
     }
   };
 
-  const handleEditGithubRepo = () => {
-    setGithubRepoInput(idea?.github_repo || '');
-    setEditingGithubRepo(true);
+  const handleEditGithubRepos = () => {
+    // Parse existing repos or start with empty array
+    try {
+      const existing = idea?.github_repo ? JSON.parse(idea.github_repo) : [];
+      setGithubRepos(Array.isArray(existing) ? existing : []);
+    } catch {
+      setGithubRepos([]);
+    }
+    setEditingGithubRepos(true);
+  };
+
+  const handleAddRepo = () => {
+    setGithubRepos([...githubRepos, { title: '', url: '' }]);
+  };
+
+  const handleRemoveRepo = (index) => {
+    setGithubRepos(githubRepos.filter((_, i) => i !== index));
+  };
+
+  const handleRepoChange = (index, field, value) => {
+    const updated = [...githubRepos];
+    updated[index][field] = value;
+    setGithubRepos(updated);
   };
 
   const handleUploadImage = async (eventId) => {
@@ -719,65 +742,112 @@ function IdeaScreen() {
                           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
                       </span>
-                      Repository
+                      Repositories
                     </h2>
-                    {!editingGithubRepo && (
+                    {!editingGithubRepos && (
                       <button
-                        onClick={handleEditGithubRepo}
+                        onClick={handleEditGithubRepos}
                         className="text-blue-400 hover:text-blue-300 transition-colors p-1 hover:bg-slate-700/50 rounded"
-                        title={idea?.github_repo ? "Edit repository" : "Add repository"}
+                        title="Edit repositories"
                       >
-                        {idea?.github_repo ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        )}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
                       </button>
                     )}
                   </div>
-                  <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30">
-                    {editingGithubRepo ? (
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={githubRepoInput}
-                          onChange={(e) => setGithubRepoInput(e.target.value)}
-                          placeholder="https://github.com/username/repo"
-                          className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleSaveGithubRepo}
-                            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingGithubRepo(false)}
-                            className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                          >
-                            Cancel
-                          </button>
+
+                  {editingGithubRepos ? (
+                    <div className="space-y-3">
+                      {githubRepos.map((repo, index) => (
+                        <div key={index} className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30 space-y-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-400 text-xs font-medium">Repository {index + 1}</span>
+                            <button
+                              onClick={() => handleRemoveRepo(index)}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                              title="Remove repository"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={repo.title}
+                            onChange={(e) => handleRepoChange(index, 'title', e.target.value)}
+                            placeholder="Title (e.g., Frontend, Backend, Mobile App)"
+                            className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <input
+                            type="text"
+                            value={repo.url}
+                            onChange={(e) => handleRepoChange(index, 'url', e.target.value)}
+                            placeholder="https://github.com/username/repo"
+                            className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
                         </div>
-                      </div>
-                    ) : idea?.github_repo ? (
-                      <a
-                        href={idea.github_repo.startsWith('http') ? idea.github_repo : `https://${idea.github_repo}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-sm break-all transition-colors flex items-center gap-2"
+                      ))}
+
+                      <button
+                        onClick={handleAddRepo}
+                        className="w-full bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500 text-gray-300 px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center gap-2"
                       >
-                        <span>🔗</span>
-                        <span className="underline">{idea.github_repo}</span>
-                      </a>
-                    ) : (
-                      <p className="text-gray-500 text-sm italic">No repository linked</p>
-                    )}
-                  </div>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Repository
+                      </button>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={handleSaveGithubRepos}
+                          className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          Save All
+                        </button>
+                        <button
+                          onClick={() => setEditingGithubRepos(false)}
+                          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (() => {
+                    try {
+                      const repos = idea?.github_repo ? JSON.parse(idea.github_repo) : [];
+                      return Array.isArray(repos) && repos.length > 0 ? (
+                        <div className="space-y-2">
+                          {repos.map((repo, index) => (
+                            <div key={index} className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30">
+                              <div className="text-gray-400 text-xs font-medium mb-1">{repo.title}</div>
+                              <a
+                                href={repo.url.startsWith('http') ? repo.url : `https://${repo.url}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:text-blue-300 text-sm break-all transition-colors flex items-center gap-2"
+                              >
+                                <span>🔗</span>
+                                <span className="underline">{repo.url}</span>
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30">
+                          <p className="text-gray-500 text-sm italic">No repositories linked</p>
+                        </div>
+                      );
+                    } catch {
+                      return (
+                        <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700/30">
+                          <p className="text-gray-500 text-sm italic">No repositories linked</p>
+                        </div>
+                      );
+                    }
+                  })()}
                 </aside>
 
                 {/* ADMIN PANEL */}
