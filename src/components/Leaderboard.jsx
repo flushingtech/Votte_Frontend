@@ -70,10 +70,22 @@ const Leaderboard = () => {
     return 'from-purple-600/20 to-pink-600/20 border-purple-500/30';
   };
 
+  const getInitials = (name, email) => {
+    const basis = name || email || '';
+    const parts = basis.split(' ').filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    if (parts.length === 1 && parts[0].length >= 2) return parts[0].slice(0, 2).toUpperCase();
+    const handle = (email || '').split('@')[0] || '';
+    return (handle.slice(0, 2) || 'U').toUpperCase();
+  };
+
   const scrollbarStyle = {
     scrollbarWidth: 'thin',
     scrollbarColor: '#9333ea #1e293b'
   };
+
+  const topThree = leaderboard.slice(0, 3);
+  const rest = leaderboard.slice(3);
 
   return (
     <div className="p-6 h-full flex flex-col">
@@ -100,41 +112,87 @@ const Leaderboard = () => {
         <span className="ml-auto text-sm text-gray-400">Top {leaderboard.length}</span>
       </div>
 
-      <div className="max-h-[420px] overflow-y-scroll overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
-        {leaderboard.map((user, index) => (
+      {/* Top 3 row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        {topThree.map((user, index) => (
           <div
             key={user.email}
-            className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-4 flex items-center gap-4 hover:scale-[1.02] transition-transform`}
+            className={`bg-gradient-to-br ${getMedalColor(index)} backdrop-blur-sm border rounded-xl p-4 flex flex-col gap-3 hover:scale-[1.02] transition-transform`}
           >
-            {/* Rank & Medal */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="text-3xl">{getMedalEmoji(index)}</div>
+                <div className="text-sm text-gray-300">Rank {index + 1}</div>
+              </div>
+              <div className="text-2xl font-bold text-white/80">{user.total_wins}</div>
+            </div>
+            <div className="text-white font-semibold text-lg truncate">
+              {user.display_name}
+            </div>
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-bold text-white/30 w-8 text-center">
-                {index + 1}
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/50 ring-2 ring-white/30 bg-white/10 flex items-center justify-center text-base font-bold text-white/80">
+                {user.profile_picture ? (
+                  <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
+                ) : (
+                  getInitials(user.display_name, user.email)
+                )}
               </div>
-              <div className="text-3xl">
-                {getMedalEmoji(index)}
+              <div className="flex items-center gap-2 text-sm text-gray-200">
+                <span className="px-2 py-1 rounded-full bg-black/20">
+                  {user.total_wins === 1 ? '1 Win' : `${user.total_wins} Wins`}
+                </span>
               </div>
-            </div>
-
-            {/* User Info */}
-            <div className="flex-1 min-w-0">
-              <div className="text-white font-semibold truncate">
-                {user.display_name}
-              </div>
-            </div>
-
-            {/* Wins Badge */}
-            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-              <span className="text-yellow-400 font-bold text-lg">
-                {user.total_wins}
-              </span>
-              <span className="text-gray-300 text-sm">
-                {user.total_wins === 1 ? 'Win' : 'Wins'}
-              </span>
             </div>
           </div>
         ))}
+        {topThree.length < 3 && Array.from({ length: 3 - topThree.length }).map((_, i) => (
+          <div key={`filler-${i}`} className="hidden sm:block" />
+        ))}
       </div>
+
+      {/* Remaining list */}
+      {rest.length > 0 && (
+        <div className="max-h-[320px] overflow-y-scroll overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
+          {rest.map((user, i) => {
+            const index = i + 3;
+            return (
+              <div
+                key={user.email}
+                className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-4 flex items-center gap-4 hover:scale-[1.01] transition-transform`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl font-bold text-white/40 w-8 text-center">
+                    {index + 1}
+                  </div>
+                  <div className="text-xl">
+                    {getMedalEmoji(index)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-sm font-bold text-white/80">
+                    {user.profile_picture ? (
+                      <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
+                    ) : (
+                      getInitials(user.display_name, user.email)
+                    )}
+                  </div>
+                  <div className="text-white font-semibold truncate">
+                    {user.display_name}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
+                  <span className="text-yellow-400 font-bold text-lg">
+                    {user.total_wins}
+                  </span>
+                  <span className="text-gray-200 text-sm">
+                    {user.total_wins === 1 ? 'Win' : 'Wins'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
