@@ -46,9 +46,23 @@ const AdminPage = () => {
       <div className="flex-1 px-4 sm:px-6 pb-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Section: Add Event */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 h-fit">
-              <AddEvent userEmail={userEmail} onSuccess={handleAddEventSuccess} />
+            {/* Left Section: Add Event & Admin Tools */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6">
+                <AddEvent userEmail={userEmail} onSuccess={handleAddEventSuccess} />
+              </div>
+
+              {/* Merge Duplicates Button */}
+              <button
+                onClick={() => navigate('/admin/duplicates')}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
+              >
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                <span className="text-lg">Merge Duplicate Ideas</span>
+                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">Admin Tool</span>
+              </button>
             </div>
 
             {/* Right Section: Events List */}

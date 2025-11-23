@@ -563,3 +563,28 @@ function _formatDate(dateString) {
     `${day}${ordinal}`
   );
 }
+
+// Admin: Get duplicate ideas
+export const getDuplicateIdeas = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/admin/duplicates`);
+    return response.data.duplicateGroups;
+  } catch (error) {
+    console.error('Error fetching duplicates:', error);
+    throw error;
+  }
+};
+
+// Admin: Merge ideas
+export const mergeIdeas = async (ideaIds, adminEmail) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/ideas/admin/merge-ideas`, {
+      ideaIds,
+      adminEmail
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error merging ideas:', error);
+    throw error;
+  }
+};

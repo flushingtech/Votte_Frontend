@@ -10,6 +10,7 @@ import IdeaScreen from './components/IdeaScreen';
 import Profile from './components/Profile';
 import PastEvents from './components/PastEvents';
 import UpcomingEvents from './components/UpcomingEvents';
+import AdminDuplicates from './components/AdminDuplicates'; // Admin Duplicates Manager
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -83,6 +84,14 @@ function App() {
             element={
               <RequireAdmin userEmail={userEmail}>
                 <IdeasForEvent userEmail={userEmail} />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/duplicates"
+            element={
+              <RequireAdmin userEmail={userEmail}>
+                <AdminDuplicates />
               </RequireAdmin>
             }
           />
