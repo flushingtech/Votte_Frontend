@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import votteLogo from "../assets/votte_favicon.png";
 import { checkAdminStatus } from "../api/API";
 
-function Navbar({ userName }) {
+function Navbar({ userName, profilePicture }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
@@ -85,9 +85,17 @@ function Navbar({ userName }) {
                   onClick={toggleDropdown}
                   className="flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-600 rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg group"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    {(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}
-                  </div>
+                  {profilePicture ? (
+                    <img
+                      src={profilePicture}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-lg object-cover border border-slate-500"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                      {(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}
+                    </div>
+                  )}
                   <svg 
                     className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
                     fill="none" 

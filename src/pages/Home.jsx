@@ -28,6 +28,7 @@ const decodeToken = (token) => {
 function Home() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const [activeTab, setActiveTab] = useState('community');
 
   const getEasternDate = () => {
@@ -47,11 +48,12 @@ function Home() {
       setUserEmail(email);
       localStorage.setItem('userEmail', email); // Store email in local storage
 
-      // Fetch user profile to get display name
+      // Fetch user profile to get display name and profile picture
       const fetchUserName = async () => {
         try {
           const profile = await getUserProfile(email);
           setUserName(profile.name || email.split('@')[0]);
+          setProfilePicture(profile.profile_picture || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setUserName(email.split('@')[0]);
@@ -69,7 +71,7 @@ function Home() {
         background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
       }}
     >
-      <Navbar userName={userName} />
+      <Navbar userName={userName} profilePicture={profilePicture} />
 
       {/* Welcome Header */}
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-2 lg:flex-shrink-0">
