@@ -633,6 +633,16 @@ export const getUserProfile = async (email) => {
   return response.data.user;
 };
 
+// Update social links
+export const updateSocialLinks = async (email, githubUrl, linkedinUrl) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/users/social-links`, {
+    email,
+    githubUrl,
+    linkedinUrl,
+  });
+  return response.data.user;
+};
+
 // Upload profile picture
 export const uploadProfilePicture = async (email, file) => {
   const formData = new FormData();

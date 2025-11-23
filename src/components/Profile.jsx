@@ -8,7 +8,8 @@ import {
   getJoinDate,
   getUserProfile,
   uploadProfilePicture,
-  updateUsername
+  updateUsername,
+  updateSocialLinks
 } from '../api/API';
 import { clearNameCache } from '../utils/displayNames';
 
@@ -27,6 +28,10 @@ const Profile = ({ user }) => {
   const [tempName, setTempName] = useState('');
   const [showAdvancedStats, setShowAdvancedStats] = useState(false);
   const [activeWinsCategory, setActiveWinsCategory] = useState(null);
+  const [githubUrl, setGithubUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [savingSocials, setSavingSocials] = useState(false);
+  const [editingLinks, setEditingLinks] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -51,6 +56,8 @@ const Profile = ({ user }) => {
         setJoinedDate(joinedDate);
         setProfilePicture(profile.profile_picture);
         setUserName(profile.name || user.email.split('@')[0]);
+        setGithubUrl(profile.github_url || '');
+        setLinkedinUrl(profile.linkedin_url || '');
       } catch (error) {
         console.error('Error fetching profile stats:', error);
       } finally {
@@ -112,6 +119,21 @@ const Profile = ({ user }) => {
       handleSaveName();
     } else if (e.key === 'Escape') {
       handleCancelEdit();
+    }
+  };
+
+  const handleSaveSocialLinks = async () => {
+    if (!user?.email) return;
+    setSavingSocials(true);
+    try {
+      const updated = await updateSocialLinks(user.email, githubUrl.trim() || null, linkedinUrl.trim() || null);
+      setGithubUrl(updated.github_url || '');
+      setLinkedinUrl(updated.linkedin_url || '');
+    } catch (error) {
+      console.error('Error updating social links:', error);
+      alert('Failed to update social links');
+    } finally {
+      setSavingSocials(false);
     }
   };
 
@@ -205,7 +227,7 @@ const Profile = ({ user }) => {
             </div>
 
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 {isEditingName ? (
                   <div className="flex items-center gap-2">
                     <input
@@ -243,6 +265,70 @@ const Profile = ({ user }) => {
                     </button>
                   </>
                 )}
+                <div className="flex items-center gap-2 ml-auto text-xs">
+                  {editingLinks ? (
+                    <>
+                      <input
+                        type="url"
+                        placeholder="GitHub URL"
+                        value={githubUrl}
+                        onChange={(e) => setGithubUrl(e.target.value)}
+                        className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-40"
+                      />
+                      <input
+                        type="url"
+                        placeholder="LinkedIn URL"
+                        value={linkedinUrl}
+                        onChange={(e) => setLinkedinUrl(e.target.value)}
+                        className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-40"
+                      />
+                      <button
+                        onClick={handleSaveSocialLinks}
+                        disabled={savingSocials}
+                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-md transition-colors"
+                      >
+                        {savingSocials ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={() => setEditingLinks(false)}
+                        className="p-2 text-gray-400 hover:text-white"
+                        title="Cancel"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href={githubUrl || undefined}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`flex items-center gap-1 px-2 py-1 rounded-md ${githubUrl ? 'bg-slate-800/70 text-white hover:bg-slate-700' : 'bg-slate-800/40 text-gray-500'}`}
+                      >
+                        <span>🐙</span>
+                        <span>GitHub</span>
+                      </a>
+                      <a
+                        href={linkedinUrl || undefined}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`flex items-center gap-1 px-2 py-1 rounded-md ${linkedinUrl ? 'bg-slate-800/70 text-white hover:bg-slate-700' : 'bg-slate-800/40 text-gray-500'}`}
+                      >
+                        <span>🔗</span>
+                        <span>LinkedIn</span>
+                      </a>
+                      <button
+                        onClick={() => setEditingLinks(true)}
+                        className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
+                        title="Edit social links"
+                      >
+                        <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
               <p className="text-purple-300 text-base font-medium mb-1">
                 {hackathonWins > 0 ? 'Hackathon Champion' : 'Innovator'} • Flushing Tech
@@ -250,6 +336,7 @@ const Profile = ({ user }) => {
               <p className="text-gray-400 text-sm">
                 Member Since {joinedDate}
               </p>
+
             </div>
           </div>
 
@@ -322,6 +409,47 @@ const Profile = ({ user }) => {
           {/* View More Button */}
           <button className="w-full bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/50 rounded-lg py-1.5 text-xs font-semibold text-blue-200 transition-all group-hover:bg-blue-600/60">
             View More →
+          </button>
+        </div>
+      </div>
+
+      {/* Social Links Card */}
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6 mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl">🔗</span>
+          <h3 className="text-lg font-semibold text-white">Social Links</h3>
+          <div className="flex gap-3 ml-auto text-xs">
+            {githubUrl ? (
+              <a href={githubUrl} target="_blank" rel="noreferrer" className="text-blue-200 hover:text-white underline">GitHub</a>
+            ) : null}
+            {linkedinUrl ? (
+              <a href={linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-200 hover:text-white underline">LinkedIn</a>
+            ) : null}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input
+            type="url"
+            placeholder="GitHub profile URL"
+            value={githubUrl}
+            onChange={(e) => setGithubUrl(e.target.value)}
+            className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <input
+            type="url"
+            placeholder="LinkedIn profile URL"
+            value={linkedinUrl}
+            onChange={(e) => setLinkedinUrl(e.target.value)}
+            className="bg-slate-900/60 border border-slate-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={handleSaveSocialLinks}
+            disabled={savingSocials}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-colors"
+          >
+            {savingSocials ? 'Saving...' : 'Save Links'}
           </button>
         </div>
       </div>
