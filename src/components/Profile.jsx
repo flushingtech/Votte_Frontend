@@ -586,7 +586,8 @@ const Profile = ({ user }) => {
                   activeWinsCategory.items.map(item => (
                     <div
                       key={`${item.event_id}-${item.category || 'main'}`}
-                      className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 border border-slate-600/40 rounded-lg p-3 flex items-center justify-between"
+                      className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 border border-slate-600/40 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-emerald-400/60 hover:bg-slate-700/50 transition-colors"
+                      onClick={() => window.location.href = `/event/${item.event_id}`}
                     >
                       <div>
                         <div className="text-sm font-semibold text-white">{item.event_title}</div>
