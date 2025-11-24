@@ -238,19 +238,16 @@ const Profile = ({ user }) => {
             <div className="flex-1 min-w-0">
               <div className="flex items-start gap-2 sm:gap-3 mb-2">
                 {isEditingName ? (
-                  <div className="flex items-start gap-2">
-                    <div className="flex flex-col gap-1">
-                      <input
-                        type="text"
-                        value={tempName}
-                        onChange={(e) => setTempName(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        className="text-3xl font-bold bg-slate-800/80 text-white border border-purple-500 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        autoFocus
-                      />
-                      <span className="text-[10px] text-gray-400">10 characters max</span>
-                    </div>
-                    <div className="flex items-center gap-2 pt-1">
+                  <div className="w-full flex flex-col gap-2">
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      className="text-2xl sm:text-3xl font-bold bg-slate-800/80 text-white border border-purple-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
+                      autoFocus
+                    />
+                    <div className="flex items-center gap-2 flex-wrap">
                       <button onClick={handleSaveName} className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">
                         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -261,13 +258,14 @@ const Profile = ({ user }) => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
+                      <span className="text-[10px] text-gray-400">10 characters max</span>
                     </div>
                   </div>
                 ) : (
-                  <>
-                      <h2 className={`${nameSizeClass} font-bold text-white leading-tight whitespace-nowrap`}>
-                        {userName}
-                      </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className={`${nameSizeClass} font-bold text-white leading-tight whitespace-nowrap`}>
+                      {userName}
+                    </h2>
                     <button
                       onClick={handleEditName}
                       className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors group"
@@ -277,7 +275,7 @@ const Profile = ({ user }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
               <p className="text-purple-300 text-xs sm:text-sm font-medium mb-1 truncate">
@@ -326,23 +324,23 @@ const Profile = ({ user }) => {
                       href={githubUrl || undefined}
                       target="_blank"
                       rel="noreferrer"
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${githubUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
-                  >
-                    <img src={githubLogo} alt="GitHub" className="w-4 h-4 object-contain" />
-                    <span className="text-[11px] sm:text-xs">GitHub</span>
-                  </a>
-                  <a
-                    href={linkedinUrl || undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${linkedinUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
-                  >
-                    <img src={linkedinLogo} alt="LinkedIn" className="w-4 h-4 object-contain" />
-                    <span className="text-[11px] sm:text-xs">LinkedIn</span>
-                  </a>
-                  <button
-                    onClick={() => setEditingLinks(true)}
-                    className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${githubUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
+                    >
+                      <img src={githubLogo} alt="GitHub" className="w-4 h-4 object-contain" />
+                      <span className="text-[11px] sm:text-xs">GitHub</span>
+                    </a>
+                    <a
+                      href={linkedinUrl || undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${linkedinUrl ? 'bg-white text-black font-semibold border-white/90 hover:bg-gray-50' : 'bg-white text-gray-800 border-white/60'} truncate min-w-[88px] sm:min-w-[96px]`}
+                    >
+                      <img src={linkedinLogo} alt="LinkedIn" className="w-4 h-4 object-contain" />
+                      <span className="text-[11px] sm:text-xs">LinkedIn</span>
+                    </a>
+                    <button
+                      onClick={() => setEditingLinks(true)}
+                      className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
                       title="Edit social links"
                     >
                       <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -434,13 +432,13 @@ const Profile = ({ user }) => {
         {/* Left Column: My Projects */}
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <span>💼</span>
+            <span className="text-lg text-purple-300">&bull;</span>
             My Projects
             <span className="text-sm font-normal text-gray-400">({contributedIdeas.length})</span>
           </h3>
           {contributedIdeas.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-6xl mb-4">📝</div>
+              <div className="text-6xl mb-4 text-gray-500">&mdash;</div>
               <p className="text-gray-400">No projects yet</p>
               <p className="text-sm text-gray-500 mt-2">Start contributing to events to see your projects here!</p>
             </div>
@@ -450,7 +448,7 @@ const Profile = ({ user }) => {
                 <div
                   key={idea.id}
                   className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/20 rounded-lg overflow-hidden hover:border-blue-500/40 transition-all cursor-pointer group flex items-stretch min-h-[150px]"
-                  onClick={() => window.location.href = `/idea/${idea.id}`}
+                  onClick={() => (window.location.href = `/idea/${idea.id}`)}
                 >
                   {/* Project Image - Left Side */}
                   {idea.image_url ? (
@@ -476,7 +474,7 @@ const Profile = ({ user }) => {
                         <h3 className="text-white font-semibold text-sm line-clamp-1 flex-1">
                           {idea.idea}
                         </h3>
-                        <div className="text-xl flex-shrink-0 ml-2">💡</div>
+                        <div className="text-xl flex-shrink-0 ml-2 text-yellow-300">⭐</div>
                       </div>
 
                       {idea.description && (
@@ -507,7 +505,7 @@ const Profile = ({ user }) => {
                       <span className="truncate">{idea.event_title || 'Project'}</span>
                       {idea.likes > 0 && (
                         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                          <span>❤️</span>
+                          <span className="text-lg text-rose-300">❤️</span>
                           <span>{idea.likes}</span>
                         </div>
                       )}
@@ -522,13 +520,13 @@ const Profile = ({ user }) => {
         {/* Right Column: Wins */}
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <span>🏆</span>
+            <span className="text-lg text-yellow-300">⭐</span>
             Hackathon Victories
             <span className="text-sm font-normal text-gray-400">({detailedWins.length})</span>
           </h3>
           {winsByCategory.every(cat => cat.count === 0) ? (
             <div className="text-center py-8">
-              <div className="text-6xl mb-4">🏅</div>
+              <div className="text-6xl mb-4 text-gray-500">🏆</div>
               <p className="text-gray-400">No wins yet</p>
               <p className="text-sm text-gray-500 mt-2">Keep participating and you'll earn your first win soon!</p>
             </div>
@@ -565,7 +563,6 @@ const Profile = ({ user }) => {
             </div>
           )}
         </div>
-
       </div>
 
       {/* Wins Detail Modal */}
@@ -740,3 +737,7 @@ const Profile = ({ user }) => {
 };
 
 export default Profile;
+
+
+
+
