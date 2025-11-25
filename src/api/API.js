@@ -672,3 +672,14 @@ export const getDisplayNames = async (emails) => {
   });
   return response.data.names;
 };
+
+// Get Google Analytics visitor statistics
+export const getMonthlyVisitors = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/analytics/visitors/monthly`);
+    return response.data.visitors;
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    throw error;
+  }
+};
