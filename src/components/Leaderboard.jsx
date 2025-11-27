@@ -110,7 +110,7 @@ const Leaderboard = () => {
       </div>
 
       {/* All rankings in one list */}
-      <div className="overflow-y-auto overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
+      <div className="max-h-[240px] overflow-y-auto overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
         {leaderboard.map((user, index) => {
           return (
             <div
