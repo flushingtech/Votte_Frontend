@@ -145,7 +145,7 @@ function Home() {
 
           {activeTab === 'community' ? (
             <>
-              {/* Community Tab - Top Row: Events and Featured Projects */}
+              {/* Community Tab - Top Row: Events and Leaderboard */}
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-3 xl:gap-4 lg:flex-[3]">
                 {/* Events Section - Takes up 2 columns on desktop */}
                 <div className="xl:col-span-2 lg:h-full">
@@ -156,21 +156,21 @@ function Home() {
                   </div>
                 </div>
 
-                {/* Featured Projects Section */}
+                {/* Leaderboard Section */}
                 <div className="xl:col-span-1">
-                  <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden">
-                    <div className="h-[400px] overflow-hidden">
-                      <FeaturedProjects />
+                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                    <div className="h-[400px] lg:h-full overflow-y-auto">
+                      <Leaderboard />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Community Tab - Bottom Row: Leaderboard */}
+              {/* Community Tab - Bottom Row: Featured Projects */}
               <div className="w-full lg:flex-[2]">
-                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
                   <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
-                    <Leaderboard />
+                    <FeaturedProjects />
                   </div>
                 </div>
               </div>

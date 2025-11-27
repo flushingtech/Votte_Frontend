@@ -91,35 +91,35 @@ const FeaturedProjects = () => {
       </div>
 
       <div
-        className="flex-1 overflow-y-scroll space-y-3 pr-2 featured-scrollbar"
+        className="flex-1 overflow-y-auto pr-2 featured-scrollbar"
         style={scrollbarStyle}
       >
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            onClick={() => handleProjectClick(project.id, project.event_id)}
-            className="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg overflow-hidden hover:border-yellow-500/60 transition-all cursor-pointer group flex"
-          >
-            {/* Project Image - Left Side */}
-            {project.image_url ? (
-              <div className="w-32 h-28 flex-shrink-0 overflow-hidden bg-slate-900">
-                <img
-                  src={project.image_url}
-                  alt={project.idea}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                />
-              </div>
-            ) : (
-              <div className="w-32 h-28 flex-shrink-0 bg-gradient-to-br from-purple-900/30 to-blue-900/30 flex items-center justify-center">
-                <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-            )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              onClick={() => handleProjectClick(project.id, project.event_id)}
+              className="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg overflow-hidden hover:border-yellow-500/60 transition-all cursor-pointer group flex flex-col"
+            >
+              {/* Project Image - Top */}
+              {project.image_url ? (
+                <div className="w-full h-32 overflow-hidden bg-slate-900">
+                  <img
+                    src={project.image_url}
+                    alt={project.idea}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-32 bg-gradient-to-br from-purple-900/30 to-blue-900/30 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+              )}
 
-            {/* Project Info - Right Side */}
-            <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
-              <div>
+              {/* Project Info - Bottom */}
+              <div className="p-3 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="text-white font-semibold text-sm line-clamp-1 flex-1">
                     {project.idea}
@@ -129,7 +129,7 @@ const FeaturedProjects = () => {
                   </svg>
                 </div>
 
-                <p className="text-gray-400 text-xs mb-2 line-clamp-2">
+                <p className="text-gray-400 text-xs mb-2 line-clamp-2 flex-1">
                   {project.description}
                 </p>
 
@@ -148,19 +148,19 @@ const FeaturedProjects = () => {
                     )}
                   </div>
                 )}
-              </div>
 
-              {/* Footer */}
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span className="truncate">{project.event_title}</span>
-                <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                  <span>❤️</span>
-                  <span>{project.likes || 0}</span>
+                {/* Footer */}
+                <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+                  <span className="truncate">{project.event_title}</span>
+                  <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                    <span>❤️</span>
+                    <span>{project.likes || 0}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
