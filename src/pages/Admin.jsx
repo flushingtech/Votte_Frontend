@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import EventsList from '../components/admin/EventsList';
 import Navbar from '../components/Navbar';
 import AddEvent from '../components/admin/AddEvent';
+import ContributorRequests from '../components/admin/ContributorRequests';
 import { getUserProfile, getMonthlyVisitors } from '../api/API';
 
 const AdminPage = () => {
@@ -220,6 +221,11 @@ const AdminPage = () => {
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6 h-[600px]">
               <EventsList key={eventsRefreshKey} onEventSelect={handleEventSelect} />
             </div>
+          </div>
+
+          {/* Contributor Requests */}
+          <div className="mt-6">
+            <ContributorRequests userEmail={userEmail} />
           </div>
         </div>
       </div>
