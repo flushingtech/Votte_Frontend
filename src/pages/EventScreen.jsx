@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 import {
   getEvents,
   getEventStage,
@@ -9,6 +10,9 @@ import {
   setEventToResultsTime,
   determineWinners,
   getUserProfile,
+  checkInToEvent,
+  addContributorToIdeaEvent,
+  getIdeasByEvent,
 } from "../api/API";
 import Navbar from "../components/Navbar";
 import IdeaSubmission from "../components/IdeaSubmission";
@@ -19,6 +23,7 @@ import ButtonUploadEvent from "../components/ButtonUploadEvent";
 
 function EventScreen() {
   const { eventId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const email = localStorage.getItem("userEmail");
 
@@ -33,6 +38,9 @@ function EventScreen() {
   const [showResultsConfirm, setShowResultsConfirm] = useState(false);
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
+  const [eventProjects, setEventProjects] = useState([]);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+  const [showProjectSelection, setShowProjectSelection] = useState(false);
 
   // Fetch user display name
   useEffect(() => {
@@ -50,6 +58,66 @@ function EventScreen() {
     };
     fetchUserName();
   }, [email]);
+
+  // Fetch event projects for selection
+  const fetchProjects = useCallback(async () => {
+    if (!eventId) return;
+    try {
+      console.log('Fetching projects for event:', eventId);
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/by-event/${eventId}`);
+      const projects = response.data.ideas || [];
+      console.log('Setting projects:', projects.length, 'projects');
+      setEventProjects(projects);
+    } catch (err) {
+      console.error('Failed to fetch projects, trying fallback:', err);
+      try {
+        const fallbackProjects = await getIdeasByEvent(eventId);
+        setEventProjects(fallbackProjects || []);
+      } catch (fallbackError) {
+        console.error('Fallback failed to fetch projects:', fallbackError);
+        setEventProjects([]);
+      }
+    }
+  }, [eventId]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const isUserCheckedIn = useMemo(() => {
+    if (!event || !email) return false;
+    return (event.checked_in || "")
+      .replace(/{}/g, "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+      .includes(email.toLowerCase());
+  }, [email, event]);
+
+  const userHasProjectSelection = useMemo(() => {
+    if (!email) return false;
+    const targetEmail = email.toLowerCase();
+    return eventProjects.some((project) => {
+      const contributors = (project.contributors || "")
+        .replace(/{}/g, "")
+        .split(",")
+        .map((c) => c.trim().toLowerCase())
+        .filter(Boolean);
+      return contributors.includes(targetEmail);
+    });
+  }, [email, eventProjects]);
+
+  const checkedInFlag = searchParams.get("checkedIn") === "true";
+  const selectionRequired =
+    !userHasProjectSelection &&
+    (isUserCheckedIn || checkedInFlag || !!email);
+
+  // Auto-show modal when user is checked in and has not picked projects
+  useEffect(() => {
+    if (event && email && !loading) {
+      setShowProjectSelection(selectionRequired);
+    }
+  }, [email, event, loading, selectionRequired]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -106,6 +174,45 @@ function EventScreen() {
     } catch (error) {
       console.error("Error showing results:", error);
       showNotification("Failed to show results.", "error");
+    }
+  };
+
+  const handleConfirmProjects = async () => {
+    if (selectedProjects.length === 0 || !email) return;
+    const projectCount = selectedProjects.length;
+
+    try {
+      if (!isUserCheckedIn) {
+        await checkInToEvent(eventId, email, selectedProjects);
+        setEvent((prev) => {
+          if (!prev) return prev;
+          const existing = (prev.checked_in || "")
+            .replace(/{}/g, "")
+            .split(",")
+            .map((entry) => entry.trim())
+            .filter(Boolean);
+          const lower = existing.map((entry) => entry.toLowerCase());
+          if (lower.includes(email.toLowerCase())) return prev;
+          return { ...prev, checked_in: [...existing, email].join(",") };
+        });
+      } else {
+        await Promise.all(
+          selectedProjects.map((projectId) =>
+            addContributorToIdeaEvent(projectId, eventId, email)
+          )
+        );
+      }
+
+      await fetchProjects();
+      setShowProjectSelection(false);
+      setSelectedProjects([]);
+      setNotification({
+        message: `Added as contributor to ${projectCount} project${projectCount !== 1 ? 's' : ''}!`,
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Failed to update projects:', err);
+      setNotification({ message: 'Failed to update projects', type: 'error' });
     }
   };
 
@@ -590,6 +697,114 @@ function EventScreen() {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Project Selection Modal */}
+      {showProjectSelection && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
+            onClick={() => {
+              if (selectionRequired) return;
+              setShowProjectSelection(false);
+              setSelectedProjects([]);
+            }}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] pointer-events-none">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 max-w-2xl w-full shadow-2xl pointer-events-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Select Your Projects</h2>
+                  <p className="text-sm text-gray-400 mt-1">Choose all projects you contributed to during this event</p>
+                </div>
+                {!selectionRequired && (
+                  <button
+                    onClick={() => {
+                      setShowProjectSelection(false);
+                      setSelectedProjects([]);
+                    }}
+                    className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+                  >
+                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {eventProjects.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-400 text-lg mb-2">No projects found for this event</p>
+                  <p className="text-gray-500 text-sm">Projects will appear here once they're submitted</p>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-96 overflow-y-auto space-y-2 mb-6">
+                    {eventProjects.map((project) => (
+                      <button
+                        key={project.id}
+                        onClick={() => {
+                          setSelectedProjects((prev) =>
+                            prev.includes(project.id)
+                              ? prev.filter((id) => id !== project.id)
+                              : [...prev, project.id]
+                          );
+                        }}
+                        className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                          selectedProjects.includes(project.id)
+                            ? 'bg-purple-600/20 border-purple-500 shadow-lg'
+                            : 'bg-slate-700/30 border-slate-600 hover:border-slate-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                              selectedProjects.includes(project.id)
+                                ? 'bg-purple-500 border-purple-500'
+                                : 'border-slate-500'
+                            }`}
+                          >
+                            {selectedProjects.includes(project.id) && (
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-semibold">{project.idea}</h4>
+                            {project.description && (
+                              <p className="text-gray-400 text-sm mt-1 line-clamp-2">{project.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowProjectSelection(false);
+                        setSelectedProjects([]);
+                      }}
+                      className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
+                    >
+                      Cancel
+                    </button>
+                    {selectedProjects.length > 0 && (
+                      <button
+                        onClick={handleConfirmProjects}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                      >
+                        Confirm {selectedProjects.length} Project{selectedProjects.length !== 1 ? 's' : ''}
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
