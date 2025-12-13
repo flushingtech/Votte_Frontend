@@ -98,12 +98,21 @@ function EventScreen() {
   const userHasProjectSelection = useMemo(() => {
     if (!email) return false;
     const targetEmail = email.toLowerCase();
-    return eventProjects.some((project) => {
-      const contributors = (project.contributors || "")
+    const normalizeContributors = (contributorsString = "", projectOwner = "") => {
+      const owner = (projectOwner || "").toLowerCase();
+      return (contributorsString || "")
         .replace(/{}/g, "")
         .split(",")
         .map((c) => c.trim().toLowerCase())
-        .filter(Boolean);
+        .filter((c) => c && c !== owner);
+    };
+    return eventProjects.some((project) => {
+      const ownerEmail =
+        project.email ||
+        project.owner_email ||
+        project.user_email ||
+        "";
+      const contributors = normalizeContributors(project.contributors, ownerEmail);
       return contributors.includes(targetEmail);
     });
   }, [email, eventProjects]);
