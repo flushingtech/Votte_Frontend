@@ -41,6 +41,7 @@ function EventScreen() {
   const [eventProjects, setEventProjects] = useState([]);
   const [selectedProjects, setSelectedProjects] = useState([]);
   const [showProjectSelection, setShowProjectSelection] = useState(false);
+  const [projectSelectionDismissed, setProjectSelectionDismissed] = useState(false);
 
   // Fetch user display name
   useEffect(() => {
@@ -114,10 +115,15 @@ function EventScreen() {
 
   // Auto-show modal when user is checked in and has not picked projects
   useEffect(() => {
-    if (event && email && !loading) {
-      setShowProjectSelection(selectionRequired);
+    if (!selectionRequired) {
+      setProjectSelectionDismissed(false);
+      setShowProjectSelection(false);
+      return;
     }
-  }, [email, event, loading, selectionRequired]);
+    if (event && email && !loading && !projectSelectionDismissed) {
+      setShowProjectSelection(true);
+    }
+  }, [email, event, loading, selectionRequired, projectSelectionDismissed]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -160,6 +166,21 @@ function EventScreen() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const addUserToCheckedInList = () => {
+    if (!email) return;
+    setEvent((prev) => {
+      if (!prev) return prev;
+      const existing = (prev.checked_in || "")
+        .replace(/{}/g, "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+      const lower = existing.map((entry) => entry.toLowerCase());
+      if (lower.includes(email.toLowerCase())) return prev;
+      return { ...prev, checked_in: [...existing, email].join(",") };
+    });
+  };
+
   const confirmShowResults = async () => {
     setShowResultsConfirm(false);
     try {
@@ -184,17 +205,7 @@ function EventScreen() {
     try {
       if (!isUserCheckedIn) {
         await checkInToEvent(eventId, email, selectedProjects);
-        setEvent((prev) => {
-          if (!prev) return prev;
-          const existing = (prev.checked_in || "")
-            .replace(/{}/g, "")
-            .split(",")
-            .map((entry) => entry.trim())
-            .filter(Boolean);
-          const lower = existing.map((entry) => entry.toLowerCase());
-          if (lower.includes(email.toLowerCase())) return prev;
-          return { ...prev, checked_in: [...existing, email].join(",") };
-        });
+        addUserToCheckedInList();
       } else {
         await Promise.all(
           selectedProjects.map((projectId) =>
@@ -205,6 +216,7 @@ function EventScreen() {
 
       await fetchProjects();
       setShowProjectSelection(false);
+      setProjectSelectionDismissed(true);
       setSelectedProjects([]);
       setNotification({
         message: `Added as contributor to ${projectCount} project${projectCount !== 1 ? 's' : ''}!`,
@@ -214,6 +226,29 @@ function EventScreen() {
       console.error('Failed to update projects:', err);
       setNotification({ message: 'Failed to update projects', type: 'error' });
     }
+  };
+
+  const handleSkipProjects = async () => {
+    if (!email) return;
+
+    try {
+      if (!isUserCheckedIn) {
+        await checkInToEvent(eventId, email, []);
+        addUserToCheckedInList();
+      }
+      setNotification({
+        message: "Checked in without selecting a project",
+        type: "success",
+      });
+    } catch (err) {
+      console.error('Failed to check in without projects:', err);
+      setNotification({ message: 'Failed to update check-in status', type: 'error' });
+      return;
+    }
+
+    setProjectSelectionDismissed(true);
+    setShowProjectSelection(false);
+    setSelectedProjects([]);
   };
 
   const participants = useMemo(() => {
@@ -781,7 +816,7 @@ function EventScreen() {
                     ))}
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => {
                         setShowProjectSelection(false);
@@ -799,6 +834,12 @@ function EventScreen() {
                         Confirm {selectedProjects.length} Project{selectedProjects.length !== 1 ? 's' : ''}
                       </button>
                     )}
+                    <button
+                      onClick={handleSkipProjects}
+                      className="px-6 py-3 border border-slate-600 text-white rounded-lg font-semibold transition-all hover:border-slate-400 hover:bg-slate-700/40"
+                    >
+                      I didn't work on a project
+                    </button>
                   </div>
                 </>
               )}
