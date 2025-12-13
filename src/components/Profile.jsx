@@ -15,7 +15,10 @@ import { clearNameCache } from '../utils/displayNames';
 import githubLogo from '../assets/github-logo.png';
 import linkedinLogo from '../assets/linkedin-logo.png';
 
-const Profile = ({ user }) => {
+const Profile = ({ user, viewingEmail = null }) => {
+  // Use viewingEmail if provided (for viewing others), otherwise use logged-in user's email
+  const profileEmail = viewingEmail || user?.email;
+  const isOwnProfile = !viewingEmail || profileEmail === user?.email;
   const [contributedCount, setContributedCount] = useState(0);
   const [contributedIdeas, setContributedIdeas] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
@@ -37,18 +40,18 @@ const Profile = ({ user }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (!user?.email) return;
+    if (!profileEmail) return;
 
     const fetchStats = async () => {
       try {
         const [count, ideas, votes, wins, winDetails, joinedDate, profile] = await Promise.all([
-          getContributedIdeaCount(user.email),
-          getContributedIdeas(user.email),
-          getTotalVotesForUser(user.email),
-          getHackathonWins(user.email),
-          getHackathonWinsDetails(user.email),
-          getJoinDate(user.email),
-          getUserProfile(user.email),
+          getContributedIdeaCount(profileEmail),
+          getContributedIdeas(profileEmail),
+          getTotalVotesForUser(profileEmail),
+          getHackathonWins(profileEmail),
+          getHackathonWinsDetails(profileEmail),
+          getJoinDate(profileEmail),
+          getUserProfile(profileEmail),
         ]);
         setContributedCount(count);
         setContributedIdeas(ideas || []);
@@ -57,7 +60,9 @@ const Profile = ({ user }) => {
         setDetailedWins(winDetails);
         setJoinedDate(joinedDate);
         setProfilePicture(profile.profile_picture);
-        setUserName(profile.name || user.email.split('@')[0]);
+        // Ensure name never contains @ symbol
+        const displayName = profile.name || profileEmail.split('@')[0];
+        setUserName(displayName.includes('@') ? displayName.split('@')[0] : displayName);
         setGithubUrl(profile.github_url || '');
         setLinkedinUrl(profile.linkedin_url || '');
       } catch (error) {
@@ -68,7 +73,7 @@ const Profile = ({ user }) => {
     };
 
     fetchStats();
-  }, [user?.email]);
+  }, [profileEmail]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -150,7 +155,7 @@ const Profile = ({ user }) => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading your profile...</p>
+            <p className="text-gray-400">Loading profile...</p>
           </div>
         </div>
       </div>
@@ -213,9 +218,9 @@ const Profile = ({ user }) => {
                 </div>
               )}
               <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                onClick={() => isOwnProfile && fileInputRef.current?.click()}
+                disabled={uploading || !isOwnProfile}
+                className={`absolute inset-0 bg-black/60 rounded-2xl opacity-0 transition-opacity flex items-center justify-center ${isOwnProfile ? 'group-hover:opacity-100 cursor-pointer' : 'cursor-default'}`}
               >
                 {uploading ? (
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -267,9 +272,9 @@ const Profile = ({ user }) => {
                       {userName}
                     </h2>
                     <button
-                      onClick={handleEditName}
-                      className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors group"
-                      title="Edit name"
+                      onClick={isOwnProfile ? handleEditName : undefined}
+                      className={`p-2 rounded-lg transition-colors group ${isOwnProfile ? 'hover:bg-purple-600/20 cursor-pointer' : 'opacity-0 pointer-events-none'}`}
+                      title={isOwnProfile ? "Edit name" : ""}
                     >
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -287,7 +292,7 @@ const Profile = ({ user }) => {
 
               {/* Social Links Row */}
               <div className="mt-2 flex items-center gap-2 text-xs flex-wrap sm:flex-nowrap">
-                {editingLinks ? (
+                {isOwnProfile && editingLinks ? (
                   <>
                     <input
                       type="url"
@@ -339,9 +344,9 @@ const Profile = ({ user }) => {
                       <span className="text-[11px] sm:text-xs">LinkedIn</span>
                     </a>
                     <button
-                      onClick={() => setEditingLinks(true)}
-                      className="p-2 hover:bg-purple-600/20 rounded-lg transition-colors"
-                      title="Edit social links"
+                      onClick={isOwnProfile ? () => setEditingLinks(true) : undefined}
+                      className={`p-2 rounded-lg transition-colors ${isOwnProfile ? 'hover:bg-purple-600/20 cursor-pointer' : 'opacity-0 pointer-events-none'}`}
+                      title={isOwnProfile ? "Edit social links" : ""}
                     >
                       <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />

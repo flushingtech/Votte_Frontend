@@ -1,24 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import votteLogo from "../assets/votte_favicon.png";
-import { checkAdminStatus } from "../api/API";
+import { checkAdminStatus, getContributorRequestCount } from "../api/API";
 
 function Navbar({ userName, profilePicture }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [requestCount, setRequestCount] = useState(0);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const userEmail = user?.email || "";
 
   useEffect(() => {
-    const fetchAdminStatus = async () => {
+    const fetchData = async () => {
       if (userEmail) {
         const adminStatus = await checkAdminStatus(userEmail);
         setIsAdmin(adminStatus);
+
+        // Fetch contributor request count
+        try {
+          const count = await getContributorRequestCount(userEmail);
+          setRequestCount(count);
+        } catch (error) {
+          console.error('Error fetching request count:', error);
+        }
       }
     };
 
-    fetchAdminStatus();
+    fetchData();
+
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, [userEmail]); // Runs when userEmail changes
 
   const toggleDropdown = () => {
@@ -81,31 +94,38 @@ function Navbar({ userName, profilePicture }) {
                 </div>
 
                 {/* Avatar Button */}
-                <button
-                  onClick={toggleDropdown}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-600 rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg group"
-                >
-                  {profilePicture ? (
-                    <img
-                      src={profilePicture}
-                      alt="Profile"
-                      className="w-8 h-8 rounded-lg object-cover border border-slate-500"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                      {(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}
+                <div className="relative">
+                  {requestCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10 animate-pulse">
+                      {requestCount}
                     </div>
                   )}
-                  <svg 
-                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <button
+                    onClick={toggleDropdown}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-600 rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg group"
+                  >
+                    {profilePicture ? (
+                      <img
+                        src={profilePicture}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-lg object-cover border border-slate-500"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                        {(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}
+                      </div>
+                    )}
+                  <svg
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
               </div>
+            </div>
 
               {/* Enhanced Dropdown Menu */}
               {isDropdownOpen && (

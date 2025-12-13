@@ -7,7 +7,7 @@ import AdminPage from './pages/Admin';
 import EventScreen from './pages/EventScreen';
 import IdeasForEvent from './components/admin/IdeasForEvent'; // Admin Event Screen
 import IdeaScreen from './components/IdeaScreen';
-import Profile from './components/Profile';
+import ProfilePage from './pages/ProfilePage';
 import PastEvents from './components/PastEvents';
 import UpcomingEvents from './components/UpcomingEvents';
 import AdminDuplicates from './components/AdminDuplicates'; // Admin Duplicates Manager
@@ -58,7 +58,13 @@ function App() {
 
           <Route
             path="/profile"
-            element={<Profile user={{ email: userEmail }} />}
+            element={<ProfilePage user={{ email: userEmail }} />}
+          />
+
+          {/* Route for viewing other users' profiles */}
+          <Route
+            path="/profile/:username"
+            element={<ProfilePage user={{ email: userEmail }} />}
           />
 
           <Route

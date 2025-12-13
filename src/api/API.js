@@ -500,6 +500,86 @@ export const getHackathonWinsDetails = async (email) => {
   }
 };
 
+// Contributor Request Functions
+export const createContributorRequest = async (ideaId, eventId, requesterEmail, message = '') => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/create`, {
+      ideaId,
+      eventId,
+      requesterEmail,
+      message
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating contributor request:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getPendingRequestsForIdea = async (ideaId, eventId) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/pending/${ideaId}/${eventId}`);
+    return response.data.requests;
+  } catch (error) {
+    console.error('Error fetching pending requests:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getMyContributorRequests = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/my-requests/${email}`);
+    return response.data.requests;
+  } catch (error) {
+    console.error('Error fetching my contributor requests:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getMyProjectRequests = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/my-projects/${email}`);
+    return response.data.requests;
+  } catch (error) {
+    console.error('Error fetching project requests:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getContributorRequestCount = async (email) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/count/${email}`);
+    return response.data.count;
+  } catch (error) {
+    console.error('Error fetching contributor request count:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const acceptContributorRequest = async (requestId, userEmail) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/${requestId}/accept`, {
+      userEmail
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error accepting contributor request:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const declineContributorRequest = async (requestId, userEmail) => {
+  try {
+    const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/contributor-requests/${requestId}/decline`, {
+      userEmail
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error declining contributor request:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const getAllUsers = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/all-users`);
@@ -631,6 +711,12 @@ export const getLeaderboard = async () => {
 export const getUserProfile = async (email) => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/profile/${email}`);
   return response.data.user;
+};
+
+// Get user email by username
+export const getUserEmailByUsername = async (username) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/users/email-by-username/${username}`);
+  return response.data.email;
 };
 
 // Update social links

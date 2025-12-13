@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
-import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent, getDisplayNames, getUserProfile } from '../api/API';
+import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent, getDisplayNames, getUserProfile, createContributorRequest, getPendingRequestsForIdea, acceptContributorRequest, declineContributorRequest } from '../api/API';
 import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
@@ -31,15 +31,20 @@ function IdeaScreen() {
   const [displayNames, setDisplayNames] = useState({});
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [requestMessage, setRequestMessage] = useState('');
+  const [hasRequestedToContribute, setHasRequestedToContribute] = useState(false);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
 
-  // Helper function to get display name
+  // Helper function to get display name (always exclude @ and domain)
   const getDisplayName = (email) => {
-    return displayNames[email] || email?.split('@')[0] || '';
+    const name = displayNames[email] || email?.split('@')[0] || '';
+    // Extra safeguard: if name somehow contains @, split it
+    return name.includes('@') ? name.split('@')[0] : name;
   };
 
   useEffect(() => {
@@ -97,6 +102,12 @@ function IdeaScreen() {
       setEditTechnologies(editingEvent.technologies || '');
     }
   }, [editingEvent]);
+
+  useEffect(() => {
+    if (contributorsEvent) {
+      loadPendingRequests(contributorsEvent.event_id);
+    }
+  }, [contributorsEvent]);
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -290,6 +301,89 @@ function IdeaScreen() {
     }
   };
 
+  const handleRequestToContribute = async () => {
+    if (!contributorsEvent || !userEmail) {
+      setMessage('Unable to send request');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    try {
+      setMessage('Sending request...');
+      await createContributorRequest(ideaId, contributorsEvent.event_id, userEmail, requestMessage);
+
+      setMessage('Request sent successfully!');
+      setHasRequestedToContribute(true);
+      setRequestMessage('');
+      setTimeout(() => setMessage(''), 3000);
+
+      // Reload pending requests
+      await loadPendingRequests(contributorsEvent.event_id);
+    } catch (error) {
+      console.error('Error sending contributor request:', error);
+      setMessage(error.response?.data?.message || 'Failed to send request');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      setMessage('Accepting request...');
+      await acceptContributorRequest(requestId, userEmail);
+
+      // Refresh idea data and pending requests
+      const ideaData = await getIdeaById(ideaId);
+      setIdea(ideaData);
+
+      if (contributorsEvent) {
+        await loadPendingRequests(contributorsEvent.event_id);
+      }
+
+      setMessage('Request accepted successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      setMessage(error.response?.data?.message || 'Failed to accept request');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId) => {
+    if (!confirm('Decline this contributor request?')) {
+      return;
+    }
+
+    try {
+      setMessage('Declining request...');
+      await declineContributorRequest(requestId, userEmail);
+
+      // Reload pending requests
+      if (contributorsEvent) {
+        await loadPendingRequests(contributorsEvent.event_id);
+      }
+
+      setMessage('Request declined');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error declining request:', error);
+      setMessage(error.response?.data?.message || 'Failed to decline request');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const loadPendingRequests = async (eventId) => {
+    try {
+      const requests = await getPendingRequestsForIdea(ideaId, eventId);
+      setPendingRequests(requests);
+
+      // Check if current user has a pending request
+      const userHasRequest = requests.some(req => req.requester_email === userEmail);
+      setHasRequestedToContribute(userHasRequest);
+    } catch (error) {
+      console.error('Error loading pending requests:', error);
+    }
+  };
+
   if (loading)
     return (
       <div
@@ -387,20 +481,32 @@ function IdeaScreen() {
                     <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-4 py-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                            <span className="text-blue-400 text-base">📅</span>
-                            {new Date(event.event_date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </h2>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                              <span className="text-blue-400 text-base">📅</span>
+                              {new Date(event.event_date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </h2>
+                            {/* Status Badge */}
+                            {event.is_built ? (
+                              <span className="bg-green-600/30 text-green-200 px-2 py-1 rounded text-xs border border-green-500/50 font-semibold flex items-center gap-1">
+                                <span>✓</span> Built
+                              </span>
+                            ) : (
+                              <span className="bg-orange-600/30 text-orange-200 px-2 py-1 rounded text-xs border border-orange-500/50 font-semibold flex items-center gap-1">
+                                <span>🚧</span> In Development
+                              </span>
+                            )}
+                          </div>
                           {event.title && (
-                            <p className="text-gray-400 text-xs">{event.title}</p>
+                            <p className="text-gray-300 text-sm font-medium">{event.title}</p>
                           )}
                         </div>
 
-                        {/* Edit Menu */}
+                        {/* Admin/Owner Menu - Three Dots */}
                         {(idea?.email === userEmail || isAdmin) && (
                           <div className="relative">
                             <button
@@ -596,26 +702,104 @@ function IdeaScreen() {
                             </div>
                           </div>
 
-                          {/* Contributors */}
+                          {/* Contributors - Redesigned with Avatars */}
                           <div>
-                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-                              <span className="text-purple-400 text-xs">👥</span>
-                              Contributors
-                            </h3>
-                            <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30">
-                              <div className="flex flex-wrap gap-1">
-                                {(event?.contributors
+                            <h3 className="text-sm font-bold text-white mb-2 flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <span className="text-purple-400 text-xs">👥</span>
+                                Contributors
+                              </span>
+                              {(() => {
+                                const contributorsList = event?.contributors
                                   ? event.contributors.split(',').filter(c => c.trim())
-                                  : ['None']
-                                ).map((contributor, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="bg-purple-600/30 text-purple-200 px-2 py-1 rounded text-xs border border-purple-500/50"
-                                  >
-                                    {contributor !== 'None' ? getDisplayName(contributor.trim()) : 'None'}
-                                  </span>
-                                ))}
+                                  : [];
+                                return contributorsList.length > 0 && (
+                                  <span className="text-xs text-gray-400">{contributorsList.length}</span>
+                                );
+                              })()}
+                            </h3>
+                            <div className="bg-slate-900/30 rounded-lg p-3 border border-slate-700/30 space-y-2">
+                              {/* Contributor Avatars */}
+                              <div className="flex flex-wrap gap-2">
+                                {(() => {
+                                  const contributorsList = event?.contributors
+                                    ? event.contributors.split(',').filter(c => c.trim())
+                                    : [];
+
+                                  if (contributorsList.length === 0) {
+                                    return <p className="text-gray-400 text-xs">No contributors yet</p>;
+                                  }
+
+                                  return contributorsList.map((contributor, idx) => {
+                                    const contributorEmail = contributor.trim();
+                                    const displayName = getDisplayName(contributorEmail);
+                                    const initial = displayName.charAt(0).toUpperCase();
+
+                                    return (
+                                      <button
+                                        key={idx}
+                                        onClick={() => navigate(`/profile/${contributorEmail.split('@')[0]}`)}
+                                        className="flex items-center gap-1.5 bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 hover:border-purple-400/60 rounded-lg px-2 py-1 transition-all duration-200 cursor-pointer"
+                                        title={`View ${displayName}'s profile`}
+                                      >
+                                        <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                          {initial}
+                                        </div>
+                                        <span className="text-purple-200 text-xs font-medium">{displayName}</span>
+                                        {contributorEmail === userEmail && (
+                                          <span className="text-green-400 text-xs">✓</span>
+                                        )}
+                                      </button>
+                                    );
+                                  });
+                                })()}
                               </div>
+
+                              {/* User Status & Actions */}
+                              {(() => {
+                                const contributorsList = event?.contributors
+                                  ? event.contributors.split(',').map(c => c.trim())
+                                  : [];
+                                const isContributor = contributorsList.includes(userEmail);
+                                const isOwner = idea?.email === userEmail;
+
+                                // Check if user has pending request for this event
+                                const hasPendingRequest = pendingRequests.some(
+                                  req => req.event_id === event.event_id && req.requester_email === userEmail
+                                );
+
+                                // Admins and owners see nothing - they use the three-dots menu
+                                if (isOwner || isAdmin) {
+                                  return null;
+                                } else if (isContributor) {
+                                  // Contributors see success badge
+                                  return (
+                                    <div className="mt-2 bg-green-900/20 border border-green-500/30 text-green-200 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+                                      <span className="text-green-400">✓</span>
+                                      <span className="font-semibold">You're a contributor</span>
+                                    </div>
+                                  );
+                                } else if (hasPendingRequest) {
+                                  // User has a pending request
+                                  return (
+                                    <div className="mt-2 bg-blue-900/20 border border-blue-500/30 text-blue-200 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+                                      <span className="animate-pulse">⏳</span>
+                                      <span className="font-semibold">Request Pending</span>
+                                    </div>
+                                  );
+                                } else {
+                                  // User can request to join
+                                  return (
+                                    <button
+                                      onClick={() => setContributorsEvent(event)}
+                                      className="w-full mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+                                    >
+                                      <span>🙋</span>
+                                      <span>Request to Join</span>
+                                    </button>
+                                  );
+                                }
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -1083,64 +1267,147 @@ function IdeaScreen() {
                 </div>
               </div>
 
-              {/* Add Contributor Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Add Contributor</h3>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Select
-                    className="flex-1 text-sm"
-                    menuPortalTarget={document.body}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        backgroundColor: '#334155',
-                        borderColor: '#475569',
-                        color: 'white',
-                        minHeight: '42px',
-                      }),
-                      menu: (base) => ({
-                        ...base,
-                        backgroundColor: '#1e293b',
-                        color: 'white',
-                        zIndex: 2147483650,
-                      }),
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 2147483650,
-                      }),
-                      option: (base, state) => ({
-                        ...base,
-                        backgroundColor: state.isFocused ? '#334155' : '#1e293b',
-                        color: 'white',
-                        cursor: 'pointer',
-                      }),
-                      singleValue: (base) => ({ ...base, color: 'white' }),
-                      input: (base) => ({ ...base, color: 'white' }),
-                      placeholder: (base) => ({ ...base, color: '#9ca3af' }),
-                    }}
-                    options={users.map(user => ({
-                      label: `${user.name} (${user.email})`,
-                      value: user.email
-                    }))}
-                    placeholder="Select contributor..."
-                    value={users
-                      .map(user => ({
-                        label: `${user.name} (${user.email})`,
-                        value: user.email
-                      }))
-                      .find(opt => opt.value === selectedContributor) || null}
-                    onChange={(selectedOption) =>
-                      setSelectedContributor(selectedOption?.value || null)
-                    }
-                  />
-                  <button
-                    onClick={handleAddContributor}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg whitespace-nowrap"
-                  >
-                    👥 Add Contributor
-                  </button>
+              {/* Owner/Admin Section: Add Contributor + Pending Requests */}
+              {(isAdmin || idea?.email === userEmail) ? (
+                <>
+                  {/* Pending Requests Section */}
+                  {pendingRequests.length > 0 && (
+                    <div className="mb-6 space-y-3">
+                      <h3 className="text-lg font-semibold text-white">Pending Requests ({pendingRequests.length})</h3>
+                      {pendingRequests.map((request) => (
+                        <div key={request.id} className="bg-slate-700/50 p-4 rounded-lg border border-slate-600/50">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {request.requester_picture && (
+                                  <img src={request.requester_picture} alt="" className="w-8 h-8 rounded-full" />
+                                )}
+                                <div>
+                                  <p className="text-white font-semibold">{request.requester_name || request.requester_email}</p>
+                                  <p className="text-gray-400 text-xs">{request.requester_email}</p>
+                                </div>
+                              </div>
+                              {request.message && (
+                                <p className="text-gray-300 text-sm mt-2">{request.message}</p>
+                              )}
+                              <p className="text-gray-500 text-xs mt-2">
+                                Requested {new Date(request.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleAcceptRequest(request.id)}
+                                className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleDeclineRequest(request.id)}
+                                className="bg-red-600/80 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Contributor Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white">Add Contributor</h3>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Select
+                        className="flex-1 text-sm"
+                        menuPortalTarget={document.body}
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            backgroundColor: '#334155',
+                            borderColor: '#475569',
+                            color: 'white',
+                            minHeight: '42px',
+                          }),
+                          menu: (base) => ({
+                            ...base,
+                            backgroundColor: '#1e293b',
+                            color: 'white',
+                            zIndex: 2147483650,
+                          }),
+                          menuPortal: (base) => ({
+                            ...base,
+                            zIndex: 2147483650,
+                          }),
+                          option: (base, state) => ({
+                            ...base,
+                            backgroundColor: state.isFocused ? '#334155' : '#1e293b',
+                            color: 'white',
+                            cursor: 'pointer',
+                          }),
+                          singleValue: (base) => ({ ...base, color: 'white' }),
+                          input: (base) => ({ ...base, color: 'white' }),
+                          placeholder: (base) => ({ ...base, color: '#9ca3af' }),
+                        }}
+                        options={users.map(user => ({
+                          label: `${user.name} (${user.email})`,
+                          value: user.email
+                        }))}
+                        placeholder="Select contributor..."
+                        value={users
+                          .map(user => ({
+                            label: `${user.name} (${user.email})`,
+                            value: user.email
+                          }))
+                          .find(opt => opt.value === selectedContributor) || null}
+                        onChange={(selectedOption) =>
+                          setSelectedContributor(selectedOption?.value || null)
+                        }
+                      />
+                      <button
+                        onClick={handleAddContributor}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg whitespace-nowrap"
+                      >
+                        👥 Add Contributor
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Regular User Section: Request to Contribute */
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white">Join This Project</h3>
+                  {contributorsEvent?.contributors?.split(',').map(c => c.trim()).includes(userEmail) ? (
+                    <div className="bg-green-900/20 border border-green-500/30 text-green-200 p-4 rounded-lg">
+                      <p className="font-semibold">You are already a contributor on this project!</p>
+                    </div>
+                  ) : hasRequestedToContribute ? (
+                    <div className="bg-blue-900/20 border border-blue-500/30 text-blue-200 p-4 rounded-lg">
+                      <p className="font-semibold">Your request is pending</p>
+                      <p className="text-sm mt-1">The project owner will review your request soon.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-300 text-sm">
+                        Want to contribute to this project? Send a request to the project owner.
+                      </p>
+                      <textarea
+                        value={requestMessage}
+                        onChange={(e) => setRequestMessage(e.target.value)}
+                        placeholder="Optional: Tell them why you want to contribute..."
+                        className="w-full bg-slate-700/50 text-white border border-slate-600/50 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        rows="3"
+                      />
+                      <button
+                        onClick={handleRequestToContribute}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
+                      >
+                        🙋 Request to Contribute
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="mt-6">
                 <button
