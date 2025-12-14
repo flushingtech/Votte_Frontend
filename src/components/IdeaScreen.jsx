@@ -485,7 +485,7 @@ function IdeaScreen() {
               )}
 
               {/* Title Header */}
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl p-4 mb-4">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl p-4 mb-4">
                 <h1 className="text-2xl font-bold text-white mb-1">
                   {idea?.idea}
                 </h1>
@@ -502,7 +502,7 @@ function IdeaScreen() {
                 return (
                   <div
                     key={event.event_id}
-                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl mb-4 overflow-hidden"
+                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl mb-4 overflow-hidden"
                   >
                     {/* Event Header */}
                     <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-4 py-3">
@@ -850,7 +850,7 @@ function IdeaScreen() {
             <div className="lg:col-span-1">
               <div className="sticky top-6 self-start space-y-4" style={{ zIndex: 20 }}>
                 {/* SUMMARY PANEL */}
-                <aside className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 backdrop-blur-sm rounded-lg border border-blue-700/50 shadow-xl p-4">
+                <aside className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 backdrop-blur-sm border border-blue-700/50 shadow-xl p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-white text-lg font-bold flex items-center gap-2">
                       <span className="text-blue-400">📊</span>
@@ -999,7 +999,7 @@ function IdeaScreen() {
                 </aside>
 
                 {/* GITHUB REPOSITORY PANEL */}
-                <aside className="bg-gradient-to-br from-slate-900/30 to-slate-800/30 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl p-4">
+                <aside className="bg-gradient-to-br from-slate-900/30 to-slate-800/30 backdrop-blur-sm border border-slate-700/50 shadow-xl p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-white text-lg font-bold flex items-center gap-2">
                       <span className="text-gray-400">
@@ -1117,7 +1117,7 @@ function IdeaScreen() {
 
                 {/* ADMIN PANEL */}
                 {isAdmin && showAdminPanel && (
-                  <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-lg border border-orange-700/50 shadow-xl p-4">
+                  <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm border border-orange-700/50 shadow-xl p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-white text-base font-bold whitespace-nowrap">
                         ⚙️ Admin Controls
@@ -1146,7 +1146,7 @@ function IdeaScreen() {
         <>
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: '2147483647', position: 'fixed' }} onClick={() => setEditingEvent(null)}></div>
           <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: '2147483647', position: 'fixed', isolation: 'isolate' }}>
-            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
               <button
                 onClick={() => setEditingEvent(null)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
@@ -1233,7 +1233,7 @@ function IdeaScreen() {
         <>
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: '2147483647', position: 'fixed' }} onClick={() => setContributorsEvent(null)}></div>
           <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: '2147483647', position: 'fixed', isolation: 'isolate' }}>
-            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
               <button
                 onClick={() => setContributorsEvent(null)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
