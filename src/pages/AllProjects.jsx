@@ -62,9 +62,18 @@ const AllProjects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col" style={{
-        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+      <div className="min-h-screen flex flex-col relative overflow-hidden" style={{
+        background: '#000000',
       }}>
+        {/* Light blue flashes/glowing effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        </div>
+
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -77,9 +86,18 @@ const AllProjects = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{
-      background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{
+      background: '#000000',
     }}>
+      {/* Light blue flashes/glowing effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <div className="sticky top-0 z-50">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
@@ -144,7 +162,7 @@ const AllProjects = () => {
       <div className="flex-1 px-4 sm:px-6 pb-6">
         <div className="max-w-7xl mx-auto">
           {filteredProjects.length === 0 ? (
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-12 text-center">
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-12 text-center">
               <p className="text-gray-400 text-lg">No projects found</p>
             </div>
           ) : (
@@ -152,7 +170,7 @@ const AllProjects = () => {
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
-                  className={`bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border ${
+                  className={`bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border ${
                     project.featured ? 'border-yellow-500/50' : 'border-slate-700/50'
                   } shadow-2xl overflow-hidden hover:scale-105 transition-transform`}
                 >

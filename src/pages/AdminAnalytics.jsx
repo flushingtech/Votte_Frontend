@@ -61,16 +61,25 @@ const AdminAnalytics = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col text-white"
-      style={{ background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)' }}
+      className="min-h-screen flex flex-col text-white relative overflow-hidden"
+      style={{ background: '#000000' }}
     >
+      {/* Light blue flashes/glowing effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <div className="sticky top-0 z-50">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
       <div className="flex-1 px-4 sm:px-6 py-6">
         <div className="max-w-6xl mx-auto space-y-6">
-          <div className="bg-gradient-to-r from-indigo-800/70 to-purple-800/70 border border-indigo-700/50 rounded-2xl p-6 shadow-2xl">
+          <div className="bg-gradient-to-r from-indigo-800/70 to-purple-800/70 border border-indigo-700/50 p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wide text-indigo-200">Analytics</p>
@@ -100,7 +109,7 @@ const AdminAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 rounded-2xl p-5 shadow-2xl">
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 p-5 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-xs uppercase tracking-wide text-gray-300">Trend</p>

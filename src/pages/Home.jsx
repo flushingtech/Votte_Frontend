@@ -66,11 +66,20 @@ function Home() {
 
   return (
     <div
-      className="home-page flex flex-col min-h-screen"
+      className="home-page flex flex-col min-h-screen relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+        background: '#000000',
       }}
     >
+      {/* Light blue flashes/glowing effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <Navbar userName={userName} profilePicture={profilePicture} />
 
       {/* Welcome Header */}
@@ -149,7 +158,7 @@ function Home() {
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-3 xl:gap-4 lg:flex-[3]">
                 {/* Events Section - Takes up 2 columns on desktop */}
                 <div className="xl:col-span-2 lg:h-full">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
                     <div className="h-auto lg:h-full">
                       <EventsList today={todayEastern} />
                     </div>
@@ -158,7 +167,7 @@ function Home() {
 
                 {/* Leaderboard Section */}
                 <div className="xl:col-span-1">
-                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
                     <div className="h-[400px] lg:h-full overflow-y-auto">
                       <Leaderboard />
                     </div>
@@ -168,7 +177,7 @@ function Home() {
 
               {/* Community Tab - Bottom Row: Featured Projects */}
               <div className="w-full lg:flex-[2]">
-                <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
+                <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
                   <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
                     <FeaturedProjects />
                   </div>
@@ -179,7 +188,7 @@ function Home() {
             <>
               {/* Profile Tab */}
               <div className="w-full lg:h-full">
-                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-xl border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
+                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
                   <div className="h-[600px] sm:h-[650px] lg:h-full overflow-y-auto">
                     <Profile user={{ email: userEmail }} />
                   </div>

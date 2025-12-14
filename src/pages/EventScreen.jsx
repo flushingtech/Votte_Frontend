@@ -318,7 +318,7 @@ function EventScreen() {
   };
 
   const ParticipantsPanel = () => (
-    <aside className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-sm rounded-xl border border-purple-700/50 shadow-2xl p-4 w-full max-h-[600px] flex flex-col">
+    <aside className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl p-4 w-full max-h-[600px] flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-white text-lg font-bold">Participants</h2>
         <span className="bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/50">
@@ -492,7 +492,7 @@ function EventScreen() {
     };
 
     return (
-      <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm rounded-xl border border-orange-700/50 shadow-2xl p-2 sm:p-3 lg:p-4 flex flex-col gap-2 lg:gap-3 w-full">
+      <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm border border-orange-700/50 shadow-2xl p-2 sm:p-3 lg:p-4 flex flex-col gap-2 lg:gap-3 w-full">
         {/* Stacked, no-wrap header */}
         <div className="flex flex-col items-start mb-1 lg:mb-2">
           <h2 className="text-white text-sm sm:text-base font-bold whitespace-nowrap mb-1">
@@ -584,12 +584,20 @@ function EventScreen() {
 
   return (
     <div
-      className="min-h-screen flex flex-col text-white"
+      className="min-h-screen flex flex-col text-white relative overflow-hidden"
       style={{
-        background:
-          "linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)",
+        background: "#000000",
       }}
     >
+      {/* Light blue flashes/glowing effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <Navbar userName={userName || email} profilePicture={profilePicture} backToHome={true} />
 
       <div className="flex-1 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
@@ -618,7 +626,7 @@ function EventScreen() {
                 </svg>
               </button>
 
-              <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-slate-700/50 shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden">
+              <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden">
                 <h1 className="text-sm sm:text-lg lg:text-2xl xl:text-3xl font-bold text-white mb-1 sm:mb-2 lg:mb-3">
                   {event?.title}
                 </h1>
@@ -738,7 +746,7 @@ function EventScreen() {
             onClick={() => setShowResultsConfirm(false)}
           ></div>
           <div className="fixed inset-0 flex items-start justify-center pt-20 p-4 z-[9999]">
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 max-w-md w-full animate-slide-down">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl p-8 max-w-md w-full animate-slide-down">
               <div className="text-center mb-6">
                 <div className="text-6xl mb-4">⚠️</div>
                 <h2 className="text-2xl font-bold text-white mb-3">Show Results?</h2>
@@ -802,7 +810,7 @@ function EventScreen() {
             }}
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] pointer-events-none">
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 max-w-2xl w-full shadow-2xl pointer-events-auto">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/30 p-6 max-w-2xl w-full shadow-2xl pointer-events-auto">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Select Your Projects</h2>

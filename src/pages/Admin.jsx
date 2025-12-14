@@ -85,11 +85,20 @@ const AdminPage = () => {
 
   return (
     <div
-      className="admin-page flex flex-col min-h-screen"
+      className="admin-page flex flex-col min-h-screen relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
+        background: '#000000',
       }}
     >
+      {/* Light blue flashes/glowing effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <div className="sticky top-0 z-50">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
@@ -97,7 +106,7 @@ const AdminPage = () => {
       <div className="px-4 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Hero + summary strip */}
-          <div className="bg-gradient-to-r from-slate-800/80 via-slate-900/80 to-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-2xl">
+          <div className="bg-gradient-to-r from-slate-800/80 via-slate-900/80 to-slate-800/80 border border-slate-700/60 p-6 shadow-2xl">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Admin Control Room</h1>
@@ -131,11 +140,11 @@ const AdminPage = () => {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Column 1: Event creation + quick actions */}
             <div className="space-y-4 h-[680px] flex flex-col">
-              <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-4">
+              <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm border border-slate-700/50 shadow-2xl p-4">
                 <AddEvent userEmail={userEmail} onSuccess={handleAddEventSuccess} />
               </div>
 
-              <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 shadow-2xl p-4 flex-shrink-0">
+              <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 shadow-2xl p-4 flex-shrink-0">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-xs uppercase tracking-wide text-purple-200">Quick Actions</p>
@@ -195,7 +204,7 @@ const AdminPage = () => {
 
             {/* Column 2: Analytics */}
             <div className="space-y-6 h-[680px] flex flex-col">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-700/50 rounded-2xl p-6 shadow-2xl">
+              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-700/50 p-6 shadow-2xl">
                 {loadingAnalytics ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-400"></div>

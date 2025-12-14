@@ -110,38 +110,38 @@ const Leaderboard = () => {
       </div>
 
       {/* All rankings in one list */}
-      <div className="max-h-[240px] overflow-y-auto overflow-x-hidden space-y-2 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
+      <div className="max-h-[240px] overflow-y-auto overflow-x-hidden space-y-1.5 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
         {leaderboard.map((user, index) => {
           return (
             <div
               key={user.email}
-              className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3 hover:scale-[1.01] transition-transform`}
+              className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-2 flex items-center gap-2 hover:scale-[1.01] transition-transform`}
             >
               <div className="flex items-center gap-2">
-                <div className="text-lg sm:text-xl font-bold text-white/40 w-6 text-center">
+                <div className="text-sm font-bold text-white/40 w-5 text-center">
                   {index + 1}
                 </div>
                 <div className="text-lg">
                   {getMedalEmoji(index)}
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-xs sm:text-sm font-bold text-white/80">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-xs font-bold text-white/80">
                   {user.profile_picture ? (
                     <img src={user.profile_picture} alt={user.display_name} className="w-full h-full object-cover" />
                   ) : (
                     getInitials(user.display_name, user.email)
                   )}
                 </div>
-                <div className="text-white font-semibold text-xs sm:text-sm truncate">
+                <div className="text-white font-semibold text-sm truncate">
                   {user.display_name}
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full">
-                <span className="text-yellow-400 font-bold text-sm sm:text-base">
+              <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
+                <span className="text-yellow-400 font-bold text-sm">
                   {user.total_wins}
                 </span>
-                <span className="text-gray-200 text-xs sm:text-sm">
+                <span className="text-gray-200 text-xs">
                   {user.total_wins === 1 ? 'Win' : 'Wins'}
                 </span>
               </div>
