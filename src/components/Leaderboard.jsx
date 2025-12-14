@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getLeaderboard } from '../api/API';
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLeaderboard();
@@ -112,10 +114,12 @@ const Leaderboard = () => {
       {/* All rankings in one list */}
       <div className="max-h-[240px] overflow-y-auto overflow-x-hidden space-y-1.5 pr-2 leaderboard-scrollbar" style={scrollbarStyle}>
         {leaderboard.map((user, index) => {
+          const username = user.email.split('@')[0];
           return (
             <div
               key={user.email}
-              className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-2 flex items-center gap-2 hover:scale-[1.01] transition-transform`}
+              onClick={() => navigate(`/profile/${username}`)}
+              className={`bg-gradient-to-r ${getMedalColor(index)} backdrop-blur-sm border rounded-lg p-2 flex items-center gap-2 hover:scale-[1.01] transition-transform cursor-pointer`}
             >
               <div className="flex items-center gap-2">
                 <div className="text-sm font-bold text-white/40 w-5 text-center">
