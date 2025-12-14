@@ -29,6 +29,7 @@ function IdeaScreen() {
   const [editingGithubRepos, setEditingGithubRepos] = useState(false);
   const [githubRepos, setGithubRepos] = useState([]);
   const [displayNames, setDisplayNames] = useState({});
+  const [contributorProfiles, setContributorProfiles] = useState({});
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -72,7 +73,7 @@ function IdeaScreen() {
           }
         }
 
-        // Fetch display names for all contributors
+        // Fetch display names and profile pictures for all contributors
         const allContributorEmails = ideaData?.events
           ?.flatMap(event =>
             event.contributors
@@ -84,6 +85,27 @@ function IdeaScreen() {
         if (uniqueEmails.length > 0) {
           const names = await getDisplayNames(uniqueEmails);
           setDisplayNames(names);
+
+          // Fetch profile pictures for all contributors
+          const profiles = {};
+          await Promise.all(
+            uniqueEmails.map(async (email) => {
+              try {
+                const profile = await getUserProfile(email);
+                profiles[email] = {
+                  name: profile.name || email.split('@')[0],
+                  profile_picture: profile.profile_picture || ''
+                };
+              } catch (error) {
+                console.error(`Error fetching profile for ${email}:`, error);
+                profiles[email] = {
+                  name: email.split('@')[0],
+                  profile_picture: ''
+                };
+              }
+            })
+          );
+          setContributorProfiles(profiles);
         }
       } catch (err) {
         console.error('Error fetching idea details:', err);
@@ -494,42 +516,66 @@ function IdeaScreen() {
                 </p>
               </div>
 
-              {/* Event Details Cards */}
-              {idea?.events?.map((event) => {
-                const hasAwards = event?.awards && Array.isArray(event.awards) && event.awards.length > 0;
-                const hasVotes = event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0;
+              {/* Project Timeline */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span className="text-xl">🚀</span>
+                    Project Timeline
+                    <span className="text-xs font-normal text-gray-400">({idea?.events?.length || 0} {idea?.events?.length === 1 ? 'Event' : 'Events'})</span>
+                  </h2>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+                </div>
 
-                return (
-                  <div
-                    key={event.event_id}
-                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl mb-4 overflow-hidden"
-                  >
+                <div className="relative">
+                  {/* Timeline vertical line */}
+                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-blue-500/50"></div>
+
+                  {/* Event cards with timeline nodes */}
+                  {idea?.events?.map((event, index) => {
+                    const hasAwards = event?.awards && Array.isArray(event.awards) && event.awards.length > 0;
+                    const hasVotes = event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0;
+                    const isFirst = index === 0;
+                    const isLast = index === idea.events.length - 1;
+
+                    return (
+                      <div key={event.event_id} className="relative pl-14 pb-5 last:pb-0">
+                        {/* Timeline node */}
+                        <div className="absolute left-0 top-0 flex flex-col items-center">
+                          {/* Node circle */}
+                          <div className={`w-10 h-10 rounded-full border-3 ${
+                            isFirst ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400/50 shadow-lg shadow-green-500/50' :
+                            isLast ? 'bg-gradient-to-br from-blue-500 to-purple-600 border-blue-400/50 shadow-lg shadow-blue-500/50' :
+                            'bg-gradient-to-br from-slate-600 to-slate-700 border-slate-500/50'
+                          } flex items-center justify-center text-white font-bold text-xs z-10`}>
+                            {isFirst ? '🎯' : isLast ? '🏁' : index + 1}
+                          </div>
+                          {/* Event order label */}
+                          <div className="mt-0.5 text-[10px] text-gray-400 font-semibold">
+                            {isFirst ? 'START' : isLast ? 'LATEST' : `#${index + 1}`}
+                          </div>
+                        </div>
+
+                        {/* Event card */}
+                        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl overflow-hidden hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300"
+                        >
                     {/* Event Header */}
-                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-4 py-3">
-                      <div className="flex items-start justify-between gap-3">
+                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-3 py-2">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                              <span className="text-blue-400 text-base">📅</span>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h2 className="text-base font-bold text-white flex items-center gap-1.5">
+                              <span className="text-blue-400 text-sm">📅</span>
                               {new Date(event.event_date).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
                                 year: 'numeric'
                               })}
                             </h2>
-                            {/* Status Badge */}
-                            {event.is_built ? (
-                              <span className="bg-green-600/30 text-green-200 px-2 py-1 rounded text-xs border border-green-500/50 font-semibold flex items-center gap-1">
-                                <span>✓</span> Built
-                              </span>
-                            ) : (
-                              <span className="bg-orange-600/30 text-orange-200 px-2 py-1 rounded text-xs border border-orange-500/50 font-semibold flex items-center gap-1">
-                                <span>🚧</span> In Development
-                              </span>
-                            )}
                           </div>
                           {event.title && (
-                            <p className="text-gray-300 text-sm font-medium">{event.title}</p>
+                            <p className="text-gray-300 text-xs font-medium">{event.title}</p>
                           )}
                         </div>
 
@@ -577,204 +623,181 @@ function IdeaScreen() {
                         )}
                       </div>
 
-                      {/* Awards - Prominent Display */}
-                      {hasAwards && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                    </div>
+
+                    {/* Trophy Showcase - Minimal */}
+                    {hasAwards && (
+                      <div className="bg-gradient-to-r from-yellow-900/20 via-yellow-800/20 to-yellow-900/20 border-y border-yellow-500/30 px-3 py-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           {event.awards.map((award, idx) => {
                             const awardStyles = {
                               'Hackathon Winner': {
-                                bg: 'from-yellow-600/40 to-yellow-800/30',
-                                border: 'border-yellow-500/60',
-                                text: 'text-yellow-200',
+                                bg: 'from-yellow-500 to-yellow-700',
+                                text: 'text-yellow-100',
                                 icon: '🏆',
-                                shadow: '0 0 20px rgba(234, 179, 8, 0.4)'
+                                glow: 'shadow-yellow-500/50'
                               },
                               'Most Creative': {
-                                bg: 'from-green-600/40 to-green-800/30',
-                                border: 'border-green-500/60',
-                                text: 'text-green-200',
+                                bg: 'from-green-500 to-emerald-700',
+                                text: 'text-green-100',
                                 icon: '🎨',
-                                shadow: '0 0 15px rgba(34, 197, 94, 0.3)'
+                                glow: 'shadow-green-500/50'
                               },
                               'Most Technical': {
-                                bg: 'from-purple-600/40 to-purple-800/30',
-                                border: 'border-purple-500/60',
-                                text: 'text-purple-200',
+                                bg: 'from-purple-500 to-purple-700',
+                                text: 'text-purple-100',
                                 icon: '⚡',
-                                shadow: '0 0 15px rgba(168, 85, 247, 0.3)'
+                                glow: 'shadow-purple-500/50'
                               },
                               'Most Impactful': {
-                                bg: 'from-red-600/40 to-red-800/30',
-                                border: 'border-red-500/60',
-                                text: 'text-red-200',
+                                bg: 'from-red-500 to-rose-700',
+                                text: 'text-red-100',
                                 icon: '🚀',
-                                shadow: '0 0 15px rgba(239, 68, 68, 0.3)'
+                                glow: 'shadow-red-500/50'
                               }
                             };
                             const style = awardStyles[award] || awardStyles['Most Creative'];
                             return (
-                              <span
+                              <div
                                 key={idx}
-                                className={`bg-gradient-to-r ${style.bg} ${style.text} px-2 py-1 rounded text-xs border ${style.border} flex items-center gap-1.5 font-semibold`}
-                                style={{ boxShadow: style.shadow }}
+                                className={`bg-gradient-to-br ${style.bg} ${style.text} px-2 py-1 rounded-md flex items-center gap-1 shadow-lg ${style.glow} hover:scale-105 transition-transform flex-shrink-0`}
                               >
                                 <span className="text-sm">{style.icon}</span>
-                                {award}
-                              </span>
+                                <span className="text-[10px] font-bold whitespace-nowrap">{award}</span>
+                              </div>
                             );
                           })}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
-                    {/* Content Grid */}
+                    {/* Content Grid - Compact */}
                     <div className="p-3">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                        {/* Left Column - Main Content (2/3 width) */}
-                        <div className="lg:col-span-2 space-y-3">
-                          {/* Description */}
-                          <div>
-                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-                              <span className="text-blue-400 text-xs">📝</span>
-                              Description
-                            </h3>
-                            <div className="bg-slate-900/30 rounded-lg p-3 border border-slate-700/30">
-                              <MarkdownWithPlugins className="prose prose-invert prose-sm max-w-none text-gray-200 text-sm">
-                                {event?.description || 'No description provided'}
-                              </MarkdownWithPlugins>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {/* Image Card */}
+                        {event?.image_url && (
+                          <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="text-lg">🖼️</span>
+                              <h3 className="text-xs font-bold text-white">Showcase</h3>
+                            </div>
+                            <img
+                              src={event.image_url}
+                              alt="Project"
+                              className="w-full h-36 object-cover rounded-lg shadow-lg"
+                            />
+                          </div>
+                        )}
+
+                        {/* Stats Card */}
+                        {hasVotes && (
+                          <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="text-lg">📊</span>
+                              <h3 className="text-xs font-bold text-white">Votes</h3>
+                            </div>
+                            <div className="space-y-1.5">
+                              {event?.votes > 0 && (
+                                <div className="flex items-center justify-between p-1.5 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                                  <span className="text-gray-300 text-[10px] font-medium">Total</span>
+                                  <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
+                                    {event.votes}
+                                  </span>
+                                </div>
+                              )}
+                              {event?.most_creative_votes > 0 && (
+                                <div className="flex items-center justify-between p-1.5 bg-green-900/20 rounded-lg border border-green-500/30">
+                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                                    <span>🎨</span> Creative
+                                  </span>
+                                  <span className="bg-green-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
+                                    {event.most_creative_votes}
+                                  </span>
+                                </div>
+                              )}
+                              {event?.most_technical_votes > 0 && (
+                                <div className="flex items-center justify-between p-1.5 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                                    <span>⚡</span> Technical
+                                  </span>
+                                  <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
+                                    {event.most_technical_votes}
+                                  </span>
+                                </div>
+                              )}
+                              {event?.most_impactful_votes > 0 && (
+                                <div className="flex items-center justify-between p-1.5 bg-red-900/20 rounded-lg border border-red-500/30">
+                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                                    <span>🚀</span> Impactful
+                                  </span>
+                                  <span className="bg-red-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
+                                    {event.most_impactful_votes}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
+                        )}
 
-                          {/* Image */}
-                          {event?.image_url && (
-                            <div>
-                              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-                                <span className="text-purple-400 text-xs">🖼️</span>
-                                Project Image
-                              </h3>
-                              <img
-                                src={event.image_url}
-                                alt="Project"
-                                className="w-full h-auto max-h-80 object-cover rounded-lg shadow-lg border border-slate-600/50"
-                              />
+                        {/* Contributors Card - Compact */}
+                        <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-lg">👥</span>
+                              <h3 className="text-xs font-bold text-white">Contributors</h3>
                             </div>
-                          )}
-                        </div>
-
-                        {/* Right Column - Meta Info (1/3 width) */}
-                        <div className="space-y-3">
-                          {/* Votes */}
-                          {hasVotes && (
-                            <div>
-                              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-                                <span className="text-blue-400 text-xs">🗳️</span>
-                                Votes
-                              </h3>
-                              <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30 space-y-1.5">
-                                {event?.votes > 0 && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-gray-300 text-xs">📊 Total</span>
-                                    <span className="bg-blue-600/30 text-blue-200 px-2 py-0.5 rounded font-bold text-xs border border-blue-500/50">
-                                      {event.votes}
-                                    </span>
-                                  </div>
-                                )}
-                                {event?.most_creative_votes > 0 && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-gray-300 text-xs">🎨 Creative</span>
-                                    <span className="bg-green-600/30 text-green-200 px-2 py-0.5 rounded font-bold text-xs border border-green-500/50">
-                                      {event.most_creative_votes}
-                                    </span>
-                                  </div>
-                                )}
-                                {event?.most_technical_votes > 0 && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-gray-300 text-xs">⚡ Technical</span>
-                                    <span className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded font-bold text-xs border border-purple-500/50">
-                                      {event.most_technical_votes}
-                                    </span>
-                                  </div>
-                                )}
-                                {event?.most_impactful_votes > 0 && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-gray-300 text-xs">🚀 Impactful</span>
-                                    <span className="bg-red-600/30 text-red-200 px-2 py-0.5 rounded font-bold text-xs border border-red-500/50">
-                                      {event.most_impactful_votes}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Tech Stack */}
-                          <div>
-                            <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
-                              <span className="text-green-400 text-xs">⚡</span>
-                              Tech Stack
-                            </h3>
-                            <div className="bg-slate-900/30 rounded-lg p-2 border border-slate-700/30">
-                              <div className="flex flex-wrap gap-1">
-                                {(event?.technologies || 'No tech stack listed')
-                                  .split(',')
-                                  .map((tech, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="bg-slate-700/50 text-gray-200 px-2 py-1 rounded text-xs border border-slate-600/50"
-                                    >
-                                      {tech.trim()}
-                                    </span>
-                                  ))}
-                              </div>
-                            </div>
+                            {(() => {
+                              const contributorsList = event?.contributors
+                                ? event.contributors.split(',').filter(c => c.trim())
+                                : [];
+                              return contributorsList.length > 0 && (
+                                <span className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded-full text-[10px] font-bold border border-purple-500/50">
+                                  {contributorsList.length}
+                                </span>
+                              );
+                            })()}
                           </div>
-
-                          {/* Contributors - Redesigned with Avatars */}
-                          <div>
-                            <h3 className="text-sm font-bold text-white mb-2 flex items-center justify-between">
-                              <span className="flex items-center gap-1.5">
-                                <span className="text-purple-400 text-xs">👥</span>
-                                Contributors
-                              </span>
-                              {(() => {
-                                const contributorsList = event?.contributors
-                                  ? event.contributors.split(',').filter(c => c.trim())
-                                  : [];
-                                return contributorsList.length > 0 && (
-                                  <span className="text-xs text-gray-400">{contributorsList.length}</span>
-                                );
-                              })()}
-                            </h3>
-                            <div className="bg-slate-900/30 rounded-lg p-3 border border-slate-700/30 space-y-2">
+                          <div className="space-y-2">
                               {/* Contributor Avatars */}
-                              <div className="flex flex-wrap gap-2">
+                              <div className="flex flex-wrap gap-1.5">
                                 {(() => {
                                   const contributorsList = event?.contributors
                                     ? event.contributors.split(',').filter(c => c.trim())
                                     : [];
 
                                   if (contributorsList.length === 0) {
-                                    return <p className="text-gray-400 text-xs">No contributors yet</p>;
+                                    return <p className="text-gray-400 text-[10px]">No contributors yet</p>;
                                   }
 
                                   return contributorsList.map((contributor, idx) => {
                                     const contributorEmail = contributor.trim();
                                     const displayName = getDisplayName(contributorEmail);
                                     const initial = displayName.charAt(0).toUpperCase();
+                                    const profilePic = contributorProfiles[contributorEmail]?.profile_picture;
 
                                     return (
                                       <button
                                         key={idx}
                                         onClick={() => navigate(`/profile/${contributorEmail.split('@')[0]}`)}
-                                        className="flex items-center gap-1.5 bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 hover:border-purple-400/60 rounded-lg px-2 py-1 transition-all duration-200 cursor-pointer"
+                                        className="flex items-center gap-1 bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 hover:border-purple-400/60 rounded-lg px-1.5 py-0.5 transition-all duration-200 cursor-pointer"
                                         title={`View ${displayName}'s profile`}
                                       >
-                                        <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                          {initial}
+                                        <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                                          {profilePic ? (
+                                            <img
+                                              src={profilePic}
+                                              alt={displayName}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <div className="w-full h-full bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-[10px]">
+                                              {initial}
+                                            </div>
+                                          )}
                                         </div>
-                                        <span className="text-purple-200 text-xs font-medium">{displayName}</span>
+                                        <span className="text-purple-200 text-[10px] font-medium">{displayName}</span>
                                         {contributorEmail === userEmail && (
-                                          <span className="text-green-400 text-xs">✓</span>
+                                          <span className="text-green-400 text-[10px]">✓</span>
                                         )}
                                       </button>
                                     );
@@ -801,7 +824,7 @@ function IdeaScreen() {
                                 } else if (isContributor) {
                                   // Contributors see success badge
                                   return (
-                                    <div className="mt-2 bg-green-900/20 border border-green-500/30 text-green-200 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+                                    <div className="mt-1.5 bg-green-900/20 border border-green-500/30 text-green-200 px-2 py-1 rounded-lg text-[10px] flex items-center gap-1">
                                       <span className="text-green-400">✓</span>
                                       <span className="font-semibold">You're a contributor</span>
                                     </div>
@@ -809,7 +832,7 @@ function IdeaScreen() {
                                 } else if (hasPendingRequest) {
                                   // User has a pending request
                                   return (
-                                    <div className="mt-2 bg-blue-900/20 border border-blue-500/30 text-blue-200 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+                                    <div className="mt-1.5 bg-blue-900/20 border border-blue-500/30 text-blue-200 px-2 py-1 rounded-lg text-[10px] flex items-center gap-1">
                                       <span className="animate-pulse">⏳</span>
                                       <span className="font-semibold">Request Pending</span>
                                     </div>
@@ -819,7 +842,7 @@ function IdeaScreen() {
                                   return (
                                     <button
                                       onClick={() => setContributorsEvent(event)}
-                                      className="w-full mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
+                                      className="w-full mt-1.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-2 py-1 rounded-lg text-[10px] font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-1"
                                     >
                                       <span>🙋</span>
                                       <span>Request to Join</span>
@@ -830,11 +853,46 @@ function IdeaScreen() {
                             </div>
                           </div>
                         </div>
+
+                        {/* Description Card - Full Width */}
+                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="text-lg">📝</span>
+                            <h3 className="text-xs font-bold text-white">Description</h3>
+                          </div>
+                          <div className="prose prose-invert prose-sm max-w-none">
+                            <MarkdownWithPlugins className="text-gray-300 text-xs leading-relaxed">
+                              {event?.description || 'No description provided'}
+                            </MarkdownWithPlugins>
+                          </div>
+                        </div>
+
+                        {/* Tech Stack Card - Full Width */}
+                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="text-lg">⚡</span>
+                            <h3 className="text-xs font-bold text-white">Tech Stack</h3>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {(event?.technologies || 'None listed')
+                              .split(',')
+                              .map((tech, idx) => (
+                                <span
+                                  key={idx}
+                                  className="bg-gradient-to-r from-blue-600/30 to-purple-600/30 text-blue-200 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-blue-500/40"
+                                >
+                                  {tech.trim()}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
+                </div>
+              </div>
 
               {/* Hidden file input for image upload */}
               <input
