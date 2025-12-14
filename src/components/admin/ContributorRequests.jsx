@@ -61,7 +61,7 @@ function ContributorRequests({ userEmail }) {
   );
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-6">
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-white">Contributor Requests</h2>
@@ -86,7 +86,7 @@ function ContributorRequests({ userEmail }) {
           No pending requests right now.
         </div>
       ) : (
-        <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+        <div className="space-y-3 max-h-[240px] overflow-y-auto pr-1">
           {requests.map((req) => (
             <div
               key={req.id}

@@ -12,6 +12,8 @@ import PastEvents from './components/PastEvents';
 import UpcomingEvents from './components/UpcomingEvents';
 import AdminDuplicates from './components/AdminDuplicates'; // Admin Duplicates Manager
 import AllProjects from './pages/AllProjects'; // Admin All Projects Manager
+import AdminRequests from './pages/AdminRequests';
+import AdminAnalytics from './pages/AdminAnalytics';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -107,6 +109,22 @@ function App() {
             element={
               <RequireAdmin userEmail={userEmail}>
                 <AllProjects />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/requests"
+            element={
+              <RequireAdmin userEmail={userEmail}>
+                <AdminRequests />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <RequireAdmin userEmail={userEmail}>
+                <AdminAnalytics />
               </RequireAdmin>
             }
           />
