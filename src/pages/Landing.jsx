@@ -59,10 +59,8 @@ function Landing() {
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-fade-in">
-                Welcome to{' '}
-                <span className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent hover:from-orange-300 hover:via-red-400 hover:to-pink-400 transition-all duration-300">
-                  Votte
-                </span>
+                <span className="text-orange-500">Votte</span>
+                <span className="text-white">.FlushingTech.org</span>
               </h1>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">

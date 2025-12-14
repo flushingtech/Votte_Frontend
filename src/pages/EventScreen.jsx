@@ -42,6 +42,7 @@ function EventScreen() {
   const [selectedProjects, setSelectedProjects] = useState([]);
   const [showProjectSelection, setShowProjectSelection] = useState(false);
   const [projectSelectionDismissed, setProjectSelectionDismissed] = useState(false);
+  const [participantProfiles, setParticipantProfiles] = useState({});
 
   // Fetch user display name
   useEffect(() => {
@@ -278,6 +279,35 @@ function EventScreen() {
     return unique;
   }, [event]);
 
+  // Fetch profile pictures for all participants
+  useEffect(() => {
+    const fetchParticipantProfiles = async () => {
+      if (participants.length === 0) return;
+
+      const profiles = {};
+      await Promise.all(
+        participants.map(async (participantEmail) => {
+          try {
+            const profile = await getUserProfile(participantEmail);
+            profiles[participantEmail.toLowerCase()] = {
+              name: profile.name || participantEmail.split('@')[0],
+              profile_picture: profile.profile_picture || '',
+            };
+          } catch (error) {
+            console.error(`Error fetching profile for ${participantEmail}:`, error);
+            profiles[participantEmail.toLowerCase()] = {
+              name: participantEmail.split('@')[0],
+              profile_picture: '',
+            };
+          }
+        })
+      );
+      setParticipantProfiles(profiles);
+    };
+
+    fetchParticipantProfiles();
+  }, [participants]);
+
   const getInitials = (emailStr) => {
     const prefix = usernameOnly(emailStr);
     if (!prefix) return "•";
@@ -301,7 +331,9 @@ function EventScreen() {
       ) : (
         <ul className="participants-scroll space-y-2 flex-1 overflow-auto pr-1">
           {participants.map((p) => {
-            const uname = usernameOnly(p);
+            const profile = participantProfiles[p.toLowerCase()];
+            const uname = profile?.name || usernameOnly(p);
+            const profilePic = profile?.profile_picture;
             const isYou = p.toLowerCase() === (email || "").toLowerCase();
             return (
               <li
@@ -309,9 +341,17 @@ function EventScreen() {
                 className="flex items-center justify-between gap-3 px-3 py-3 bg-purple-800/20 rounded-lg border border-purple-700/30 hover:bg-purple-800/30 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex items-center justify-center w-9 h-9 text-sm font-bold shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg text-white shadow-lg">
-                    {getInitials(p)}
-                  </div>
+                  {profilePic ? (
+                    <img
+                      src={profilePic}
+                      alt={uname}
+                      className="w-9 h-9 rounded-lg object-cover shrink-0 shadow-lg border-2 border-purple-500/30"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-9 h-9 text-sm font-bold shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg text-white shadow-lg">
+                      {getInitials(p)}
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <p className="text-white text-sm font-medium truncate">
                       {uname}
