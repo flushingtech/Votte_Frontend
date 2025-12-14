@@ -118,9 +118,16 @@ function EventScreen() {
   }, [email, eventProjects]);
 
   const checkedInFlag = searchParams.get("checkedIn") === "true";
+
+  // Only allow project selection in stage 1.2 or stage 2
+  const isStageAllowingSelection =
+    (eventStage === "1" && subStage === "2") ||
+    (eventStage === "2");
+
   const selectionRequired =
     !userHasProjectSelection &&
-    (isUserCheckedIn || checkedInFlag || !!email);
+    (isUserCheckedIn || checkedInFlag || !!email) &&
+    isStageAllowingSelection;
 
   // Auto-show modal when user is checked in and has not picked projects
   useEffect(() => {
