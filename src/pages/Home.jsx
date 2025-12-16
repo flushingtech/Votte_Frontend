@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
@@ -26,6 +27,7 @@ const decodeToken = (token) => {
 };
 
 function Home() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
@@ -39,6 +41,14 @@ function Home() {
 
   const todayEastern = getEasternDate();
 
+  // Redirect to landing page if not logged in
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/', { replace: true });
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');

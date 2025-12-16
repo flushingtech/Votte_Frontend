@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Profile from '../components/Profile';
 import { getUserProfile, getUserEmailByUsername } from '../api/API';
 
 const ProfilePage = ({ user }) => {
   const { username: urlUsername } = useParams();
+  const navigate = useNavigate();
   const [viewingEmail, setViewingEmail] = useState(null);
   const [navbarUserName, setNavbarUserName] = useState('');
   const [navbarProfilePicture, setNavbarProfilePicture] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is logged in
+  const isLoggedIn = !!user?.email;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,6 +93,35 @@ const ProfilePage = ({ user }) => {
           <Profile user={user} viewingEmail={viewingEmail} />
         </div>
       </div>
+
+      {/* Sign In Banner for Non-Logged-In Users */}
+      {!isLoggedIn && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-900/95 to-purple-900/95 backdrop-blur-md border-t border-blue-500/30 shadow-2xl z-50">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm sm:text-base">
+                  Sign in to see full profile details and project contributions
+                </p>
+                <p className="text-blue-200 text-xs hidden sm:block">
+                  Join to connect with innovators and collaborate on projects
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-white hover:bg-gray-100 text-blue-900 font-bold py-2 px-6 rounded-lg transition-all duration-200 shadow-lg whitespace-nowrap"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
