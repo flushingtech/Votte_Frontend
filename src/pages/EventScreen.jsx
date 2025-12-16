@@ -20,11 +20,15 @@ import Stage_1_Ideas from "../components/Stage_1_Ideas";
 import Stage_2 from "../components/Stage_2";
 import Stage_3_Ideas from "../components/Stage_3_Ideas";
 import ButtonUploadEvent from "../components/ButtonUploadEvent";
+import { extractEventId, createEventSlug } from "../utils/urlHelpers";
 
 function EventScreen() {
-  const { eventId } = useParams();
+  const { eventId: eventSlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Extract numeric ID from slug (handles both "123" and "123-hackathon-jan-1-2024" formats)
+  const eventId = extractEventId(eventSlug);
   const email = localStorage.getItem("userEmail");
 
   const [isAdmin, setIsAdmin] = useState(false);
@@ -152,6 +156,16 @@ function EventScreen() {
         if (!eventDetails) throw new Error("Event not found");
         setEvent(eventDetails);
 
+        // Update URL to proper slug format if not already
+        if (eventDetails) {
+          const properSlug = createEventSlug(eventDetails.id, eventDetails.title, eventDetails.date);
+
+          // Only update if current URL doesn't match the proper slug
+          if (eventSlug !== properSlug) {
+            navigate(`/event/${properSlug}`, { replace: true });
+          }
+        }
+
         const stageData = await getEventStage(eventId);
         console.log("Initial getEventStage response:", stageData);
         const rawStage = stageData?.stage?.toString?.();
@@ -173,7 +187,7 @@ function EventScreen() {
     };
 
     fetchEventDetails();
-  }, [eventId, email]);
+  }, [eventId, email, eventSlug, navigate]);
 
   const refreshIdeas = () => setIdeasRefreshKey((prevKey) => prevKey + 1);
   const usernameOnly = (s = "") => s.split("@")[0] || "";

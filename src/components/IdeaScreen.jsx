@@ -7,10 +7,14 @@ import Navbar from '../components/Navbar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
 import MarkdownPreviewer from './MarkdownPreviewer';
+import { extractIdeaId, createIdeaSlug } from '../utils/urlHelpers';
 
 function IdeaScreen() {
-  const { ideaId } = useParams();
+  const { ideaId: ideaSlug } = useParams();
   const navigate = useNavigate();
+
+  // Extract numeric ID from slug (handles both "123" and "123-title-jan-2024" formats)
+  const ideaId = extractIdeaId(ideaSlug);
   const [idea, setIdea] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,6 +61,17 @@ function IdeaScreen() {
         ]);
         setIdea(ideaData);
         setUsers(allUsers);
+
+        // Update URL to proper slug format if not already
+        if (ideaData && ideaData.events && ideaData.events.length > 0) {
+          const firstEvent = ideaData.events[0];
+          const properSlug = createIdeaSlug(ideaData.id, ideaData.idea, firstEvent.event_date);
+
+          // Only update if current URL doesn't match the proper slug
+          if (ideaSlug !== properSlug) {
+            navigate(`/idea/${properSlug}`, { replace: true });
+          }
+        }
 
         if (userEmail) {
           const status = await checkAdminStatus(userEmail);
@@ -116,7 +131,7 @@ function IdeaScreen() {
     };
 
     if (ideaId) fetchData();
-  }, [ideaId, userEmail]);
+  }, [ideaId, userEmail, ideaSlug, navigate]);
 
   useEffect(() => {
     if (editingEvent) {
