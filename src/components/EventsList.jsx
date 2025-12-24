@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { dateTimeFormatter } from '/src/utils/intlUtils';
 import { checkInToEvent, checkAdminStatus } from '../api/API';
@@ -251,7 +252,7 @@ function EventsList({ today }) {
       </div>
 
       {/* Canceled Event Popup */}
-      {canceledEventPopup && (
+      {canceledEventPopup && createPortal(
         <>
           <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
@@ -289,7 +290,8 @@ function EventsList({ today }) {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

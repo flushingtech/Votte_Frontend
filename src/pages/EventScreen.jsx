@@ -158,6 +158,10 @@ function EventScreen() {
         if (!eventDetails) throw new Error("Event not found");
         setEvent(eventDetails);
 
+        // Check admin status first
+        const isAdminStatus = await checkAdminStatus(email);
+        setIsAdmin(isAdminStatus);
+
         // Check if event is canceled
         if (eventDetails.canceled) {
           setLoading(false);
@@ -182,9 +186,6 @@ function EventScreen() {
 
         setEventStage(rawStage || "1");
         setSubStage(rawSubStage || "1");
-
-        const isAdminStatus = await checkAdminStatus(email);
-        setIsAdmin(isAdminStatus);
 
         setLoading(false);
       } catch (err) {
