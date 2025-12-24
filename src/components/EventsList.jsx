@@ -249,7 +249,7 @@ function EventsList({ today }) {
                   {/* Floating speech bubble for canceled events */}
                   {event.canceled && (
                     <div
-                      className="absolute -top-8 left-1/2 -translate-x-1/2 pointer-events-none hidden sm:block"
+                      className="absolute -top-8 right-0 pointer-events-none hidden sm:block"
                       style={{
                         animation: 'float-sway 3s ease-in-out infinite'
                       }}
@@ -257,8 +257,8 @@ function EventsList({ today }) {
                       <div className="bg-white text-gray-800 text-xs rounded-xl px-3 py-2 shadow-xl border-2 border-gray-300 max-w-[250px] relative">
                         <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{event.cancellation_reason || 'No reason provided'}</p>
                         {/* Speech bubble tail */}
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-gray-300"></div>
+                        <div className="absolute -bottom-2 right-4 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
+                        <div className="absolute -bottom-2.5 right-4 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-gray-300"></div>
                       </div>
                       <style>{`
                         @keyframes float-sway {
