@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { dateTimeFormatter } from '/src/utils/intlUtils';
-import { checkInToEvent } from '../api/API';
+import { checkInToEvent, checkAdminStatus } from '../api/API';
 
 function EventsList({ today }) {
   const [events, setEvents] = useState([]);
@@ -10,6 +10,7 @@ function EventsList({ today }) {
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false); // 👈 NEW
   const [canceledEventPopup, setCanceledEventPopup] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
@@ -49,6 +50,20 @@ function EventsList({ today }) {
     };
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (userEmail) {
+        try {
+          const adminStatus = await checkAdminStatus(userEmail);
+          setIsAdmin(adminStatus);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      }
+    };
+    checkAdmin();
+  }, [userEmail]);
 
   if (loading) return <p className="text-center text-sm">Loading events...</p>;
   if (error) return <p className="text-center text-sm text-red-500">{error}</p>;
@@ -161,7 +176,8 @@ function EventsList({ today }) {
             if (event.canceled) {
               setCanceledEventPopup({
                 title: event.title,
-                reason: event.cancellation_reason || 'No reason provided'
+                reason: event.cancellation_reason || 'No reason provided',
+                eventId: event.id
               });
               return;
             }
@@ -252,10 +268,21 @@ function EventsList({ today }) {
                   <p className="text-white">{canceledEventPopup.reason}</p>
                 </div>
               </div>
-              <div className="flex justify-center">
+              <div className="flex flex-col gap-3">
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      navigate(`/event/${canceledEventPopup.eventId}`);
+                      setCanceledEventPopup(null);
+                    }}
+                    className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-500 hover:to-red-500 transition-all duration-200 shadow-lg"
+                  >
+                    🔓 Enter as Admin
+                  </button>
+                )}
                 <button
                   onClick={() => setCanceledEventPopup(null)}
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-500 hover:to-red-600 transition-all duration-200 shadow-lg"
+                  className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-slate-500 hover:to-slate-600 transition-all duration-200 shadow-lg"
                 >
                   Close
                 </button>

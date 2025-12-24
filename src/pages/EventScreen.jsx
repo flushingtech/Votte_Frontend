@@ -642,7 +642,28 @@ function EventScreen() {
     );
 
   // Show canceled event page
-  if (event?.canceled)
+  if (event?.canceled) {
+    const handleUncancelEvent = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/uncancel-event/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        if (response.ok) {
+          // Reload the page to show the uncanceled event
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert(data.message || "Failed to uncancel event");
+        }
+      } catch (error) {
+        console.error("Error uncanceling event:", error);
+        alert("Failed to uncancel event");
+      }
+    };
+
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center text-white relative overflow-hidden"
@@ -661,15 +682,26 @@ function EventScreen() {
             <p className="text-sm text-gray-400 mb-2">Cancellation Reason:</p>
             <p className="text-lg text-white">{event.cancellation_reason || 'No reason provided'}</p>
           </div>
-          <button
-            onClick={() => navigate('/home')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
-          >
-            Return to Home
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {isAdmin && (
+              <button
+                onClick={handleUncancelEvent}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg"
+              >
+                ✅ Uncancel Event
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/home')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
+            >
+              Return to Home
+            </button>
+          </div>
         </div>
       </div>
     );
+  }
 
   return (
     <div
