@@ -12,6 +12,7 @@ import PastEvents from './components/PastEvents';
 import UpcomingEvents from './components/UpcomingEvents';
 import AdminDuplicates from './components/AdminDuplicates'; // Admin Duplicates Manager
 import AllProjects from './pages/AllProjects'; // Admin All Projects Manager
+import AllEvents from './pages/AllEvents'; // Admin All Events Manager
 import AdminRequests from './pages/AdminRequests';
 import AdminAnalytics from './pages/AdminAnalytics';
 import { checkAdminStatus } from './api/API';
@@ -93,6 +94,14 @@ function App() {
             element={
               <RequireAdmin userEmail={userEmail}>
                 <IdeasForEvent userEmail={userEmail} />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/all-events"
+            element={
+              <RequireAdmin userEmail={userEmail}>
+                <AllEvents />
               </RequireAdmin>
             }
           />

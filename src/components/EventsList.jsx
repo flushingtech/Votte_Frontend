@@ -9,6 +9,7 @@ function EventsList({ today }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false); // 👈 NEW
+  const [canceledEventPopup, setCanceledEventPopup] = useState(null);
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
@@ -136,7 +137,10 @@ function EventsList({ today }) {
           let buttonText = '';
           let buttonColor = '#1E2A3A';
 
-          if (event.stage === 3) {
+          if (event.canceled) {
+            buttonText = 'Canceled';
+            buttonColor = '#6B7280'; // Light gray
+          } else if (event.stage === 3) {
             buttonText = 'View Winners';
             buttonColor = '#FF5722';
           } else if (isCheckedIn) {
@@ -152,6 +156,16 @@ function EventsList({ today }) {
 
           const handleButtonClick = async (e) => {
             e.stopPropagation();
+
+            // Check if event is canceled
+            if (event.canceled) {
+              setCanceledEventPopup({
+                title: event.title,
+                reason: event.cancellation_reason || 'No reason provided'
+              });
+              return;
+            }
+
             if (buttonText === 'Check In') {
               try {
                 await checkInToEvent(event.id, userEmail);
@@ -178,15 +192,23 @@ function EventsList({ today }) {
                   : '0 4px 15px rgba(0, 0, 0, 0.1)',
               }}
             >
-              {isEventToday && (
-                <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg animate-pulse">
-                  🔥 LIVE TODAY
+              {event.canceled ? (
+                <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg">
+                  ❌ CANCELED
                 </div>
-              )}
-              {isNextUpcoming && !isEventToday && (
-                <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg">
-                  ⭐ NEXT UP
-                </div>
+              ) : (
+                <>
+                  {isEventToday && (
+                    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg animate-pulse">
+                      🔥 LIVE TODAY
+                    </div>
+                  )}
+                  {isNextUpcoming && !isEventToday && (
+                    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg">
+                      ⭐ NEXT UP
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex-1 pt-3 sm:pt-8 lg:pt-2 min-w-0">
@@ -212,6 +234,36 @@ function EventsList({ today }) {
         </div>
       </div>
 
+      {/* Canceled Event Popup */}
+      {canceledEventPopup && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
+            onClick={() => setCanceledEventPopup(null)}
+          ></div>
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999]">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-red-500/50 shadow-2xl p-8 max-w-md w-full">
+              <div className="text-center mb-6">
+                <div className="text-6xl mb-4">❌</div>
+                <h2 className="text-2xl font-bold text-white mb-3">Event Canceled</h2>
+                <p className="text-gray-300 text-lg mb-2">{canceledEventPopup.title}</p>
+                <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-4 mt-4">
+                  <p className="text-sm text-gray-400 mb-1">Cancellation Reason:</p>
+                  <p className="text-white">{canceledEventPopup.reason}</p>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setCanceledEventPopup(null)}
+                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-500 hover:to-red-600 transition-all duration-200 shadow-lg"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

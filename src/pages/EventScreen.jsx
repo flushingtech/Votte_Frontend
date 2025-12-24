@@ -47,6 +47,8 @@ function EventScreen() {
   const [showProjectSelection, setShowProjectSelection] = useState(false);
   const [projectSelectionDismissed, setProjectSelectionDismissed] = useState(false);
   const [participantProfiles, setParticipantProfiles] = useState({});
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
 
   // Fetch user display name
   useEffect(() => {
@@ -156,9 +158,15 @@ function EventScreen() {
         if (!eventDetails) throw new Error("Event not found");
         setEvent(eventDetails);
 
+        // Check if event is canceled
+        if (eventDetails.canceled) {
+          setLoading(false);
+          return; // Don't load event details, just show the canceled popup
+        }
+
         // Update URL to proper slug format if not already
         if (eventDetails) {
-          const properSlug = createEventSlug(eventDetails.id, eventDetails.title, eventDetails.date);
+          const properSlug = createEventSlug(eventDetails.id, eventDetails.title, eventDetails.event_date);
 
           // Only update if current URL doesn't match the proper slug
           if (eventSlug !== properSlug) {
@@ -280,6 +288,35 @@ function EventScreen() {
     setProjectSelectionDismissed(true);
     setShowProjectSelection(false);
     setSelectedProjects([]);
+  };
+
+  const handleCancelEvent = async () => {
+    if (!cancellationReason.trim()) {
+      showNotification("Please provide a cancellation reason", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/cancel-event/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, cancellationReason: cancellationReason.trim() })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShowCancelConfirm(false);
+        setCancellationReason('');
+        // Immediately navigate to home page
+        navigate('/home');
+      } else {
+        showNotification(data.message || "Failed to cancel event", "error");
+      }
+    } catch (error) {
+      console.error("Error canceling event:", error);
+      showNotification("Failed to cancel event", "error");
+    }
   };
 
   const participants = useMemo(() => {
@@ -578,6 +615,14 @@ function EventScreen() {
         <div className="transform scale-90 sm:scale-95">
           <ButtonUploadEvent eventId={eventId} />
         </div>
+
+        {/* Cancel Event Button */}
+        <button
+          onClick={() => setShowCancelConfirm(true)}
+          className="w-full bg-gradient-to-r from-red-700 to-red-800 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+        >
+          ❌ Cancel Event
+        </button>
       </aside>
     );
   };
@@ -593,6 +638,36 @@ function EventScreen() {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500 bg-[#0F1419]">
         {error}
+      </div>
+    );
+
+  // Show canceled event page
+  if (event?.canceled)
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center text-white relative overflow-hidden"
+        style={{ background: "#000000" }}
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="relative z-10 max-w-2xl mx-auto px-4 text-center">
+          <div className="text-8xl mb-6">❌</div>
+          <h1 className="text-4xl font-bold text-white mb-4">Event Canceled</h1>
+          <p className="text-2xl text-gray-300 mb-6">{event.title}</p>
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-red-500/50 rounded-lg p-8 mb-8">
+            <p className="text-sm text-gray-400 mb-2">Cancellation Reason:</p>
+            <p className="text-lg text-white">{event.cancellation_reason || 'No reason provided'}</p>
+          </div>
+          <button
+            onClick={() => navigate('/home')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     );
 
@@ -783,6 +858,57 @@ function EventScreen() {
                   }}
                 >
                   🏆 Show Results
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Cancel Event Confirmation Modal */}
+      {showCancelConfirm && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]"
+            onClick={() => {
+              setShowCancelConfirm(false);
+              setCancellationReason('');
+            }}
+          ></div>
+          <div className="fixed inset-0 flex items-start justify-center pt-20 p-4 z-[9999]">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl p-8 max-w-md w-full animate-slide-down">
+              <div className="text-center mb-6">
+                <div className="text-6xl mb-4">❌</div>
+                <h2 className="text-2xl font-bold text-white mb-3">Cancel Event?</h2>
+                <p className="text-gray-300 text-base mb-4">
+                  This will cancel the event. Please provide a reason for cancellation:
+                </p>
+                <textarea
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  placeholder="Enter cancellation reason..."
+                  className="w-full bg-slate-700/50 text-white border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                  rows={4}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCancelConfirm(false);
+                    setCancellationReason('');
+                  }}
+                  className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 text-white px-4 py-3 rounded-lg font-semibold hover:from-slate-600/50 hover:to-slate-700/50 transition-all duration-200 border border-slate-600/50"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleCancelEvent}
+                  className="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3 rounded-lg font-semibold hover:from-red-500 hover:to-red-600 transition-all duration-200 shadow-lg"
+                  style={{
+                    boxShadow: "0 0 20px rgba(239, 68, 68, 0.4)",
+                  }}
+                >
+                  ❌ Cancel Event
                 </button>
               </div>
             </div>
