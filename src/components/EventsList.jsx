@@ -236,14 +236,49 @@ function EventsList({ today }) {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 mt-3 lg:mt-0 lg:ml-4">
-                <button
-                  className="relative text-sm font-semibold text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:scale-105 transition-all duration-200 shadow-lg overflow-hidden group w-full sm:w-auto"
-                  onClick={handleButtonClick}
-                  style={{ backgroundColor: buttonColor }}
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
-                  <span className="relative">{buttonText}</span>
-                </button>
+                <div className="relative w-full sm:w-auto">
+                  <button
+                    className="relative text-sm font-semibold text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:scale-105 transition-all duration-200 shadow-lg overflow-hidden group w-full"
+                    onClick={handleButtonClick}
+                    style={{ backgroundColor: buttonColor }}
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+                    <span className="relative">{buttonText}</span>
+                  </button>
+
+                  {/* Floating speech bubble for canceled events */}
+                  {event.canceled && (
+                    <div
+                      className="absolute -top-8 left-1/2 -translate-x-1/2 pointer-events-none hidden sm:block"
+                      style={{
+                        animation: 'float-sway 3s ease-in-out infinite'
+                      }}
+                    >
+                      <div className="bg-white text-gray-800 text-xs rounded-xl px-3 py-2 shadow-xl border-2 border-gray-300 max-w-[150px] whitespace-normal relative">
+                        <p className="font-medium">{event.cancellation_reason || 'No reason provided'}</p>
+                        {/* Speech bubble tail */}
+                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
+                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-gray-300"></div>
+                      </div>
+                      <style>{`
+                        @keyframes float-sway {
+                          0%, 100% {
+                            transform: translateY(0px) translateX(0px);
+                          }
+                          25% {
+                            transform: translateY(-4px) translateX(2px);
+                          }
+                          50% {
+                            transform: translateY(-8px) translateX(0px);
+                          }
+                          75% {
+                            transform: translateY(-4px) translateX(-2px);
+                          }
+                        }
+                      `}</style>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           );
