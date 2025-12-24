@@ -254,8 +254,8 @@ function EventsList({ today }) {
                         animation: 'float-sway 3s ease-in-out infinite'
                       }}
                     >
-                      <div className="bg-white text-gray-800 text-xs rounded-xl px-3 py-2 shadow-xl border-2 border-gray-300 max-w-[150px] whitespace-normal relative">
-                        <p className="font-medium">{event.cancellation_reason || 'No reason provided'}</p>
+                      <div className="bg-white text-gray-800 text-xs rounded-xl px-3 py-2 shadow-xl border-2 border-gray-300 max-w-[250px] relative">
+                        <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{event.cancellation_reason || 'No reason provided'}</p>
                         {/* Speech bubble tail */}
                         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
                         <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-gray-300"></div>
