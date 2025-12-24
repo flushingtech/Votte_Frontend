@@ -155,7 +155,7 @@ function EventsList({ today }) {
 
           if (event.canceled) {
             buttonText = 'Canceled';
-            buttonColor = '#6B7280'; // Light gray
+            buttonColor = '#DC2626'; // Red
           } else if (event.stage === 3) {
             buttonText = 'View Winners';
             buttonColor = '#FF5722';
