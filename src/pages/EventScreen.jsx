@@ -972,10 +972,31 @@ function EventScreen() {
               </div>
 
               {eventProjects.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400 text-lg mb-2">No projects found for this event</p>
-                  <p className="text-gray-500 text-sm">Projects will appear here once they're submitted</p>
-                </div>
+                <>
+                  <div className="text-center py-12">
+                    <p className="text-gray-400 text-lg mb-2">No projects found for this event</p>
+                    <p className="text-gray-500 text-sm">Projects will appear here once they're submitted</p>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleSkipProjects}
+                      className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
+                    >
+                      I didn't work on a project
+                    </button>
+                    {!selectionRequired && (
+                      <button
+                        onClick={() => {
+                          setShowProjectSelection(false);
+                          setSelectedProjects([]);
+                        }}
+                        className="w-full px-6 py-3 border border-slate-600 text-gray-400 rounded-lg font-semibold transition-all hover:border-slate-400 hover:bg-slate-700/40"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </>
               ) : (
                 <>
                   <div className="max-h-96 overflow-y-auto space-y-2 mb-6">
@@ -1020,29 +1041,29 @@ function EventScreen() {
                     ))}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => {
-                        setShowProjectSelection(false);
-                        setSelectedProjects([]);
-                      }}
-                      className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex flex-col gap-3">
                     {selectedProjects.length > 0 && (
                       <button
                         onClick={handleConfirmProjects}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg"
                       >
                         Confirm {selectedProjects.length} Project{selectedProjects.length !== 1 ? 's' : ''}
                       </button>
                     )}
                     <button
                       onClick={handleSkipProjects}
-                      className="px-6 py-3 border border-slate-600 text-white rounded-lg font-semibold transition-all hover:border-slate-400 hover:bg-slate-700/40"
+                      className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
                     >
                       I didn't work on a project
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowProjectSelection(false);
+                        setSelectedProjects([]);
+                      }}
+                      className="w-full px-6 py-3 border border-slate-600 text-gray-400 rounded-lg font-semibold transition-all hover:border-slate-400 hover:bg-slate-700/40"
+                    >
+                      Cancel
                     </button>
                   </div>
                 </>
