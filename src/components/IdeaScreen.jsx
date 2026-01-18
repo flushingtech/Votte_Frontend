@@ -691,27 +691,32 @@ function IdeaScreen() {
                     <div className="p-3">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {/* Image Card */}
-                        {event?.image_url && (
-                          <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <span className="text-lg">🖼️</span>
-                              <h3 className="text-xs font-bold text-white">Showcase</h3>
-                            </div>
+                        <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="text-lg">🖼️</span>
+                            <h3 className="text-xs font-bold text-white">Showcase</h3>
+                          </div>
+                          {event?.image_url ? (
                             <img
                               src={event.image_url}
                               alt="Project"
                               className="w-full h-36 object-cover rounded-lg shadow-lg"
                             />
-                          </div>
-                        )}
+                          ) : (
+                            <div className="w-full h-36 bg-slate-800/50 border border-slate-700/30 rounded-lg flex flex-col items-center justify-center">
+                              <span className="text-3xl text-slate-600 mb-1">🖼️</span>
+                              <span className="text-slate-500 text-xs">No image yet</span>
+                            </div>
+                          )}
+                        </div>
 
                         {/* Stats Card */}
-                        {hasVotes && (
-                          <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <span className="text-lg">📊</span>
-                              <h3 className="text-xs font-bold text-white">Votes</h3>
-                            </div>
+                        <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="text-lg">📊</span>
+                            <h3 className="text-xs font-bold text-white">Votes</h3>
+                          </div>
+                          {hasVotes ? (
                             <div className="space-y-1.5">
                               {event?.votes > 0 && (
                                 <div className="flex items-center justify-between p-1.5 bg-blue-900/20 rounded-lg border border-blue-500/30">
@@ -752,8 +757,13 @@ function IdeaScreen() {
                                 </div>
                               )}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-4">
+                              <span className="text-2xl text-slate-600 mb-1">📊</span>
+                              <span className="text-slate-500 text-xs">No votes yet</span>
+                            </div>
+                          )}
+                        </div>
 
                         {/* Contributors Card - Compact */}
                         <div className="bg-slate-900/40 border border-slate-700/50 rounded-xl p-2.5 hover:border-slate-600/50 transition-all">
@@ -840,29 +850,35 @@ function IdeaScreen() {
                                 } else if (isContributor) {
                                   // Contributors see success badge
                                   return (
-                                    <div className="mt-1.5 bg-green-900/20 border border-green-500/30 text-green-200 px-2 py-1 rounded-lg text-[10px] flex items-center gap-1">
-                                      <span className="text-green-400">✓</span>
-                                      <span className="font-semibold">You're a contributor</span>
+                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                      <div className="flex items-center gap-1.5 text-green-400">
+                                        <span className="text-xs">✓</span>
+                                        <span className="text-[10px] font-medium">You're a contributor</span>
+                                      </div>
                                     </div>
                                   );
                                 } else if (hasPendingRequest) {
                                   // User has a pending request
                                   return (
-                                    <div className="mt-1.5 bg-blue-900/20 border border-blue-500/30 text-blue-200 px-2 py-1 rounded-lg text-[10px] flex items-center gap-1">
-                                      <span className="animate-pulse">⏳</span>
-                                      <span className="font-semibold">Request Pending</span>
+                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                      <div className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow-md cursor-default">
+                                        <span className="animate-pulse">⏳</span>
+                                        <span>Request Pending</span>
+                                      </div>
                                     </div>
                                   );
                                 } else {
                                   // User can request to join
                                   return (
-                                    <button
-                                      onClick={() => setContributorsEvent(event)}
-                                      className="w-full mt-1.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-2 py-1 rounded-lg text-[10px] font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-1"
-                                    >
-                                      <span>🙋</span>
-                                      <span>Request to Join</span>
-                                    </button>
+                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                      <button
+                                        onClick={() => setContributorsEvent(event)}
+                                        className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-md hover:shadow-purple-500/25"
+                                      >
+                                        <span>🙋</span>
+                                        <span>I worked on this</span>
+                                      </button>
+                                    </div>
                                   );
                                 }
                               })()}
@@ -1477,7 +1493,7 @@ function IdeaScreen() {
               ) : (
                 /* Regular User Section: Request to Contribute */
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Join This Project</h3>
+                  <h3 className="text-lg font-semibold text-white">I Worked on This</h3>
                   {contributorsEvent?.contributors?.split(',').map(c => c.trim()).includes(userEmail) ? (
                     <div className="bg-green-900/20 border border-green-500/30 text-green-200 p-4 rounded-lg">
                       <p className="font-semibold">You are already a contributor on this project!</p>
@@ -1490,12 +1506,12 @@ function IdeaScreen() {
                   ) : (
                     <>
                       <p className="text-gray-300 text-sm">
-                        Want to contribute to this project? Send a request to the project owner.
+                        Worked on this project? Let the owner know so they can add you as a contributor.
                       </p>
                       <textarea
                         value={requestMessage}
                         onChange={(e) => setRequestMessage(e.target.value)}
-                        placeholder="Optional: Tell them why you want to contribute..."
+                        placeholder="Optional: Describe what you contributed..."
                         className="w-full bg-slate-700/50 text-white border border-slate-600/50 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
                         rows="3"
                       />
@@ -1503,7 +1519,7 @@ function IdeaScreen() {
                         onClick={handleRequestToContribute}
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
                       >
-                        🙋 Request to Contribute
+                        🙋 Submit Request
                       </button>
                     </>
                   )}

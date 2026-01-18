@@ -204,14 +204,23 @@ const AdminPage = () => {
                     className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/15">
+                      <div className="p-2 rounded-lg bg-white/15 relative">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405M15 17v-2a3 3 0 00-3-3H6a3 3 0 00-3 3v2m12 0a3 3 0 01-3 3H6a3 3 0 01-3-3m12 0v2m0 0h6m-6-6V5a2 2 0 00-2-2H9l-2 2H5a2 2 0 00-2 2v6" />
                         </svg>
+                        {requestCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full shadow-lg animate-pulse">
+                            {requestCount}
+                          </span>
+                        )}
                       </div>
                       <span>Contributor Requests</span>
                     </div>
-                    <span className="text-xs text-white/80 group-hover:text-white">Review</span>
+                    {requestCount > 0 ? (
+                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{requestCount} new</span>
+                    ) : (
+                      <span className="text-xs text-white/80 group-hover:text-white">Review</span>
+                    )}
                   </button>
                 </div>
               </div>

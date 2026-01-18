@@ -7,9 +7,10 @@ const EventsList = ({ onEventSelect }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [selectedView, setSelectedView] = useState('upcoming'); // 'upcoming' or 'past'
+  const [selectedView, setSelectedView] = useState('upcoming');
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -17,7 +18,6 @@ const EventsList = ({ onEventSelect }) => {
         const eventsData = await getEvents();
         setEvents(eventsData);
 
-        // Fetch idea counts for each event
         const counts = {};
         for (const event of eventsData) {
           try {
@@ -38,7 +38,8 @@ const EventsList = ({ onEventSelect }) => {
     fetchEvents();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
     setDeleteConfirm(id);
   };
 
@@ -69,11 +70,9 @@ const EventsList = ({ onEventSelect }) => {
       await syncMeetupEvents(userEmail);
       setSyncMessage({ type: 'success', text: 'Events synced successfully!' });
 
-      // Refresh events list
       const eventsData = await getEvents();
       setEvents(eventsData);
 
-      // Refresh idea counts
       const counts = {};
       for (const event of eventsData) {
         try {
@@ -85,7 +84,6 @@ const EventsList = ({ onEventSelect }) => {
       }
       setIdeasCounts(counts);
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSyncMessage(null), 3000);
     } catch (err) {
       console.error('Error syncing events:', err);
@@ -96,24 +94,31 @@ const EventsList = ({ onEventSelect }) => {
     }
   };
 
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading events...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mb-4"></div>
+        <p className="text-gray-400">Loading events...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <p className="text-red-500">{error}</p>
+      <div className="text-center py-12">
+        <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-3xl">⚠️</span>
         </div>
+        <p className="text-red-400 font-medium">{error}</p>
       </div>
     );
   }
@@ -121,153 +126,182 @@ const EventsList = ({ onEventSelect }) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingEvents = events.filter(event => new Date(event.event_date) >= today);
+  const upcomingEvents = events
+    .filter(event => new Date(event.event_date) >= today)
+    .filter(event => event.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+
   const pastEvents = events
     .filter(event => new Date(event.event_date) < today)
-    .sort((a, b) => new Date(b.event_date) - new Date(a.event_date)); // Most recent first
-
-  const EventCard = ({ event }) => (
-    <li
-      key={event.id}
-      className="bg-gradient-to-br from-slate-700/30 to-slate-800/20 backdrop-blur-sm rounded-xl border border-slate-600/50 p-4 hover:border-slate-500/60 transition-all duration-300 hover:scale-[1.01]"
-    >
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-bold text-white mb-2 leading-tight">
-            {event.title}
-          </h3>
-          <div className="flex flex-wrap gap-2 mb-2">
-            <span className="bg-purple-600/30 text-purple-200 px-3 py-1 rounded-lg text-xs font-semibold border border-purple-500/50">
-              📅 {new Date(event.event_date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </span>
-            <span className="bg-blue-600/30 text-blue-200 px-3 py-1 rounded-lg text-xs font-semibold border border-blue-500/50">
-              💡 {ideasCounts[event.id] || 0} Ideas
-            </span>
-          </div>
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <button
-            onClick={() => onEventSelect(event)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-          >
-            👁️ View
-          </button>
-          <button
-            onClick={() => handleDelete(event.id)}
-            className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            🗑️
-          </button>
-        </div>
-      </div>
-    </li>
-  );
+    .filter(event => event.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
 
   const displayedEvents = selectedView === 'upcoming' ? upcomingEvents : pastEvents;
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
-        <h2 className="text-2xl font-bold text-white">📅 Events</h2>
-        <div className="flex items-center gap-2">
-          <span className="bg-blue-600/50 text-blue-200 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/50">
-            {events.length} Total
-          </span>
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Filter Tabs */}
+        <div className="flex gap-2">
           <button
-            onClick={handleSync}
-            disabled={syncing}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-              syncing
-                ? 'bg-slate-600/50 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-500 hover:to-green-500 shadow-lg hover:shadow-xl'
+            onClick={() => setSelectedView('upcoming')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5 ${
+              selectedView === 'upcoming'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                : 'bg-slate-700/50 text-gray-400 border border-slate-600/50 hover:border-slate-500'
             }`}
-            title="Sync events from Meetup"
           >
-            {syncing ? (
-              <>
-                <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></div>
-                Syncing...
-              </>
-            ) : (
-              <>
-                🔄 Sync
-              </>
-            )}
+            <span>🔜</span>
+            <span>Upcoming ({events.filter(e => new Date(e.event_date) >= today).length})</span>
+          </button>
+          <button
+            onClick={() => setSelectedView('past')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5 ${
+              selectedView === 'past'
+                ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                : 'bg-slate-700/50 text-gray-400 border border-slate-600/50 hover:border-slate-500'
+            }`}
+          >
+            <span>📜</span>
+            <span>Past ({events.filter(e => new Date(e.event_date) < today).length})</span>
           </button>
         </div>
+
+        {/* Search */}
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search events..."
+            className="w-full px-4 py-2 pl-10 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm"
+          />
+          <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        {/* Sync Button */}
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5 ${
+            syncing
+              ? 'bg-slate-600/50 text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-500 hover:to-green-500 shadow-lg'
+          }`}
+        >
+          {syncing ? (
+            <>
+              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+              <span>Syncing...</span>
+            </>
+          ) : (
+            <>
+              <span>🔄</span>
+              <span>Sync Meetup</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Sync Message */}
       {syncMessage && (
-        <div className={`mb-3 px-3 py-2 rounded-lg text-xs font-semibold ${
+        <div className={`px-4 py-3 rounded-lg text-sm font-medium ${
           syncMessage.type === 'success'
-            ? 'bg-green-600/20 text-green-200 border border-green-500/50'
-            : 'bg-red-600/20 text-red-200 border border-red-500/50'
+            ? 'bg-green-900/20 text-green-300 border border-green-500/50'
+            : 'bg-red-900/20 text-red-300 border border-red-500/50'
         }`}>
           {syncMessage.text}
         </div>
       )}
 
-      {/* Tab Buttons */}
-      <div className="flex gap-3 mb-4">
-        <button
-          onClick={() => setSelectedView('upcoming')}
-          className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
-            selectedView === 'upcoming'
-              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
-              : 'bg-slate-700/30 text-gray-400 hover:text-white hover:bg-slate-700/50 border border-slate-600/50'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <span>🔜 Upcoming</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              selectedView === 'upcoming'
-                ? 'bg-white/20'
-                : 'bg-slate-600/50'
-            }`}>
-              {upcomingEvents.length}
-            </span>
-          </div>
-        </button>
-        <button
-          onClick={() => setSelectedView('past')}
-          className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
-            selectedView === 'past'
-              ? 'bg-gradient-to-r from-gray-600 to-slate-600 text-white shadow-lg'
-              : 'bg-slate-700/30 text-gray-400 hover:text-white hover:bg-slate-700/50 border border-slate-600/50'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <span>📜 Past</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              selectedView === 'past'
-                ? 'bg-white/20'
-                : 'bg-slate-600/50'
-            }`}>
-              {pastEvents.length}
-            </span>
-          </div>
-        </button>
+      {/* Stats */}
+      <div className="flex items-center justify-between">
+        <p className="text-gray-400 text-sm">
+          Showing <span className="text-white font-medium">{displayedEvents.length}</span> {selectedView} event{displayedEvents.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {/* Events List */}
       {displayedEvents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 text-center">
-          <div className="text-6xl mb-4">{selectedView === 'upcoming' ? '📭' : '🗂️'}</div>
-          <p className="text-gray-400 text-lg">
+        <div className="text-center py-16">
+          <div className="w-20 h-20 bg-slate-800/60 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700/50">
+            <span className="text-4xl">{selectedView === 'upcoming' ? '📭' : '🗂️'}</span>
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">
             {selectedView === 'upcoming' ? 'No upcoming events' : 'No past events'}
+          </h3>
+          <p className="text-gray-400">
+            {searchQuery ? 'Try a different search term.' : selectedView === 'upcoming' ? 'Sync from Meetup to add events.' : 'Past events will appear here.'}
           </p>
         </div>
       ) : (
-        <ul className="space-y-3 flex-1 overflow-auto pr-2">
+        <div className="border border-slate-700/60 rounded-xl overflow-hidden divide-y divide-slate-700/50">
           {displayedEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <div
+              key={event.id}
+              onClick={() => onEventSelect(event)}
+              className="p-4 cursor-pointer transition-all duration-200 hover:bg-slate-800/50"
+            >
+              <div className="flex items-center gap-4">
+                {/* Date badge */}
+                <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0 border ${
+                  new Date(event.event_date) >= today
+                    ? 'bg-gradient-to-br from-green-600/30 to-emerald-600/30 border-green-500/50'
+                    : 'bg-gradient-to-br from-slate-700/30 to-slate-800/30 border-slate-600/50'
+                }`}>
+                  <span className="text-xs font-bold text-gray-300 uppercase">
+                    {new Date(event.event_date).toLocaleDateString('en-US', { month: 'short' })}
+                  </span>
+                  <span className="text-lg font-bold text-white">
+                    {new Date(event.event_date).getDate()}
+                  </span>
+                </div>
+
+                {/* Main content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-white font-semibold truncate">{event.title}</span>
+                    {new Date(event.event_date) >= today && (
+                      <span className="bg-green-500/20 text-green-300 border border-green-500/40 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        Upcoming
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-sm">
+                    <span className="text-gray-400">{formatDate(event.event_date)}</span>
+                    <span className="text-gray-600">•</span>
+                    <span className="text-purple-400 flex items-center gap-1">
+                      <span>💡</span> {ideasCounts[event.id] || 0} ideas
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEventSelect(event);
+                    }}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg flex items-center gap-1.5 text-sm"
+                  >
+                    <span>👁️</span>
+                    <span className="hidden sm:inline">View</span>
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(e, event.id)}
+                    className="bg-slate-700/50 hover:bg-red-600/80 border border-slate-600/50 hover:border-red-500 text-gray-300 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1.5 text-sm"
+                  >
+                    <span>🗑️</span>
+                    <span className="hidden sm:inline">Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
@@ -278,9 +312,11 @@ const EventsList = ({ onEventSelect }) => {
             onClick={() => setDeleteConfirm(null)}
           ></div>
           <div className="fixed inset-0 flex items-start justify-center pt-20 p-4 z-[9999]">
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 max-w-md w-full animate-slide-down">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 max-w-md w-full">
               <div className="text-center mb-6">
-                <div className="text-6xl mb-4">⚠️</div>
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">⚠️</span>
+                </div>
                 <h2 className="text-2xl font-bold text-white mb-3">Delete Event?</h2>
                 <p className="text-gray-300 text-base">
                   Are you sure you want to delete this event? This action cannot be undone and will delete all associated ideas.
@@ -289,16 +325,13 @@ const EventsList = ({ onEventSelect }) => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 bg-gradient-to-br from-slate-700/50 to-slate-800/50 text-white px-4 py-3 rounded-lg font-semibold hover:from-slate-600/50 hover:to-slate-700/50 transition-all duration-200 border border-slate-600/50"
+                  className="flex-1 bg-slate-700/50 hover:bg-slate-600 border border-slate-600/50 text-white px-4 py-3 rounded-lg font-semibold transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg"
-                  style={{
-                    boxShadow: "0 0 20px rgba(239, 68, 68, 0.4)",
-                  }}
+                  className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-3 rounded-lg font-semibold transition-all shadow-lg"
                 >
                   🗑️ Delete
                 </button>

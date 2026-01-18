@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ContributorRequests from '../components/admin/ContributorRequests';
 import { getUserProfile } from '../api/API';
 
 const AdminRequests = () => {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
   const [userName, setUserName] = useState('');
@@ -45,7 +47,16 @@ const AdminRequests = () => {
       <div className="flex-1 px-4 sm:px-6 py-6">
         <div className="max-w-6xl mx-auto space-y-4">
           <div className="bg-gradient-to-r from-emerald-800/60 to-teal-800/60 border border-emerald-700/50 p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/admin')}
+                className="bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 text-white p-3 rounded-xl font-semibold transition-all flex items-center justify-center"
+                title="Back to Admin"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
               <div>
                 <p className="text-xs uppercase tracking-wide text-emerald-200">Contributors</p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white">Contributor Requests</h1>
