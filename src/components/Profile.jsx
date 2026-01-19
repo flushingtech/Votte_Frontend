@@ -449,7 +449,8 @@ const Profile = ({ user, viewingEmail = null }) => {
             </div>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-              {contributedIdeas.map(idea => (
+              {/* Deduplicate ideas by id to avoid showing the same project multiple times */}
+              {[...new Map(contributedIdeas.map(idea => [idea.id, idea])).values()].map(idea => (
                 <div
                   key={idea.id}
                   className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/20 rounded-lg overflow-hidden hover:border-blue-500/40 transition-all cursor-pointer group flex items-stretch min-h-[150px]"
