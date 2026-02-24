@@ -117,13 +117,13 @@ export const getLikedIdeas = async (email) => {
 };
 
 // Function to add a new event (only if user is an admin)
-export const addEvent = async (email, title, eventDate) => {
+export const addEvent = async (email, title, eventDate, eventType = 'hackathon') => {
   const isAdmin = await checkAdminStatus(email);
   if (!isAdmin) {
     throw new Error('Unauthorized access: User is not an admin');
   }
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, { email, title, eventDate });
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/events/add-event`, { email, title, eventDate, eventType });
     return response.data;
   } catch (error) {
     console.error('Error adding event:', error);

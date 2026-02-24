@@ -5,7 +5,7 @@ import { getIdeasByEvent, deleteIdea, setIdeaStage } from "../api/API";
 import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 
-function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1" }) {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1", readOnly = false }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -149,7 +149,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", event
                       👁️ View
                     </button>
 
-                    {(isYourIdea || isAdmin) && (
+                    {!readOnly && (isYourIdea || isAdmin) && (
                       <div className="relative sm:mt-auto">
                         <button
                           className="text-gray-400 hover:text-white transition-colors p-0.5 hover:bg-slate-700/50 rounded"

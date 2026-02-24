@@ -4,6 +4,7 @@ import { addEvent } from '../../api/API';
 const AddEvent = ({ userEmail, onSuccess }) => {
   const [title, setTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [eventType, setEventType] = useState('hackathon');
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
 
@@ -16,11 +17,12 @@ const AddEvent = ({ userEmail, onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await addEvent(userEmail, title, eventDate);
+      await addEvent(userEmail, title, eventDate, eventType);
       showNotification('Event added successfully!', 'success');
       onSuccess();
       setTitle('');
       setEventDate('');
+      setEventType('hackathon');
     } catch (error) {
       console.error('Error adding event:', error);
       showNotification('Failed to add event. Please try again.', 'error');
@@ -57,6 +59,33 @@ const AddEvent = ({ userEmail, onSuccess }) => {
               onChange={(e) => setEventDate(e.target.value)}
               required
             />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1">Event Type</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEventType('hackathon')}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                  eventType === 'hackathon'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-blue-500/50 text-white shadow-lg'
+                    : 'bg-slate-700/30 border-slate-600/50 text-gray-400 hover:border-slate-500'
+                }`}
+              >
+                🏆 Hackathon
+              </button>
+              <button
+                type="button"
+                onClick={() => setEventType('live_coding')}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                  eventType === 'live_coding'
+                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 border-teal-500/50 text-white shadow-lg'
+                    : 'bg-slate-700/30 border-slate-600/50 text-gray-400 hover:border-slate-500'
+                }`}
+              >
+                💻 Live Coding
+              </button>
+            </div>
           </div>
         </div>
 

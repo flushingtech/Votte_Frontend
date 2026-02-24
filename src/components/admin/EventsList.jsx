@@ -268,6 +268,15 @@ const EventsList = ({ onEventSelect }) => {
                         Upcoming
                       </span>
                     )}
+                    {event.event_type === 'live_coding' ? (
+                      <span className="bg-teal-500/20 text-teal-300 border border-teal-500/40 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        💻 Live Coding
+                      </span>
+                    ) : (
+                      <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        🏆 Hackathon
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-sm">
                     <span className="text-gray-400">{formatDate(event.event_date)}</span>

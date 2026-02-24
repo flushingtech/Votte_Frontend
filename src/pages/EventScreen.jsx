@@ -92,6 +92,8 @@ function EventScreen() {
     fetchProjects();
   }, [fetchProjects]);
 
+  const isLiveCoding = event?.event_type === 'live_coding';
+
   const isUserCheckedIn = useMemo(() => {
     if (!event || !email) return false;
     return (event.checked_in || "")
@@ -126,10 +128,10 @@ function EventScreen() {
 
   const checkedInFlag = searchParams.get("checkedIn") === "true";
 
-  // Only allow project selection in stage 1.2 or stage 2
+  // Only allow project selection in stage 1.2 or stage 2 (for hackathons only in stage 2)
   const isStageAllowingSelection =
     (eventStage === "1" && subStage === "2") ||
-    (eventStage === "2");
+    (eventStage === "2" && !isLiveCoding);
 
   const selectionRequired =
     !userHasProjectSelection &&
@@ -543,6 +545,47 @@ function EventScreen() {
       setShowResultsConfirm(true);
     };
 
+    const handleCompleteSession = async () => {
+      try {
+        const apiResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: 2 })
+        });
+        const data = await apiResponse.json();
+        const updatedEvent = data.event || data;
+        setEventStage(updatedEvent.stage.toString());
+        showNotification("✅ Session completed!", "success");
+      } catch (error) {
+        console.error("Error completing session:", error);
+        showNotification("Failed to complete session.", "error");
+      }
+    };
+
+    const handleReopenSession = async () => {
+      try {
+        const stageResponse = await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: 1 })
+        });
+        const stageData = await stageResponse.json();
+        const updatedEvent = stageData.event || stageData;
+        setEventStage(updatedEvent.stage.toString());
+
+        await fetch(`${import.meta.env.VITE_BASE_URL}/api/events/set-sub-stage/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sub_stage: "1" })
+        });
+        setSubStage("1");
+        showNotification("🔓 Session reopened!", "success");
+      } catch (error) {
+        console.error("Error reopening session:", error);
+        showNotification("Failed to reopen session.", "error");
+      }
+    };
+
     return (
       <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm border border-orange-700/50 shadow-2xl p-2 sm:p-3 lg:p-4 flex flex-col gap-2 lg:gap-3 w-full">
         {/* Stacked, no-wrap header */}
@@ -550,65 +593,97 @@ function EventScreen() {
           <h2 className="text-white text-sm sm:text-base font-bold whitespace-nowrap mb-1">
             ⚙️ Admin Controls
           </h2>
-          <span className="bg-orange-600/50 text-orange-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-orange-500/50">
-            Stage {eventStage}{eventStage === "1" && `.${subStage}`}
-          </span>
+          {isLiveCoding ? (
+            <span className="bg-teal-600/50 text-teal-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-teal-500/50">
+              {eventStage === "1" ? "Stage 1 (Open)" : "Stage 2 (Complete)"}
+            </span>
+          ) : (
+            <span className="bg-orange-600/50 text-orange-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-orange-500/50">
+              Stage {eventStage}{eventStage === "1" && `.${subStage}`}
+            </span>
+          )}
         </div>
 
-        {/* Stage 1.1 controls */}
-        {eventStage === "1" && subStage === "1" && (
-          <button
-            onClick={handleToggleSubStage}
-            className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-          >
-            🔒 Lock
-          </button>
-        )}
-
-        {/* Stage 1.2 controls */}
-        {eventStage === "1" && subStage === "2" && (
+        {isLiveCoding ? (
           <>
-            <button
-              onClick={handleStartVoting}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-            >
-              🗳️ Voting
-            </button>
-            <button
-              onClick={handleBackToSubmissionsOpen}
-              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
-            >
-              🔓 Unlock
-            </button>
-          </>
-        )}
+            {/* Live Coding Stage 1 controls */}
+            {eventStage === "1" && (
+              <button
+                onClick={handleCompleteSession}
+                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-teal-500 hover:to-cyan-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+              >
+                ✅ Complete Session
+              </button>
+            )}
 
-        {/* Stage 2 controls */}
-        {eventStage === "2" && (
+            {/* Live Coding Stage 2 controls */}
+            {eventStage === "2" && (
+              <button
+                onClick={handleReopenSession}
+                className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+              >
+                🔓 Reopen Session
+              </button>
+            )}
+          </>
+        ) : (
           <>
-            <button
-              onClick={handleShowResults}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-            >
-              🏆 Results
-            </button>
-            <button
-              onClick={handleBackToSubmissionsOpen}
-              className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
-            >
-              ← Back
-            </button>
-          </>
-        )}
+            {/* Stage 1.1 controls */}
+            {eventStage === "1" && subStage === "1" && (
+              <button
+                onClick={handleToggleSubStage}
+                className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+              >
+                🔒 Lock
+              </button>
+            )}
 
-        {/* Stage 3 controls */}
-        {eventStage === "3" && (
-          <button
-            onClick={handleBackToVoting}
-            className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-          >
-            ← Back
-          </button>
+            {/* Stage 1.2 controls */}
+            {eventStage === "1" && subStage === "2" && (
+              <>
+                <button
+                  onClick={handleStartVoting}
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+                >
+                  🗳️ Voting
+                </button>
+                <button
+                  onClick={handleBackToSubmissionsOpen}
+                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
+                >
+                  🔓 Unlock
+                </button>
+              </>
+            )}
+
+            {/* Stage 2 controls */}
+            {eventStage === "2" && (
+              <>
+                <button
+                  onClick={handleShowResults}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+                >
+                  🏆 Results
+                </button>
+                <button
+                  onClick={handleBackToSubmissionsOpen}
+                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
+                >
+                  ← Back
+                </button>
+              </>
+            )}
+
+            {/* Stage 3 controls */}
+            {eventStage === "3" && (
+              <button
+                onClick={handleBackToVoting}
+                className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
+              >
+                ← Back
+              </button>
+            )}
+          </>
         )}
 
         {/* Divider + Upload */}
@@ -772,25 +847,42 @@ function EventScreen() {
                 )}
 
                 <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-6 sm:mb-8 lg:mb-12">
-                  {eventStage === "1" && subStage === "1" && (
-                    <span className="bg-blue-600/50 text-blue-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-blue-500/50">
-                      📝 Submissions Open
-                    </span>
-                  )}
-                  {eventStage === "1" && subStage === "2" && (
-                    <span className="bg-orange-600/50 text-orange-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-orange-500/50">
-                      🔒 Submissions Locked
-                    </span>
-                  )}
-                  {eventStage === "2" && (
-                    <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
-                      🗳️ Voting Time
-                    </span>
-                  )}
-                  {eventStage === "3" && (
-                    <span className="bg-yellow-600/50 text-yellow-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-yellow-500/50">
-                      🏆 Our Winners!
-                    </span>
+                  {isLiveCoding ? (
+                    <>
+                      {eventStage === "1" && (
+                        <span className="bg-teal-600/50 text-teal-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-teal-500/50">
+                          💻 Ideas Open
+                        </span>
+                      )}
+                      {eventStage === "2" && (
+                        <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
+                          ✅ Session Complete
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {eventStage === "1" && subStage === "1" && (
+                        <span className="bg-blue-600/50 text-blue-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-blue-500/50">
+                          📝 Submissions Open
+                        </span>
+                      )}
+                      {eventStage === "1" && subStage === "2" && (
+                        <span className="bg-orange-600/50 text-orange-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-orange-500/50">
+                          🔒 Submissions Locked
+                        </span>
+                      )}
+                      {eventStage === "2" && (
+                        <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
+                          🗳️ Voting Time
+                        </span>
+                      )}
+                      {eventStage === "3" && (
+                        <span className="bg-yellow-600/50 text-yellow-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-yellow-500/50">
+                          🏆 Our Winners!
+                        </span>
+                      )}
+                    </>
                   )}
                   {(event?.checked_in || "")
                     .split(",")
@@ -803,7 +895,7 @@ function EventScreen() {
                 </div>
 
                 {/* Add New Idea inside header, bottom-right */}
-                {eventStage === "1" && subStage === "1" && (
+                {eventStage === "1" && (isLiveCoding || subStage === "1") && (
                   <div className="absolute bottom-4 right-4">
                     <IdeaSubmission
                       email={email}
@@ -827,7 +919,17 @@ function EventScreen() {
 
             {/* IDEAS (cols 1–3) */}
             <div className="lg:col-span-3">
-              {eventStage === "1" ? (
+              {isLiveCoding ? (
+                <Stage_1_Ideas
+                  key={ideasRefreshKey}
+                  eventId={eventId}
+                  refreshIdeas={refreshIdeas}
+                  isAdmin={isAdmin}
+                  eventStage={eventStage}
+                  eventSubStage={subStage}
+                  readOnly={eventStage === "2"}
+                />
+              ) : eventStage === "1" ? (
                 <Stage_1_Ideas
                   key={ideasRefreshKey}
                   eventId={eventId}
