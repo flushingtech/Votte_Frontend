@@ -57,12 +57,53 @@ function Navbar({ userName, profilePicture }) {
     <nav className="relative z-50">
       {/* Main Navbar */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-sm border-b border-slate-700/50 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+
+          {/* Centered search (Reddit-style) - hidden on small screens */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 z-10 hidden sm:block">
+            <div className="search-wrapper relative">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const q = e.target.search?.value?.trim();
+                  if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+                }}
+                role="search"
+                className="relative"
+              >
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                </svg>
+                <input
+                  name="search"
+                  aria-label="Search"
+                  placeholder="Find anything"
+                  className="w-full pl-10 pr-4 h-10 rounded-full bg-slate-800/60 border border-slate-700 placeholder-slate-400 text-white focus:outline-none relative z-30"
+                  style={{
+                    boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+                    transition: 'box-shadow 180ms ease-in-out, border-color 180ms ease-in-out',
+                    zIndex: 30,
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(96,165,250,0.14), 0 12px 40px -14px rgba(96,165,250,0.18)';
+                    e.currentTarget.style.borderColor = 'rgba(96,165,250,0.9)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06)';
+                    e.currentTarget.style.borderColor = '';
+                  }}
+                />
+              </form>
+
+              {/* no decorative trail — glow removed per user request */}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between h-16">
-            
+
             {/* Logo Section */}
-            <button 
-              onClick={goToHome} 
+            <button
+              onClick={goToHome}
               className="flex items-center space-x-3 group hover:scale-105 transition-all duration-200"
             >
               <div className="relative">

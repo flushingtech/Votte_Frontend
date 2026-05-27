@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import EventsList from '../components/EventsList';
 import Navbar from '../components/Navbar';
 import MyIdeas from '../components/MyIdeas';
-import Profile from '../components/Profile';
 import FeaturedProjects from '../components/FeaturedProjects';
 import Leaderboard from '../components/Leaderboard';
+import Sidebar from '../components/dashboard/Sidebar';
 import { getUserProfile } from '../api/API';
 
 // Function to decode JWT manually
@@ -31,7 +31,7 @@ function Home() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
-  const [activeTab, setActiveTab] = useState('community');
+  // No tabs: always show community view
 
   const getEasternDate = () => {
     const eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
@@ -75,12 +75,16 @@ function Home() {
   }, []);
 
   return (
-    <div
-      className="home-page flex flex-col min-h-screen relative overflow-hidden"
-      style={{
-        background: '#000000',
-      }}
-    >
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#000000' }}>
+
+      {/* Navbar spans full width, above the sidebar */}
+      <div className="relative z-50 flex-shrink-0">
+        <Navbar userName={userName} profilePicture={profilePicture} />
+      </div>
+
+      {/* Below navbar: sidebar + content side by side */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+
       {/* Light blue flashes/glowing effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
@@ -90,7 +94,10 @@ function Home() {
         <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
       </div>
 
-      <Navbar userName={userName} profilePicture={profilePicture} />
+      <Sidebar />
+
+      {/* Right: content */}
+  <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative pl-6">
 
       {/* Welcome Header */}
       <div className="px-4 sm:px-6 py-4 sm:py-6 lg:py-2 lg:flex-shrink-0">
@@ -110,105 +117,40 @@ function Home() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="px-4 sm:px-6 pb-4">
-        <div className="max-w-7xl mx-auto flex gap-2 border-b border-slate-700/50">
-          <button
-            onClick={() => setActiveTab('community')}
-            className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-              activeTab === 'community'
-                ? 'border-purple-500 text-purple-400 bg-purple-500/10'
-                : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-slate-800/50'
-            } rounded-t-lg`}
-          >
-            🌐 Community
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-              activeTab === 'profile'
-                ? 'border-purple-500 text-purple-400 bg-purple-500/10'
-                : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-slate-800/50'
-            } rounded-t-lg`}
-          >
-            👤 Profile
-          </button>
-        </div>
-      </div>
+      {/* No tabs - community content only */}
 
       {/* Main Content Grid */}
-      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 relative">
-        {/* Left Decorative Lines */}
-        <div className="fixed left-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
-          <div className="space-y-4">
-            <div className="w-16 h-px bg-gradient-to-r from-transparent to-blue-500/50"></div>
-            <div className="w-24 h-px bg-gradient-to-r from-transparent to-purple-500/40"></div>
-            <div className="w-12 h-px bg-gradient-to-r from-transparent to-cyan-500/30"></div>
-            <div className="w-20 h-px bg-gradient-to-r from-transparent to-blue-400/60"></div>
-            <div className="w-8 h-px bg-gradient-to-r from-transparent to-indigo-500/35"></div>
-          </div>
-        </div>
+      <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pb-6">
+        <div className="flex-1 min-h-0 flex flex-col gap-4 max-w-7xl mx-auto w-full">
 
-        {/* Right Decorative Lines */}
-        <div className="fixed right-0 top-1/2 transform -translate-y-1/2 hidden lg:block z-10">
-          <div className="space-y-4">
-            <div className="w-16 h-px bg-gradient-to-l from-transparent to-blue-500/50"></div>
-            <div className="w-24 h-px bg-gradient-to-l from-transparent to-purple-500/40"></div>
-            <div className="w-12 h-px bg-gradient-to-l from-transparent to-cyan-500/30"></div>
-            <div className="w-20 h-px bg-gradient-to-l from-transparent to-blue-400/60"></div>
-            <div className="w-8 h-px bg-gradient-to-l from-transparent to-indigo-500/35"></div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-3 xl:gap-4">
-
-          {activeTab === 'community' ? (
             <>
-              {/* Community Tab - Top Row: Events and Leaderboard */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-3 xl:gap-4 lg:flex-[3]">
-                {/* Events Section - Takes up 2 columns on desktop */}
-                <div className="xl:col-span-2 lg:h-full">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-2xl overflow-hidden lg:h-full">
-                    <div className="h-auto lg:h-full">
-                      <EventsList today={todayEastern} />
-                    </div>
+              {/* Events + Leaderboard — fixed height */}
+              <div className="flex-shrink-0 grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div className="xl:col-span-2">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-2xl overflow-hidden" style={{ minHeight: '340px' }}>
+                    <EventsList today={todayEastern} />
                   </div>
                 </div>
-
-                {/* Leaderboard Section */}
                 <div className="xl:col-span-1">
-                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
-                    <div className="h-[400px] lg:h-full overflow-y-auto">
+                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden">
+                    <div className="h-[340px] overflow-y-auto">
                       <Leaderboard />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Community Tab - Bottom Row: Featured Projects */}
-              <div className="w-full lg:flex-[2]">
-                <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-hidden lg:h-full">
-                  <div className="h-[350px] sm:h-[400px] lg:h-full overflow-y-auto">
-                    <FeaturedProjects />
-                  </div>
-                </div>
+              {/* Featured Projects — fills remaining height */}
+              <div className="flex-1 min-h-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-y-auto lg:overflow-hidden">
+                <FeaturedProjects />
               </div>
             </>
-          ) : (
-            <>
-              {/* Profile Tab */}
-              <div className="w-full lg:h-full">
-                <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden lg:h-full">
-                  <div className="h-[600px] sm:h-[650px] lg:h-full overflow-y-auto">
-                    <Profile user={{ email: userEmail }} />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
 
         </div>
       </div>
+
+      </div>{/* end right column */}
+      </div>{/* end sidebar+content row */}
     </div>
   );
 }

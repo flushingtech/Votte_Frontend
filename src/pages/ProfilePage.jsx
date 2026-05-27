@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Profile from '../components/Profile';
+import Sidebar from '../components/dashboard/Sidebar';
 import { getUserProfile, getUserEmailByUsername } from '../api/API';
 
 const ProfilePage = ({ user }) => {
@@ -88,9 +89,16 @@ const ProfilePage = ({ user }) => {
 
       <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
 
-      <div className="flex-1 px-4 sm:px-6 py-6">
-        <div className="max-w-7xl mx-auto">
-          <Profile user={user} viewingEmail={viewingEmail} />
+      {/* Below navbar: sidebar + content side by side */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        <Sidebar />
+
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative pl-6">
+          <div className="flex-1 px-4 sm:px-6 py-6">
+            <div className="max-w-7xl mx-auto">
+              <Profile user={user} viewingEmail={viewingEmail} />
+            </div>
+          </div>
         </div>
       </div>
 
