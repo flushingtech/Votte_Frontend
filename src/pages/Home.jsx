@@ -131,7 +131,7 @@ function Home() {
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
       {/* Right: content — left padding matches sidebar width */}
-  <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative"
+  <div className="flex flex-col flex-1 min-w-0 overflow-y-auto lg:overflow-hidden relative"
     style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
 
       {/* Welcome Header */}
@@ -189,8 +189,8 @@ function Home() {
                 </div>
               </div>
 
-              {/* Featured Projects — fills remaining height */}
-              <div className="flex-1 min-h-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-y-auto lg:overflow-hidden">
+              {/* Featured Projects — fills remaining height on desktop, fixed min on mobile */}
+              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-y-auto lg:overflow-hidden">
                 <FeaturedProjects />
               </div>
             </>

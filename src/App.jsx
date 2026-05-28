@@ -18,8 +18,12 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  return user?.email || null;
+  // Try Google OAuth key first, then fall back to JWT-decoded key
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user?.email) return user.email;
+  } catch {}
+  return localStorage.getItem('userEmail') || null;
 };
 
 const RequireAdmin = ({ children, userEmail }) => {
