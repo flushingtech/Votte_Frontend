@@ -398,10 +398,10 @@ export default function FeaturedProjects() {
               : <NoImg />
             }
 
-            {/* Cinematic gradient overlay — subtle vignette only, image stays dominant */}
+            {/* Cinematic gradient overlay — image fully visible, only a thin fade at the very bottom */}
             <div style={{
               position: 'absolute', inset: 0,
-              background: 'linear-gradient(to bottom,rgba(5,12,27,.18) 0%,transparent 40%,rgba(5,12,27,.55) 82%,rgba(5,12,27,.78) 100%)',
+              background: 'linear-gradient(to bottom, transparent 0%, transparent 62%, rgba(5,12,27,.32) 80%, rgba(5,12,27,.58) 100%)',
             }} />
 
             {/* Corner accent lines */}
