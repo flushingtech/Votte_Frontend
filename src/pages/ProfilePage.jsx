@@ -12,6 +12,7 @@ const ProfilePage = ({ user }) => {
   const [navbarUserName, setNavbarUserName] = useState('');
   const [navbarProfilePicture, setNavbarProfilePicture] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
   // Check if user is logged in
   const isLoggedIn = !!user?.email;
@@ -91,9 +92,10 @@ const ProfilePage = ({ user }) => {
 
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        <Sidebar />
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
-        <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative pl-6">
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
           <div className="flex-1 px-4 sm:px-6 py-6">
             <div className="max-w-7xl mx-auto">
               <Profile user={user} viewingEmail={viewingEmail} />

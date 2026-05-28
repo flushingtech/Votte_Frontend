@@ -1,5 +1,11 @@
 import axios from 'axios';
 
+// Search across projects, developers, and events
+export const search = async (q) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/search`, { params: { q } });
+  return response.data; // { projects, developers, events }
+};
+
 // Function to submit an idea associated with a specific event
 export const submitIdea = async (email, idea, description, technologies, event_id, is_built = false, github_repos = []) => {
   try {

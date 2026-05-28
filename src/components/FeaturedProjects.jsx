@@ -94,30 +94,40 @@ const FeaturedProjects = () => {
   }
 
   return (
-    <div className="h-full flex flex-col p-4">
-      {/* Header + dot indicators */}
-      <div className="flex items-center justify-between mb-3 flex-shrink-0">
-        <h2 className="text-sm font-semibold text-white">Featured Projects</h2>
-        {total > 1 && (
-          <div className="flex items-center gap-1.5">
-            {projects.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setVisible(false); setTimeout(() => { setActiveIdx(i); setVisible(true); }, FADE_MS); }}
-                className="rounded-full transition-all duration-300"
-                style={{
-                  width:  i === activeIdx ? '16px' : '6px',
-                  height: '6px',
-                  backgroundColor: i === activeIdx ? '#60A5FA' : '#334155',
-                }}
-              />
-            ))}
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-3 flex-shrink-0 flex items-center justify-between bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
+        <div className="flex items-center gap-2">
+          <div className="bg-purple-500 p-1.5 rounded-lg">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
           </div>
-        )}
+          <h2 className="text-base font-bold text-white">Featured Projects</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          {total > 1 && (
+            <div className="flex items-center gap-1.5">
+              {projects.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setVisible(false); setTimeout(() => { setActiveIdx(i); setVisible(true); }, FADE_MS); }}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width:  i === activeIdx ? '16px' : '6px',
+                    height: '6px',
+                    backgroundColor: i === activeIdx ? '#60A5FA' : '#334155',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          <span className="bg-slate-600/50 px-2.5 py-0.5 rounded-full text-xs text-gray-200">{total} projects</span>
+        </div>
       </div>
 
       {/* Outer grid: 1 col on mobile, 2 col on desktop */}
-      <div className="flex-1 min-h-0 grid gap-3 grid-cols-1 lg:grid-cols-2">
+      <div className="flex-1 min-h-0 p-4 grid gap-3 grid-cols-1 lg:grid-cols-2">
 
         {/* ── Big featured card ── */}
         <div
