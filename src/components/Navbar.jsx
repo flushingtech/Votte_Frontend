@@ -152,7 +152,7 @@ function Navbar({ userName, profilePicture }) {
             </button>
             {/* Dropdown moved here so it's colocated with the trigger button (prevents duplicate UI) */}
             {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl backdrop-blur-sm z-[9999] overflow-hidden">
+              <div className="absolute right-0 top-full mt-2 w-64 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 shadow-2xl backdrop-blur-sm z-[9999] overflow-hidden">
                 {/* Dropdown Header */}
                 <div className="px-4 py-3 border-b border-slate-700/50 bg-gradient-to-r from-slate-700/50 to-slate-600/50">
                   <p className="text-sm font-medium text-white truncate">
