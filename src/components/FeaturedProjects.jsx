@@ -88,6 +88,12 @@ const STYLES = `
       overflow-y:auto !important;
     }
   }
+  @media (max-height:600px) {
+    .fp-hero-img { height:44% !important; min-height:100px !important; }
+  }
+  @media (max-height:480px) {
+    .fp-hero-img { height:36% !important; min-height:80px !important; }
+  }
 `;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -385,7 +391,7 @@ export default function FeaturedProjects() {
           }}
         >
           {/* Image region */}
-          <div style={{ position: 'relative', flexShrink: 0, height: '62%', minHeight: 150, overflow: 'hidden' }}>
+          <div className="fp-hero-img" style={{ position: 'relative', flexShrink: 0, height: '52%', minHeight: 130, overflow: 'hidden' }}>
             {featured.image_url
               ? <img src={featured.image_url} alt={featured.idea}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -415,7 +421,7 @@ export default function FeaturedProjects() {
           </div>
 
           {/* Content region */}
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '12px 14px', gap: 7, minHeight: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '10px 14px', gap: 6, minHeight: 0, overflow: 'hidden' }}>
 
             {/* Title + subtitle */}
             <div style={{ flexShrink: 0 }}>
@@ -430,9 +436,9 @@ export default function FeaturedProjects() {
               )}
             </div>
 
-            {/* Description — max 3 lines */}
+            {/* Description — max 3 lines, shrinks first when space is tight */}
             <p style={{
-              margin: 0, flexShrink: 0,
+              margin: 0, flexShrink: 1, minHeight: 0,
               color: 'rgba(148,163,184,.72)', fontSize: 11, lineHeight: 1.7,
               overflow: 'hidden', display: '-webkit-box',
               WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
