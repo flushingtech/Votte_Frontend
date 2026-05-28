@@ -109,7 +109,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #fdf4ff 0%, #e9d5ff 20%, #a855f7 45%, #6d28d9 70%, #3b0080 100%)' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f5eeff 30%, #e9d5ff 60%, #d8b4fe 85%, #c084fc 100%)' }}>
 
       {/* Navbar spans full width, above the sidebar */}
       <div className="relative z-50 flex-shrink-0">
@@ -119,14 +119,13 @@ function Home() {
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
 
-      {/* White + purple ambient glow */}
+      {/* Subtle white + light purple glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[0%] left-[20%] w-[520px] h-[520px] bg-white/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[10%] right-[10%] w-96 h-96 bg-white/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute top-[40%] left-[0%] w-80 h-80 bg-white/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
-        <div className="absolute bottom-[15%] right-[5%] w-96 h-96 bg-purple-400/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[0%] left-[30%] w-[420px] h-[420px] bg-violet-600/35 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[55%] right-[35%] w-72 h-72 bg-fuchsia-400/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-[0%] left-[15%] w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-[5%] right-[5%] w-96 h-96 bg-white/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-[20%] left-[10%] w-80 h-80 bg-white/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-purple-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-violet-300/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
       </div>
 
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
