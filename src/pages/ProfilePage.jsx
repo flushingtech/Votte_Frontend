@@ -49,16 +49,17 @@ const ProfilePage = ({ user }) => {
       <div
         className="flex flex-col min-h-screen relative overflow-hidden"
         style={{
-          background: '#000000',
+          background: 'linear-gradient(135deg, #000000 0%, #0a0018 20%, #1a0042 45%, #0d0028 70%, #000000 100%)',
         }}
       >
-        {/* Light blue flashes/glowing effects */}
+        {/* Purple / white ambient glow effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-          <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute top-[10%] left-[5%] w-72 h-72 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[55%] right-[10%] w-96 h-96 bg-violet-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-[15%] left-[25%] w-64 h-64 bg-purple-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-[35%] right-[35%] w-80 h-80 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute top-[5%] right-[20%] w-56 h-56 bg-white/[0.03] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-[5%] right-[5%] w-48 h-48 bg-violet-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
         </div>
 
         <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
@@ -76,7 +77,7 @@ const ProfilePage = ({ user }) => {
     <div
       className="flex flex-col min-h-screen relative overflow-hidden"
       style={{
-        background: '#000000',
+        background: 'linear-gradient(135deg, #000000 0%, #0a0018 20%, #1a0042 45%, #0d0028 70%, #000000 100%)',
       }}
     >
       {/* Light blue flashes/glowing effects */}
