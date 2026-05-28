@@ -11,8 +11,24 @@ function Navbar({ userName, profilePicture }) {
   const [results, setResults] = useState(null);
   const [searching, setSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [wordIdx, setWordIdx]     = useState(0);
+  const [wordVisible, setWordVisible] = useState(true);
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
+
+  const ROTATE_WORDS = ['projects', 'developers', 'events'];
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setWordVisible(false);
+      setTimeout(() => {
+        setWordIdx(i => (i + 1) % ROTATE_WORDS.length);
+        setWordVisible(true);
+      }, 220);
+    }, 2400);
+    return () => clearInterval(t);
+  }, []);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const userEmail = user?.email || "";
@@ -197,30 +213,55 @@ function Navbar({ userName, profilePicture }) {
                   role="search"
                   className="relative"
                 >
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 z-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
-                  </svg>
-                  <input
-                    name="search"
-                    aria-label="Search"
-                    value={query}
-                    onChange={handleSearchChange}
-                    onFocus={(e) => {
-                      e.currentTarget.style.animation = 'none';
-                      e.currentTarget.style.boxShadow = '0 0 14px 3px rgba(147,197,253,0.45), 0 0 0 1px rgba(147,197,253,0.55)';
-                      e.currentTarget.style.borderColor = 'rgba(147,197,253,0.8)';
-                      if (results) setSearchOpen(true);
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.animation = '';
-                      e.currentTarget.style.boxShadow = '';
-                      e.currentTarget.style.borderColor = '';
-                    }}
-                    placeholder="Find projects, developers, events"
-                    className="search-glow w-full pl-10 pr-4 h-10 rounded-full bg-slate-800/60 border border-blue-300/40 placeholder-slate-400 text-white focus:outline-none relative z-30"
-                    style={{ transition: 'box-shadow 180ms ease-in-out, border-color 180ms ease-in-out', zIndex: 30 }}
-                    autoComplete="off"
-                  />
+                  {/* White pill wrapper — everything lives inside this */}
+                  <div className="navbar-search flex items-center w-full h-10 rounded-full px-3 gap-2"
+                    style={{ background: '#fff', border: '1px solid #d1d5db', transition: 'box-shadow 180ms ease, border-color 180ms ease' }}>
+
+                    {/* Black icon */}
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="#111827" strokeWidth={2.2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                    </svg>
+
+                    {/* Input + animated placeholder */}
+                    <div className="relative flex-1 flex items-center">
+                      <input
+                        name="search"
+                        aria-label="Search"
+                        value={query}
+                        onChange={handleSearchChange}
+                        onFocus={(e) => {
+                          setSearchFocused(true);
+                          e.currentTarget.closest('.navbar-search').style.boxShadow = '0 0 0 3px rgba(59,130,246,.2)';
+                          e.currentTarget.closest('.navbar-search').style.borderColor = 'rgba(59,130,246,.5)';
+                          if (results) setSearchOpen(true);
+                        }}
+                        onBlur={(e) => {
+                          setSearchFocused(false);
+                          e.currentTarget.closest('.navbar-search').style.boxShadow = '';
+                          e.currentTarget.closest('.navbar-search').style.borderColor = '';
+                        }}
+                        className="w-full bg-transparent focus:outline-none text-sm"
+                        style={{ color: '#111827' }}
+                        autoComplete="off"
+                      />
+                      {/* Animated placeholder — only when empty + unfocused */}
+                      {!query && !searchFocused && (
+                        <div className="absolute inset-0 flex items-center gap-1 pointer-events-none select-none"
+                          style={{ fontSize: 14 }}>
+                          <span style={{ color: 'rgba(17,24,39,.7)' }}>Find</span>
+                          <span style={{
+                            color: 'rgba(17,24,39,.7)', fontStyle: 'italic',
+                            transition: 'opacity 220ms ease, transform 220ms ease',
+                            opacity: wordVisible ? 1 : 0,
+                            transform: wordVisible ? 'translateY(0)' : 'translateY(4px)',
+                            display: 'inline-block',
+                          }}>
+                            {ROTATE_WORDS[wordIdx]}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </form>
 
                 {/* Dropdown */}

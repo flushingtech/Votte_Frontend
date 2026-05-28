@@ -18,3 +18,9 @@
   animation: none;
   box-shadow: 0 0 14px 3px rgba(147,197,253,0.35), 0 0 0 1px rgba(147,197,253,0.45) !important;
 }
+
+/* Force white-bg search bar text to always be black */
+input.navbar-search {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}

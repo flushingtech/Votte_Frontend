@@ -1,9 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const ROTATE_WORDS = ['projects', 'developers', 'events'];
 
 export default function TopBar({ userName, profilePicture, userEmail, isAdmin, onSignOut }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchValue, setSearchValue]   = useState('');
+  const [focused, setFocused]           = useState(false);
+  const [wordIdx, setWordIdx]           = useState(0);
+  const [wordVisible, setWordVisible]   = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setWordVisible(false);
+      setTimeout(() => {
+        setWordIdx(i => (i + 1) % ROTATE_WORDS.length);
+        setWordVisible(true);
+      }, 220);
+    }, 2400);
+    return () => clearInterval(t);
+  }, []);
 
   const initials = (userName || userEmail || 'G')
     .split(' ')
@@ -26,28 +43,59 @@ export default function TopBar({ userName, profilePicture, userEmail, isAdmin, o
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-150"
           style={{
-            backgroundColor: '#0a1628',
-            border: '1px solid #1E2D4A',
+            backgroundColor: '#ffffff',
+            border: '1px solid #d1d5db',
+            boxShadow: focused ? '0 0 0 2px rgba(59,130,246,.25)' : 'none',
+            position: 'relative',
           }}
         >
+          {/* Black search icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-3.5 h-3.5 text-gray-600 flex-shrink-0"
+            fill="none" viewBox="0 0 24 24"
+            strokeWidth={2} stroke="#111827"
+            className="w-3.5 h-3.5 flex-shrink-0"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
-          <input
-            type="text"
-            placeholder="Search projects, events..."
-            className="bg-transparent text-sm text-gray-400 placeholder-gray-700 outline-none w-full"
-          />
+
+          {/* Input wrapper — holds the real input + fake animated placeholder */}
+          <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+            <input
+              type="text"
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              className="outline-none w-full text-sm"
+              style={{ background: 'transparent', color: '#111827', caretColor: '#111827' }}
+            />
+            {/* Animated placeholder — only shown when input is empty and not focused */}
+            {!searchValue && !focused && (
+              <div
+                style={{
+                  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                  display: 'flex', alignItems: 'center', gap: 3,
+                  pointerEvents: 'none', userSelect: 'none',
+                  fontSize: 14, color: 'rgba(17,24,39,.38)',
+                }}
+              >
+                <span>Find</span>
+                <span style={{
+                  transition: 'opacity 220ms ease, transform 220ms ease',
+                  opacity: wordVisible ? 1 : 0,
+                  transform: wordVisible ? 'translateY(0)' : 'translateY(4px)',
+                  fontStyle: 'italic',
+                }}>
+                  {ROTATE_WORDS[wordIdx]}
+                </span>
+              </div>
+            )}
+          </div>
+
           <kbd
-            className="hidden sm:inline-flex text-[10px] text-gray-700 px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: '#0a1628', border: '1px solid #1E2D4A' }}
+            className="hidden sm:inline-flex text-[10px] px-1.5 py-0.5 rounded flex-shrink-0"
+            style={{ backgroundColor: '#f3f4f6', border: '1px solid #d1d5db', color: '#6b7280' }}
           >
             ⌘K
           </kbd>
