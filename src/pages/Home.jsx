@@ -109,7 +109,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #000000 0%, #0a0018 20%, #1a0042 45%, #0d0028 70%, #000000 100%)' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #000000 0%, #12003a 30%, #2a006e 50%, #12003a 70%, #000000 100%)' }}>
 
       {/* Navbar spans full width, above the sidebar */}
       <div className="relative z-50 flex-shrink-0">
@@ -119,14 +119,16 @@ function Home() {
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
 
-      {/* Purple / white ambient glow effects */}
+      {/* White / purple / black ambient glow effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[10%] left-[5%] w-72 h-72 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[55%] right-[10%] w-96 h-96 bg-violet-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[15%] left-[25%] w-64 h-64 bg-purple-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[35%] right-[35%] w-80 h-80 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute top-[5%] right-[20%] w-56 h-56 bg-white/[0.03] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute bottom-[5%] right-[5%] w-48 h-48 bg-violet-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
+        {/* White blobs — dominant, large, visible */}
+        <div className="absolute top-[2%] left-[30%] w-[480px] h-[480px] bg-white/[0.13] rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-[10%] right-[20%] w-96 h-96 bg-white/[0.10] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[45%] left-[5%] w-72 h-72 bg-white/[0.07] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+        {/* Purple blobs */}
+        <div className="absolute top-[20%] right-[8%] w-96 h-96 bg-purple-600/35 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[5%] left-[15%] w-80 h-80 bg-violet-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-[55%] right-[40%] w-64 h-64 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
       </div>
 
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
