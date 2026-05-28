@@ -137,7 +137,7 @@ function Home() {
       {/* Welcome Header */}
       <div className="px-4 sm:px-6 pt-4 pb-3 flex-shrink-0">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="bg-gradient-to-r from-slate-800/60 via-slate-800/40 to-slate-900/60 backdrop-blur-sm border border-slate-700/50 px-5 py-4">
+          <div className="bg-gradient-to-r from-slate-800 via-slate-850 to-slate-900 border border-slate-700 px-5 py-4 shadow-xl">
 
             <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
               Welcome back, {userName || 'Guest'}! 👋
@@ -176,12 +176,12 @@ function Home() {
               {/* Events + Leaderboard — fixed height */}
               <div className="flex-shrink-0 grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <div className="xl:col-span-2">
-                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-2xl overflow-hidden" style={{ minHeight: '363px' }}>
+                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl overflow-hidden" style={{ minHeight: '363px' }}>
                     <EventsList today={todayEastern} />
                   </div>
                 </div>
                 <div className="xl:col-span-1">
-                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl overflow-hidden">
+                  <div className="bg-gradient-to-br from-slate-900 to-purple-950 border border-purple-900/60 shadow-2xl overflow-hidden">
                     <div className="h-[360px]">
                       <Leaderboard />
                     </div>
@@ -190,7 +190,7 @@ function Home() {
               </div>
 
               {/* Featured Projects — fills remaining height on desktop, fixed min on mobile */}
-              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-700/50 shadow-2xl overflow-y-auto lg:overflow-hidden">
+              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-slate-900 to-indigo-950 border border-indigo-900/60 shadow-2xl overflow-y-auto lg:overflow-hidden">
                 <FeaturedProjects />
               </div>
             </>
