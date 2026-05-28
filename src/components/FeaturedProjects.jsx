@@ -376,91 +376,93 @@ export default function FeaturedProjects() {
       }}>
 
         {/* ══════════════════════════════════════
-            HERO CARD
+            HERO CARD — full-bleed image
         ══════════════════════════════════════ */}
         <div
           className="fp-hero"
           onClick={() => go(featured.id, featured.event_id)}
           style={{
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            background: 'linear-gradient(160deg,rgba(139,92,246,.058) 0%,rgba(6,182,212,.025) 100%)',
+            position: 'relative', overflow: 'hidden',
+            background: '#060d1e',
             border: '1px solid rgba(139,92,246,.28)',
             animation: 'fp-hero-breathe 4.5s ease-in-out infinite',
             opacity: visible ? 1 : 0,
             transition: `opacity ${FADE_MS}ms ease-in-out`,
           }}
         >
-          {/* Image region */}
-          <div className="fp-hero-img" style={{ position: 'relative', flexShrink: 0, height: '52%', minHeight: 130, overflow: 'hidden' }}>
-            {featured.image_url
-              ? <img src={featured.image_url} alt={featured.idea}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              : <NoImg />
-            }
+          {/* Full-bleed image — fills entire card */}
+          {featured.image_url
+            ? <img src={featured.image_url} alt={featured.idea}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            : <div style={{ position: 'absolute', inset: 0 }}><NoImg /></div>
+          }
 
-            {/* Cinematic gradient overlay — image fully visible, only a thin fade at the very bottom */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(to bottom, transparent 0%, transparent 62%, rgba(5,12,27,.32) 80%, rgba(5,12,27,.58) 100%)',
-            }} />
+          {/* Cinematic gradient — fully clear at top, only fades dark at the bottom third for content */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to bottom, transparent 0%, transparent 35%, rgba(5,12,27,.65) 60%, rgba(5,12,27,.92) 76%, rgba(5,12,27,.98) 88%, #050c1b 100%)',
+          }} />
 
-            {/* Corner accent lines */}
-            <div style={{ position:'absolute', top:0, left:0, width:18, height:1,  background:'rgba(139,92,246,.6)' }} />
-            <div style={{ position:'absolute', top:0, left:0, width:1,  height:18, background:'rgba(139,92,246,.6)' }} />
-            <div style={{ position:'absolute', top:0, right:0, width:18, height:1, background:'rgba(139,92,246,.6)' }} />
-            <div style={{ position:'absolute', top:0, right:0, width:1, height:18, background:'rgba(139,92,246,.6)' }} />
+          {/* Corner accent lines */}
+          <div style={{ position:'absolute', top:0, left:0, width:18, height:1,  background:'rgba(139,92,246,.6)', zIndex:2 }} />
+          <div style={{ position:'absolute', top:0, left:0, width:1,  height:18, background:'rgba(139,92,246,.6)', zIndex:2 }} />
+          <div style={{ position:'absolute', top:0, right:0, width:18, height:1, background:'rgba(139,92,246,.6)', zIndex:2 }} />
+          <div style={{ position:'absolute', top:0, right:0, width:1, height:18, background:'rgba(139,92,246,.6)', zIndex:2 }} />
 
+          {/* Scan line */}
+          <div style={{
+            position: 'absolute', left: 0, right: 0, height: 1, top: 0, zIndex: 2,
+            background: 'linear-gradient(to right,transparent 0%,rgba(139,92,246,.55) 50%,transparent 100%)',
+            animation: 'fp-scan 6s linear infinite',
+            pointerEvents: 'none',
+          }} />
 
-            {/* Scan line */}
-            <div style={{
-              position: 'absolute', left: 0, right: 0, height: 1, top: 0,
-              background: 'linear-gradient(to right,transparent 0%,rgba(139,92,246,.55) 50%,transparent 100%)',
-              animation: 'fp-scan 6s linear infinite',
-              pointerEvents: 'none',
-            }} />
-          </div>
-
-          {/* Content region */}
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '10px 14px', gap: 6, minHeight: 0, overflow: 'hidden' }}>
+          {/* Content pinned to bottom, floating over image */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '12px 16px 14px',
+            display: 'flex', flexDirection: 'column', gap: 7,
+            zIndex: 2,
+          }}>
 
             {/* Title + subtitle */}
-            <div style={{ flexShrink: 0 }}>
-              <h3 style={{ margin: 0, color: '#f1f5f9', fontWeight: 800, fontSize: 14.5,
+            <div>
+              <h3 style={{ margin: 0, color: '#f1f5f9', fontWeight: 800, fontSize: 15,
                 lineHeight: 1.28, letterSpacing: '.01em' }}>
                 {featured.idea}
               </h3>
               {featured.event_title && (
-                <p style={{ margin: '3px 0 0', color: 'rgba(167,139,250,.6)', fontSize: 10, fontWeight: 600 }}>
+                <p style={{ margin: '3px 0 0', color: 'rgba(167,139,250,.7)', fontSize: 10, fontWeight: 600 }}>
                   {featured.event_title}
                 </p>
               )}
             </div>
 
-            {/* Description — max 3 lines, shrinks first when space is tight */}
+            {/* Description — max 2 lines */}
             <p style={{
-              margin: 0, flexShrink: 1, minHeight: 0,
-              color: 'rgba(148,163,184,.72)', fontSize: 11, lineHeight: 1.7,
+              margin: 0,
+              color: 'rgba(203,213,225,.78)', fontSize: 11, lineHeight: 1.65,
               overflow: 'hidden', display: '-webkit-box',
-              WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
             }}>
               {featured.description}
             </p>
 
-            {/* Awards — large cinematic chips below description */}
+            {/* Awards — large cinematic chips */}
             {featured.awards?.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {featured.awards.map((a, i) => <HeroAward key={a} award={a} delay={i * 0.5} />)}
               </div>
             )}
 
             {/* Hairline divider */}
             <div style={{
-              height: 1, flexShrink: 0,
-              background: 'linear-gradient(to right,transparent,rgba(255,255,255,.08),transparent)',
+              height: 1,
+              background: 'linear-gradient(to right,transparent,rgba(255,255,255,.12),transparent)',
             }} />
 
             {/* Footer: contributors left, votes right */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <AvatarStack
                 contributors={
                   featured.contributors?.length > 0
