@@ -15,6 +15,7 @@ import AllProjects from './pages/AllProjects'; // Admin All Projects Manager
 import AllEvents from './pages/AllEvents'; // Admin All Events Manager
 import AdminRequests from './pages/AdminRequests';
 import AdminAnalytics from './pages/AdminAnalytics';
+import LeaderboardPage from './pages/LeaderboardPage';
 import { checkAdminStatus } from './api/API';
 
 const getUserEmail = () => {
@@ -73,6 +74,8 @@ function App() {
             path="/profile/:username"
             element={<ProfilePage user={{ email: userEmail }} />}
           />
+
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
 
           <Route
             path="/past-events"

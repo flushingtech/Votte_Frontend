@@ -165,10 +165,10 @@ const Profile = ({ user, viewingEmail = null }) => {
   const profileLevel = Math.floor((contributedCount + totalVotes + hackathonWins * 10) / 10);
 
   const winCategories = [
-    { key: 'Hackathon Winner', label: 'Hackathon Wins', gradient: 'from-yellow-900/30 to-orange-900/30', border: 'border-yellow-500/30', accent: 'text-yellow-300' },
-    { key: 'Most Creative', label: 'Most Creative', gradient: 'from-pink-900/30 to-red-900/30', border: 'border-pink-500/30', accent: 'text-pink-300' },
-    { key: 'Most Impactful', label: 'Most Impactful', gradient: 'from-emerald-900/30 to-teal-900/30', border: 'border-emerald-500/30', accent: 'text-emerald-300' },
-    { key: 'Most Technical', label: 'Most Technical', gradient: 'from-blue-900/30 to-indigo-900/30', border: 'border-blue-500/30', accent: 'text-blue-300' },
+    { key: 'Hackathon Winner', label: 'Hackathon Wins', gradient: 'from-yellow-950 to-orange-950', border: 'border-yellow-700/60', accent: 'text-yellow-300' },
+    { key: 'Most Creative', label: 'Most Creative', gradient: 'from-pink-950 to-red-950', border: 'border-pink-700/60', accent: 'text-pink-300' },
+    { key: 'Most Impactful', label: 'Most Impactful', gradient: 'from-emerald-950 to-teal-950', border: 'border-emerald-700/60', accent: 'text-emerald-300' },
+    { key: 'Most Technical', label: 'Most Technical', gradient: 'from-blue-950 to-indigo-950', border: 'border-blue-700/60', accent: 'text-blue-300' },
   ];
 
   const winsByCategory = winCategories.map(cat => {
@@ -199,7 +199,7 @@ const Profile = ({ user, viewingEmail = null }) => {
   return (
     <div className="profile-container p-3 sm:p-4 text-white w-full h-full">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-700/50 rounded-2xl p-5 sm:p-8 mb-4">
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-5 sm:p-8 mb-4">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
           {/* Left Section: Profile Picture + Info */}
           <div className="flex items-start gap-4 sm:gap-6 w-full sm:w-auto min-w-0">
@@ -208,10 +208,10 @@ const Profile = ({ user, viewingEmail = null }) => {
                 <img
                   src={profilePicture}
                   alt="Profile"
-                  className="w-28 h-28 rounded-2xl object-cover border-4 border-purple-500/50 shadow-xl"
+                  className="w-28 h-28 object-cover border-2 border-slate-600 shadow-xl"
                 />
               ) : (
-                <div className="bg-gradient-to-br from-purple-500 to-blue-500 p-6 rounded-2xl w-28 h-28 flex items-center justify-center border-4 border-purple-500/50 shadow-xl">
+                <div className="bg-gradient-to-br from-purple-600 to-blue-600 p-6 w-28 h-28 flex items-center justify-center border-2 border-slate-600 shadow-xl">
                   <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -220,7 +220,7 @@ const Profile = ({ user, viewingEmail = null }) => {
               <button
                 onClick={() => isOwnProfile && fileInputRef.current?.click()}
                 disabled={uploading || !isOwnProfile}
-                className={`absolute inset-0 bg-black/60 rounded-2xl opacity-0 transition-opacity flex items-center justify-center ${isOwnProfile ? 'group-hover:opacity-100 cursor-pointer' : 'cursor-default'}`}
+                className={`absolute inset-0 bg-black/60 opacity-0 transition-opacity flex items-center justify-center ${isOwnProfile ? 'group-hover:opacity-100 cursor-pointer' : 'cursor-default'}`}
               >
                 {uploading ? (
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -374,7 +374,7 @@ const Profile = ({ user, viewingEmail = null }) => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
         {/* Projects Card */}
-        <div className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-500/30 rounded-xl p-5 hover:scale-105 transition-transform relative overflow-hidden">
+        <div className="bg-gradient-to-br from-orange-950 to-red-950 border border-orange-800/60 p-5 hover:scale-105 transition-transform relative overflow-hidden">
           <div className="flex items-start justify-between mb-1">
             <div className="text-3xl">💡</div>
             <div className="text-4xl font-bold text-orange-300">{contributedCount}</div>
@@ -388,7 +388,7 @@ const Profile = ({ user, viewingEmail = null }) => {
         </div>
 
         {/* Events Participated Card */}
-        <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 border border-cyan-500/30 rounded-xl p-5 hover:scale-105 transition-transform relative overflow-hidden">
+        <div className="bg-gradient-to-br from-cyan-950 to-blue-950 border border-cyan-800/60 p-5 hover:scale-105 transition-transform relative overflow-hidden">
           <div className="flex items-start justify-between mb-1">
             <div className="text-3xl">📅</div>
             <div className="text-4xl font-bold text-cyan-300">{participantEventsCount}</div>
@@ -402,7 +402,7 @@ const Profile = ({ user, viewingEmail = null }) => {
         </div>
 
         {/* Hackathon Wins Card */}
-        <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-xl p-5 hover:scale-105 transition-transform relative overflow-hidden">
+        <div className="bg-gradient-to-br from-purple-950 to-pink-950 border border-purple-800/60 p-5 hover:scale-105 transition-transform relative overflow-hidden">
           <div className="flex items-start justify-between mb-1">
             <div className="text-3xl">🏆</div>
             <div className="text-4xl font-bold text-purple-300">{hackathonWins}</div>
@@ -416,7 +416,7 @@ const Profile = ({ user, viewingEmail = null }) => {
         </div>
 
         {/* Advanced Stats Card */}
-        <div className="bg-gradient-to-br from-blue-700/20 to-indigo-700/20 border border-blue-600/30 rounded-xl p-5 hover:scale-105 transition-transform relative overflow-hidden cursor-pointer group" onClick={() => setShowAdvancedStats(true)}>
+        <div className="bg-gradient-to-br from-blue-950 to-indigo-950 border border-blue-800/60 p-5 hover:scale-105 transition-transform relative overflow-hidden cursor-pointer group" onClick={() => setShowAdvancedStats(true)}>
           <div className="flex items-start justify-between mb-1">
             <div className="text-3xl">📊</div>
             <div className="text-4xl font-bold text-blue-300">
@@ -435,7 +435,7 @@ const Profile = ({ user, viewingEmail = null }) => {
       {/* Projects & Wins Section - Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
         {/* Left Column: My Projects */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-6">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <span className="text-lg text-purple-300">&bull;</span>
             My Projects
@@ -453,7 +453,7 @@ const Profile = ({ user, viewingEmail = null }) => {
               {[...new Map(contributedIdeas.map(idea => [idea.id, idea])).values()].map(idea => (
                 <div
                   key={idea.id}
-                  className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/20 rounded-lg overflow-hidden hover:border-blue-500/40 transition-all cursor-pointer group flex items-stretch min-h-[150px]"
+                  className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 overflow-hidden hover:border-slate-500 transition-all cursor-pointer group flex items-stretch min-h-[150px]"
                   onClick={() => (window.location.href = `/idea/${idea.id}`)}
                 >
                   {/* Project Image - Left Side */}
@@ -524,7 +524,7 @@ const Profile = ({ user, viewingEmail = null }) => {
         </div>
 
         {/* Right Column: Wins */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-6">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <span className="text-lg text-yellow-300">⭐</span>
             Hackathon Victories
@@ -541,7 +541,7 @@ const Profile = ({ user, viewingEmail = null }) => {
               {winsByCategory.map(cat => (
                 <div
                   key={cat.key}
-                  className={`bg-gradient-to-br ${cat.gradient} border ${cat.border} rounded-lg p-4 flex items-center justify-between`}
+                  className={`bg-gradient-to-br ${cat.gradient} border ${cat.border} p-4 flex items-center justify-between`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-10 rounded-full bg-white/20" />
@@ -579,7 +579,7 @@ const Profile = ({ user, viewingEmail = null }) => {
             onClick={() => setActiveWinsCategory(null)}
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] pointer-events-none">
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 max-w-3xl w-full shadow-2xl pointer-events-auto animate-slide-down">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-700/40 p-6 max-w-3xl w-full shadow-2xl pointer-events-auto animate-slide-down">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <div className="text-xs text-gray-400">Category</div>
@@ -603,7 +603,7 @@ const Profile = ({ user, viewingEmail = null }) => {
                   activeWinsCategory.items.map(item => (
                     <div
                       key={`${item.event_id}-${item.category || 'main'}`}
-                      className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 border border-slate-600/40 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-emerald-400/60 hover:bg-slate-700/50 transition-colors"
+                      className="bg-gradient-to-r from-slate-800 to-slate-700 border border-slate-600 p-3 flex items-center justify-between cursor-pointer hover:border-emerald-500/60 hover:bg-slate-700 transition-colors"
                       onClick={() => window.location.href = `/event/${item.event_id}`}
                     >
                       <div>
@@ -633,7 +633,7 @@ const Profile = ({ user, viewingEmail = null }) => {
 
           {/* Modal */}
           <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] pointer-events-none">
-            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 max-w-4xl w-full shadow-2xl pointer-events-auto animate-slide-down">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-purple-700/40 p-8 max-w-4xl w-full shadow-2xl pointer-events-auto animate-slide-down">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -653,14 +653,14 @@ const Profile = ({ user, viewingEmail = null }) => {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 {/* Total Votes */}
-                <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-blue-950 to-cyan-950 border border-blue-700/50 p-4">
                   <div className="text-2xl mb-2">🗳️</div>
                   <div className="text-3xl font-bold text-blue-300">{totalVotes}</div>
                   <div className="text-sm text-gray-400">Total Votes Received</div>
                 </div>
 
                 {/* Avg Votes */}
-                <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-purple-950 to-pink-950 border border-purple-700/50 p-4">
                   <div className="text-2xl mb-2">📊</div>
                   <div className="text-3xl font-bold text-purple-300">
                     {contributedCount > 0 ? Math.round((totalVotes / contributedCount) * 10) / 10 : 0}
@@ -669,7 +669,7 @@ const Profile = ({ user, viewingEmail = null }) => {
                 </div>
 
                 {/* Success Rate */}
-                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-green-950 to-emerald-950 border border-green-700/50 p-4">
                   <div className="text-2xl mb-2">✅</div>
                   <div className="text-3xl font-bold text-green-300">
                     {contributedCount > 0 ? Math.round((hackathonWins / contributedCount) * 100) : 0}%
@@ -678,21 +678,21 @@ const Profile = ({ user, viewingEmail = null }) => {
                 </div>
 
                 {/* Participation */}
-                <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-yellow-950 to-orange-950 border border-yellow-700/50 p-4">
                   <div className="text-2xl mb-2">🎯</div>
                   <div className="text-3xl font-bold text-yellow-300">{contributedCount}</div>
                   <div className="text-sm text-gray-400">Total Participations</div>
                 </div>
 
                 {/* Profile Score */}
-                <div className="bg-gradient-to-br from-indigo-600/20 to-blue-600/20 border border-indigo-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-indigo-950 to-blue-950 border border-indigo-700/50 p-4">
                   <div className="text-2xl mb-2">⭐</div>
                   <div className="text-3xl font-bold text-indigo-300">{profileLevel}</div>
                   <div className="text-sm text-gray-400">Profile Level</div>
                 </div>
 
                 {/* Highest Votes */}
-                <div className="bg-gradient-to-br from-red-600/20 to-rose-600/20 border border-red-500/30 rounded-xl p-4">
+                <div className="bg-gradient-to-br from-red-950 to-rose-950 border border-red-700/50 p-4">
                   <div className="text-2xl mb-2">🔥</div>
                   <div className="text-3xl font-bold text-red-300">
                     {contributedCount > 0 ? Math.round((totalVotes / contributedCount) * 1.5) : 0}
@@ -702,7 +702,7 @@ const Profile = ({ user, viewingEmail = null }) => {
               </div>
 
               {/* Additional Insights */}
-              <div className="bg-slate-700/30 border border-slate-600/30 rounded-xl p-6">
+              <div className="bg-slate-800 border border-slate-600 p-6">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <span>💡</span>
                   Performance Insights

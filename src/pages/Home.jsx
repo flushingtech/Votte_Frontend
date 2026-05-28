@@ -32,7 +32,7 @@ function Home() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [subtitleIdx, setSubtitleIdx] = useState(0);
   const [subtitleVisible, setSubtitleVisible] = useState(true);
   const [lastProject, setLastProject] = useState(null);
@@ -109,7 +109,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f5eeff 30%, #e9d5ff 60%, #d8b4fe 85%, #c084fc 100%)' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)' }}>
 
       {/* Navbar spans full width, above the sidebar */}
       <div className="relative z-50 flex-shrink-0">
@@ -119,13 +119,14 @@ function Home() {
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
 
-      {/* Subtle white + light purple glow */}
+      {/* Subtle white + light blue glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[420px] h-[420px] bg-blue-400/25 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-[0%] left-[15%] w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-[5%] right-[5%] w-96 h-96 bg-white/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         <div className="absolute bottom-[20%] left-[10%] w-80 h-80 bg-white/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-purple-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-violet-300/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-blue-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-blue-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
       </div>
 
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
@@ -149,7 +150,7 @@ function Home() {
               style={{
                 opacity: subtitleVisible ? 1 : 0,
                 transition: 'opacity 350ms ease-in-out',
-                color: subtitleIdx === 0 ? '#93c5fd' : '#c4b5fd',
+                color: subtitleIdx === 0 ? '#93c5fd' : '#bfdbfe',
               }}
             >
               {subtitleIdx === 0
@@ -181,7 +182,7 @@ function Home() {
                   </div>
                 </div>
                 <div className="xl:col-span-1">
-                  <div className="bg-gradient-to-br from-slate-900 to-purple-950 border border-purple-900/60 shadow-2xl overflow-hidden">
+                  <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 shadow-2xl overflow-hidden">
                     <div className="h-[360px]">
                       <Leaderboard />
                     </div>
@@ -190,7 +191,7 @@ function Home() {
               </div>
 
               {/* Featured Projects — fills remaining height on desktop, fixed min on mobile */}
-              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-slate-900 to-indigo-950 border border-indigo-900/60 shadow-2xl overflow-y-auto lg:overflow-hidden">
+              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 shadow-2xl overflow-y-auto lg:overflow-hidden">
                 <FeaturedProjects />
               </div>
             </>

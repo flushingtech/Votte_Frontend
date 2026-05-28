@@ -12,7 +12,7 @@ const ProfilePage = ({ user }) => {
   const [navbarUserName, setNavbarUserName] = useState('');
   const [navbarProfilePicture, setNavbarProfilePicture] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
 
   // Check if user is logged in
   const isLoggedIn = !!user?.email;
@@ -49,22 +49,22 @@ const ProfilePage = ({ user }) => {
       <div
         className="flex flex-col min-h-screen relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f5eeff 30%, #e9d5ff 60%, #d8b4fe 85%, #c084fc 100%)',
+          background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)',
         }}
       >
-        {/* Subtle white + light purple glow */}
+        {/* Subtle white + light blue glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[0%] left-[15%] w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute top-[5%] right-[5%] w-96 h-96 bg-white/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
           <div className="absolute bottom-[20%] left-[10%] w-80 h-80 bg-white/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-purple-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-          <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-violet-300/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
+          <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-blue-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-blue-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
         </div>
 
         <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
             <p className="text-gray-400">Loading profile...</p>
           </div>
         </div>

@@ -708,9 +708,27 @@ export const getFeaturedProjects = async () => {
   return response.data.projects;
 };
 
-// Get leaderboard
+// Get leaderboard (top 5)
 export const getLeaderboard = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard`);
+  return response.data.leaderboard;
+};
+
+// Get full leaderboard (all entries)
+export const getFullLeaderboard = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard?limit=all`);
+  return response.data.leaderboard;
+};
+
+// Get votes leaderboard (ranked by total votes received)
+export const getVotesLeaderboard = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard/votes`);
+  return response.data.leaderboard;
+};
+
+// Get events leaderboard (ranked by events participated)
+export const getEventsLeaderboard = async () => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard/events`);
   return response.data.leaderboard;
 };
 
