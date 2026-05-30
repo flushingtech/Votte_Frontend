@@ -177,13 +177,13 @@ function Home() {
               {/* Events + Leaderboard — fixed height */}
               <div className="flex-shrink-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl overflow-hidden" style={{ height: '280px' }}>
+                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl overflow-hidden" style={{ height: '360px' }}>
                     <EventsList today={todayEastern} />
                   </div>
                 </div>
                 <div className="lg:col-span-1">
                   <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 shadow-2xl overflow-hidden">
-                    <div className="h-[280px]">
+                    <div className="h-[360px]">
                       <Leaderboard />
                     </div>
                   </div>
