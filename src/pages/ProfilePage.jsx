@@ -20,10 +20,17 @@ const ProfilePage = ({ user }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch viewing email from username if provided in URL
+        // Fetch viewing email from URL param if provided
         if (urlUsername) {
-          const email = await getUserEmailByUsername(urlUsername);
-          setViewingEmail(email);
+          const decoded = decodeURIComponent(urlUsername);
+          if (decoded.includes('@')) {
+            // Already a full email address
+            setViewingEmail(decoded);
+          } else {
+            // Legacy username slug — look up by display name
+            const email = await getUserEmailByUsername(decoded);
+            setViewingEmail(email);
+          }
         }
 
         // Fetch navbar profile (logged-in user)

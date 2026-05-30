@@ -94,7 +94,9 @@ function Navbar({ userName, profilePicture }) {
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
     setIsDropdownOpen(false);
+    navigate("/");
   };
 
   const goToAdminPage = () => {
@@ -314,7 +316,7 @@ function Navbar({ userName, profilePicture }) {
                           <div>
                             <div className="px-4 pt-3 pb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase">Developers</div>
                             {results.developers.map(d => (
-                              <button key={d.email} onMouseDown={() => { navigate(`/profile/${d.email}`); setSearchOpen(false); setQuery(''); }}
+                              <button key={d.email} onMouseDown={() => { navigate(`/profile/${encodeURIComponent(d.email)}`); setSearchOpen(false); setQuery(''); }}
                                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/70 transition-colors text-left">
                                 {d.profile_picture
                                   ? <img src={d.profile_picture} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />

@@ -354,7 +354,7 @@ function LeaderboardPanel({ title, subtitle, accentColor, glowColor, data, loadi
           return (
             <div
               key={user.email}
-              onClick={() => navigate(`/profile/${username}`)}
+              onClick={() => navigate(`/profile/${encodeURIComponent(user.email)}`)}
               className="flex items-center gap-2.5 px-3 py-2 cursor-pointer group transition-all duration-150"
               style={{
                 background: tier.bg,
