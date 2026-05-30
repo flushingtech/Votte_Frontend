@@ -116,11 +116,11 @@ function EventScreen() {
         .filter((c) => c && c !== owner);
     };
     return eventProjects.some((project) => {
-      const ownerEmail =
-        project.email ||
-        project.owner_email ||
-        project.user_email ||
-        "";
+      const ownerEmail = (
+        project.email || project.owner_email || project.user_email || ""
+      ).toLowerCase();
+      // Owner already belongs to their own project — no need to select
+      if (ownerEmail === targetEmail) return true;
       const contributors = normalizeContributors(project.contributors, ownerEmail);
       return contributors.includes(targetEmail);
     });
