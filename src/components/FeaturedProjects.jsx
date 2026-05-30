@@ -240,21 +240,12 @@ function LoadingSkeleton() {
   return (
     <div style={ROOT}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      {/* header */}
       <div className="bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 flex-shrink-0" style={{ height: 46 }} />
-      {/* grid */}
       <div style={{ flex: 1, padding: '10px 12px', display: 'grid',
-        gridTemplateColumns: '3fr 2fr', gap: 10 }}>
-        <div className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: '1fr 1fr', gap: 8 }}>
-          {[0,1,2,3].map(i =>
-            <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.03)' }} />)}
-        </div>
+        gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+        {[0,1,2,3].map(i =>
+          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', minHeight: 120 }} />)}
       </div>
-      {/* footer */}
-      <div style={{ height: 34, borderTop: '1px solid rgba(255,255,255,.05)',
-        background: 'rgba(255,255,255,.012)', flexShrink: 0 }} />
     </div>
   );
 }
@@ -263,8 +254,6 @@ function LoadingSkeleton() {
 export default function FeaturedProjects() {
   const [projects, setProjects] = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const [idx,      setIdx]      = useState(0);
-  const [visible,  setVisible]  = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -274,28 +263,17 @@ export default function FeaturedProjects() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (projects.length < 2) return;
-    const t = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => { setIdx(i => (i + 1) % projects.length); setVisible(true); }, FADE_MS);
-    }, ROTATE_MS);
-    return () => clearInterval(t);
-  }, [projects.length]);
-
   const go = (ideaId, eventId) => navigate(`/idea/${ideaId}`, { state: { eventId } });
-
-  if (loading) return <LoadingSkeleton />;
-
-  const total    = projects.length;
-  const featured = projects[idx] || {};
-  const rest     = total > 1 ? [1,2,3,4].map(n => projects[(idx + n) % total]) : [];
 
   const ROOT = {
     background: 'linear-gradient(160deg,#050c1b 0%,#070d1e 58%,#060a18 100%)',
     display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden',
     position: 'relative',
   };
+
+  if (loading) return <LoadingSkeleton />;
+
+  const total = projects.length;
 
   if (!total) return (
     <div style={{ ...ROOT, alignItems: 'center', justifyContent: 'center' }}>
@@ -313,23 +291,8 @@ export default function FeaturedProjects() {
     <div style={ROOT}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
-      {/* ── Ambient glow blobs ── */}
-      <div style={{
-        position: 'absolute', top: '8%', left: '3%', width: '32%', height: '55%',
-        background: 'radial-gradient(ellipse,rgba(139,92,246,.08) 0%,transparent 68%)',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '10%', right: '18%', width: '22%', height: '35%',
-        background: 'radial-gradient(ellipse,rgba(6,182,212,.06) 0%,transparent 70%)',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* Header */}
       <div className="px-4 py-3 flex-shrink-0 flex items-center justify-between bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600" style={{ position: 'relative', zIndex: 2 }}>
-        {/* Left: icon + title */}
         <div className="flex items-center gap-2">
           <div className="bg-purple-500 p-1.5 rounded-lg">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -339,158 +302,16 @@ export default function FeaturedProjects() {
           </div>
           <h2 className="text-base font-bold text-white">Featured Projects</h2>
         </div>
-
-        {/* Right: dots + count */}
-        <div className="flex items-center gap-3">
-          {total > 1 && (
-            <div className="flex items-center gap-1.5">
-              {projects.map((_, i) => (
-                <button key={i}
-                  onClick={() => {
-                    setVisible(false);
-                    setTimeout(() => { setIdx(i); setVisible(true); }, FADE_MS);
-                  }}
-                  className="rounded-full transition-all duration-300"
-                  style={{
-                    width: i === idx ? '16px' : '6px',
-                    height: '6px',
-                    backgroundColor: i === idx ? '#60A5FA' : '#334155',
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          <span className="bg-slate-600/50 px-2.5 py-0.5 rounded-full text-xs text-gray-200">
-            {total} project{total !== 1 ? 's' : ''}
-          </span>
-        </div>
+        <span className="bg-slate-600/50 px-2.5 py-0.5 rounded-full text-xs text-gray-200">
+          {total} project{total !== 1 ? 's' : ''}
+        </span>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          MAIN GRID
-      ══════════════════════════════════════════════════════════════════════ */}
-      <div className="fp-main-grid" style={{
-        flex: 1, minHeight: 0, padding: '10px 12px', gap: 10, overflow: 'hidden',
-        display: 'grid', gridTemplateColumns: '3fr 2fr',
-        position: 'relative', zIndex: 1,
-      }}>
-
-        {/* ══════════════════════════════════════
-            HERO CARD — full-bleed image
-        ══════════════════════════════════════ */}
-        <div
-          className="fp-hero"
-          onClick={() => go(featured.id, featured.event_id)}
-          style={{
-            position: 'relative', overflow: 'hidden',
-            background: '#060d1e',
-            border: '1px solid rgba(139,92,246,.28)',
-            animation: 'fp-hero-breathe 4.5s ease-in-out infinite',
-            opacity: visible ? 1 : 0,
-            transition: `opacity ${FADE_MS}ms ease-in-out`,
-          }}
-        >
-          {/* Full-bleed image — fills entire card */}
-          {featured.image_url
-            ? <img src={featured.image_url} alt={featured.idea}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            : <div style={{ position: 'absolute', inset: 0 }}><NoImg /></div>
-          }
-
-          {/* Cinematic gradient — fully clear at top, only fades dark at the bottom third for content */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to bottom, transparent 0%, transparent 35%, rgba(5,12,27,.65) 60%, rgba(5,12,27,.92) 76%, rgba(5,12,27,.98) 88%, #050c1b 100%)',
-          }} />
-
-          {/* Corner accent lines */}
-          <div style={{ position:'absolute', top:0, left:0, width:18, height:1,  background:'rgba(139,92,246,.6)', zIndex:2 }} />
-          <div style={{ position:'absolute', top:0, left:0, width:1,  height:18, background:'rgba(139,92,246,.6)', zIndex:2 }} />
-          <div style={{ position:'absolute', top:0, right:0, width:18, height:1, background:'rgba(139,92,246,.6)', zIndex:2 }} />
-          <div style={{ position:'absolute', top:0, right:0, width:1, height:18, background:'rgba(139,92,246,.6)', zIndex:2 }} />
-
-          {/* Scan line */}
-          <div style={{
-            position: 'absolute', left: 0, right: 0, height: 1, top: 0, zIndex: 2,
-            background: 'linear-gradient(to right,transparent 0%,rgba(139,92,246,.55) 50%,transparent 100%)',
-            animation: 'fp-scan 6s linear infinite',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Content pinned to bottom, floating over image */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            padding: '12px 16px 14px',
-            display: 'flex', flexDirection: 'column', gap: 7,
-            zIndex: 2,
-          }}>
-
-            {/* Title + subtitle */}
-            <div>
-              <h3 style={{ margin: 0, color: '#f1f5f9', fontWeight: 800, fontSize: 15,
-                lineHeight: 1.28, letterSpacing: '.01em' }}>
-                {featured.idea}
-              </h3>
-              {featured.event_title && (
-                <p style={{ margin: '3px 0 0', color: 'rgba(167,139,250,.7)', fontSize: 10, fontWeight: 600 }}>
-                  {featured.event_title}
-                </p>
-              )}
-            </div>
-
-            {/* Description — max 2 lines */}
-            <p style={{
-              margin: 0,
-              color: 'rgba(203,213,225,.78)', fontSize: 11, lineHeight: 1.65,
-              overflow: 'hidden', display: '-webkit-box',
-              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-            }}>
-              {featured.description}
-            </p>
-
-            {/* Awards — large cinematic chips */}
-            {featured.awards?.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {featured.awards.map((a, i) => <HeroAward key={a} award={a} delay={i * 0.5} />)}
-              </div>
-            )}
-
-            {/* Hairline divider */}
-            <div style={{
-              height: 1,
-              background: 'linear-gradient(to right,transparent,rgba(255,255,255,.12),transparent)',
-            }} />
-
-            {/* Footer: contributors left, votes right */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-              <AvatarStack
-                contributors={
-                  featured.contributors?.length > 0
-                    ? featured.contributors
-                    : (featured.profile_picture || featured.contributor_name)
-                      ? [{ email: featured.email, name: featured.contributor_name, profile_picture: featured.profile_picture }]
-                      : []
-                }
-                max={5} dim={26}
-              />
-              <VotePill count={featured.vote_count} lg />
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════
-            2 × 2 SMALL CARDS
-        ══════════════════════════════════════ */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: '1fr 1fr', gap: 8,
-        }}>
-          {[0, 1, 2, 3].map(i => {
-            const p = rest[i];
-            if (!p) return (
-              <div key={`e-${i}`} style={{ background: 'rgba(15,23,42,.4)', border: '1px solid rgba(51,65,85,.4)' }} />
-            );
-            const smContributors = p.contributors?.length > 0
+      {/* Responsive grid — 2 cols on mobile, 3 on md, 4 on lg+ */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '10px 12px', position: 'relative', zIndex: 1 }}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {projects.map(p => {
+            const contributors = p.contributors?.length > 0
               ? p.contributors
               : (p.profile_picture || p.contributor_name)
                 ? [{ email: p.email, name: p.contributor_name, profile_picture: p.profile_picture }]
@@ -501,65 +322,50 @@ export default function FeaturedProjects() {
                 onClick={() => go(p.id, p.event_id)}
                 className="group"
                 style={{
-                  position: 'relative', overflow: 'hidden',
+                  position: 'relative', overflow: 'hidden', minHeight: 150,
                   border: '1px solid rgba(51,65,85,.5)', background: '#0f172a',
-                  cursor: 'pointer', transition: 'border-color 200ms ease',
+                  cursor: 'pointer', transition: 'border-color 200ms ease, box-shadow 200ms ease',
                 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(139,92,246,.55)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(139,92,246,.15)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(51,65,85,.5)';    e.currentTarget.style.boxShadow = 'none'; }}
               >
-                  {/* Full-bleed image */}
-                  {p.image_url
-                    ? <img src={p.image_url} alt={p.idea}
-                        className="group-hover:scale-105 transition-transform duration-500"
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    : <div style={{ position: 'absolute', inset: 0 }}><NoImg sm /></div>
-                  }
+                {/* Full-bleed image */}
+                {p.image_url
+                  ? <img src={p.image_url} alt={p.idea}
+                      className="group-hover:scale-105 transition-transform duration-500"
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  : <div style={{ position: 'absolute', inset: 0 }}><NoImg sm /></div>
+                }
 
-                  {/* Cinematic gradient — heavy at the bottom so text is always readable */}
-                  <div style={{ position: 'absolute', inset: 0,
-                    background: 'linear-gradient(to bottom, rgba(15,23,42,.04) 0%, rgba(15,23,42,.25) 35%, rgba(15,23,42,.88) 68%, rgba(15,23,42,.98) 100%)' }} />
+                {/* Gradient overlay */}
+                <div style={{ position: 'absolute', inset: 0,
+                  background: 'linear-gradient(to bottom, rgba(15,23,42,.04) 0%, rgba(15,23,42,.3) 40%, rgba(15,23,42,.92) 72%, rgba(15,23,42,.99) 100%)' }} />
 
-                  {/* Content pinned to bottom */}
-                  <div style={{
-                    position: 'absolute', bottom: 0, left: 0, right: 0,
-                    padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4,
-                  }}>
-                    <p className="group-hover:text-blue-300 transition-colors"
-                      style={{
-                        margin: 0, color: '#f1f5f9', fontWeight: 800, fontSize: 13, lineHeight: 1.3,
-                        overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                      }}>
-                      {p.idea}
-                    </p>
+                {/* Content pinned to bottom */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <p className="group-hover:text-blue-300 transition-colors"
+                    style={{ margin: 0, color: '#f1f5f9', fontWeight: 800, fontSize: 12, lineHeight: 1.3,
+                      overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    {p.idea}
+                  </p>
 
-                    <p style={{
-                      margin: 0, color: 'rgba(148,163,184,.82)', fontSize: 9, lineHeight: 1.5,
-                      overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                    }}>
-                      {p.description}
-                    </p>
-
-                    {/* Awards */}
-                    {p.awards?.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                        {p.awards.map(a => <Badge key={a} award={a} />)}
-                      </div>
-                    )}
-
-                    {/* Footer */}
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4,
-                      borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 5,
-                    }}>
-                      <AvatarStack contributors={smContributors} max={4} dim={18} />
-                      <VotePill count={p.vote_count} />
+                  {p.awards?.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                      {p.awards.map(a => <Badge key={a} award={a} />)}
                     </div>
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4,
+                    borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 5 }}>
+                    <AvatarStack contributors={contributors} max={4} dim={18} />
+                    <VotePill count={p.vote_count} />
                   </div>
                 </div>
-              );
+              </div>
+            );
           })}
         </div>
       </div>
-
     </div>
   );
 }
