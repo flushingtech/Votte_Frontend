@@ -5,7 +5,7 @@ import { checkAdminStatus, getContributorRequestCount, search } from "../api/API
 
 function Navbar({ userName, profilePicture }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
   const [requestCount, setRequestCount] = useState(0);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
@@ -38,6 +38,7 @@ function Navbar({ userName, profilePicture }) {
       if (userEmail) {
         const adminStatus = await checkAdminStatus(userEmail);
         setIsAdmin(adminStatus);
+        localStorage.setItem('isAdmin', adminStatus ? 'true' : 'false');
 
         // Fetch contributor request count
         try {
@@ -95,6 +96,7 @@ function Navbar({ userName, profilePicture }) {
   const handleSignOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("isAdmin");
     setIsDropdownOpen(false);
     navigate("/");
   };
