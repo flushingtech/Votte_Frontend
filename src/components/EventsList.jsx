@@ -84,17 +84,12 @@ function EventsList({ today }) {
 
   const eventToday = events.find((e) => isSameDay(e.event_date)) || null;
 
-  // --- desktop (2 cards) vs mobile (1 card) ---
-  const filteredEventsDesktop = [];
-  if (recentPastEvent) filteredEventsDesktop.push(recentPastEvent);
+  // --- both events on all screen sizes ---
+  const filteredEvents = [];
+  if (recentPastEvent) filteredEvents.push(recentPastEvent);
   if (nextUpcomingEvent && (!recentPastEvent || nextUpcomingEvent.id !== recentPastEvent.id)) {
-    filteredEventsDesktop.push(nextUpcomingEvent);
+    filteredEvents.push(nextUpcomingEvent);
   }
-
-  const selectedOneMobile = eventToday ?? nextUpcomingEvent ?? recentPastEvent ?? null;
-  const filteredEvents = isMobile
-    ? (selectedOneMobile ? [selectedOneMobile] : [])
-    : filteredEventsDesktop;
 
   return (
     <div className="events-container relative flex flex-col">
