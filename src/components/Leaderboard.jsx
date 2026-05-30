@@ -102,7 +102,7 @@ const Leaderboard = () => {
           return (
             <div
               key={user.email}
-              onClick={() => navigate(`/profile/${user.email.split('@')[0]}`)}
+              onClick={() => navigate(`/profile/${encodeURIComponent(user.email)}`)}
               className={`${cfg.card} border-2 rounded-lg px-2.5 py-1.5 flex items-center gap-2 cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all duration-150`}
               style={{
                 borderColor: cfg.border,
