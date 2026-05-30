@@ -92,7 +92,7 @@ function EventsList({ today }) {
   }
 
   return (
-    <div className="events-container relative flex flex-col">
+    <div className="events-container relative flex flex-col h-full">
       {/* Enhanced Header */}
       <div className="p-3 sm:p-4 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 sticky top-0 z-10">
         <div className="flex items-center justify-between">
@@ -132,7 +132,7 @@ function EventsList({ today }) {
       </div>
 
       {/* Scrollable content area */}
-      <div className="overflow-y-auto p-1 sm:p-3">
+      <div className="flex-1 min-h-0 overflow-y-auto p-1 sm:p-3">
         <div className="space-y-2 sm:space-y-3">
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
