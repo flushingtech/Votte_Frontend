@@ -708,6 +708,15 @@ export const getFeaturedProjects = async () => {
   return response.data.projects;
 };
 
+// Update event date (admin only)
+export const updateEventDate = async (eventId, eventDate, email) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/update-event/${eventId}`, {
+    event_date: eventDate,
+    email,
+  });
+  return response.data;
+};
+
 // Get leaderboard (top 5)
 export const getLeaderboard = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard`);

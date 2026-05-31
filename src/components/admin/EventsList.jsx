@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getEvents, deleteEvent, getIdeasForEvent, syncMeetupEvents } from '../../api/API';
+import { getEvents, deleteEvent, getIdeasForEvent, syncMeetupEvents, updateEventDate } from '../../api/API';
 
 const EventsList = ({ onEventSelect }) => {
   const [events, setEvents] = useState([]);
@@ -7,6 +7,10 @@ const EventsList = ({ onEventSelect }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [editDate, setEditDate] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editMessage, setEditMessage] = useState(null);
   const [selectedView, setSelectedView] = useState('upcoming');
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState(null);
@@ -37,6 +41,36 @@ const EventsList = ({ onEventSelect }) => {
     };
     fetchEvents();
   }, []);
+
+  const handleEditClick = (e, event) => {
+    e.stopPropagation();
+    // Format date as YYYY-MM-DD for the date input
+    const d = new Date(event.event_date);
+    const formatted = d.toISOString().split('T')[0];
+    setEditDate(formatted);
+    setEditingEvent(event);
+    setEditMessage(null);
+  };
+
+  const handleSaveDate = async () => {
+    if (!editDate || !editingEvent) return;
+    const user = JSON.parse(localStorage.getItem('user'));
+    const userEmail = user?.email || localStorage.getItem('userEmail') || '';
+    setEditSaving(true);
+    try {
+      await updateEventDate(editingEvent.id, editDate, userEmail);
+      setEvents(prev => prev.map(ev =>
+        ev.id === editingEvent.id ? { ...ev, event_date: editDate } : ev
+      ));
+      setEditMessage({ type: 'success', text: 'Date updated!' });
+      setTimeout(() => { setEditingEvent(null); setEditMessage(null); }, 1200);
+    } catch (err) {
+      console.error('Error updating event date:', err);
+      setEditMessage({ type: 'error', text: 'Failed to update date' });
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
@@ -300,6 +334,13 @@ const EventsList = ({ onEventSelect }) => {
                     <span className="hidden sm:inline">View</span>
                   </button>
                   <button
+                    onClick={(e) => handleEditClick(e, event)}
+                    className="bg-slate-700/50 hover:bg-blue-600/80 border border-slate-600/50 hover:border-blue-500 text-gray-300 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1.5 text-sm"
+                  >
+                    <span>✏️</span>
+                    <span className="hidden sm:inline">Edit Date</span>
+                  </button>
+                  <button
                     onClick={(e) => handleDelete(e, event.id)}
                     className="bg-slate-700/50 hover:bg-red-600/80 border border-slate-600/50 hover:border-red-500 text-gray-300 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1.5 text-sm"
                   >
@@ -311,6 +352,55 @@ const EventsList = ({ onEventSelect }) => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Edit Date Modal */}
+      {editingEvent && (
+        <>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998]" onClick={() => setEditingEvent(null)} />
+          <div className="fixed inset-0 flex items-start justify-center pt-20 p-4 z-[9999]">
+            <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-white mb-1">Edit Event Date</h2>
+              <p className="text-gray-400 text-sm mb-6 truncate">{editingEvent.title}</p>
+
+              {editMessage && (
+                <div className={`mb-4 px-4 py-3 rounded-lg text-sm font-medium ${
+                  editMessage.type === 'success'
+                    ? 'bg-green-900/20 text-green-300 border border-green-500/50'
+                    : 'bg-red-900/20 text-red-300 border border-red-500/50'
+                }`}>
+                  {editMessage.text}
+                </div>
+              )}
+
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">New Date</label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setEditingEvent(null)}
+                  className="flex-1 bg-slate-700/50 hover:bg-slate-600 border border-slate-600/50 text-white px-4 py-3 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveDate}
+                  disabled={editSaving || !editDate}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                >
+                  {editSaving ? 'Saving...' : '💾 Save Date'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Delete Confirmation Modal */}
