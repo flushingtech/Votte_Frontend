@@ -44,7 +44,7 @@ function IdeaScreen() {
   const fileInputRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
-  const userEmail = user?.email || '';
+  const userEmail = user?.email || localStorage.getItem('userEmail') || '';
   const isLoggedIn = !!userEmail;
 
   // Helper function to get display name (always exclude @ and domain)
@@ -818,7 +818,7 @@ function IdeaScreen() {
                                     return (
                                       <button
                                         key={idx}
-                                        onClick={() => navigate(`/profile/${contributorEmail.split('@')[0]}`)}
+                                        onClick={() => navigate(`/profile/${encodeURIComponent(contributorEmail)}`)}
                                         className="flex items-center gap-1 bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 hover:border-purple-400/60 rounded-lg px-1.5 py-0.5 transition-all duration-200 cursor-pointer"
                                         title={`View ${displayName}'s profile`}
                                       >
