@@ -307,6 +307,10 @@ function IdeaScreen() {
       const ideaData = await getIdeaById(ideaId);
       setIdea(ideaData);
 
+      // Also refresh the open modal's event so contributors list updates immediately
+      const refreshedEvent = ideaData.events?.find(e => e.event_id === contributorsEvent.event_id);
+      if (refreshedEvent) setContributorsEvent(refreshedEvent);
+
       setMessage('Contributor added successfully!');
       setSelectedContributor(null);
       setTimeout(() => setMessage(''), 3000);
