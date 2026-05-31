@@ -241,10 +241,10 @@ function LoadingSkeleton() {
     <div style={ROOT}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <div className="bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 flex-shrink-0" style={{ height: 46 }} />
-      <div style={{ flex: 1, padding: '10px 12px', display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+      <div style={{ flex: 1, minHeight: 0, padding: '10px 12px', display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: '1fr', gap: 10 }}>
         {[0,1,2,3].map(i =>
-          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', minHeight: 120 }} />)}
+          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)' }} />)}
       </div>
     </div>
   );
@@ -308,8 +308,8 @@ export default function FeaturedProjects() {
       </div>
 
       {/* Responsive grid — 2 cols on mobile, 3 on md, 4 on lg+ */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '10px 12px', position: 'relative', zIndex: 1 }}>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div style={{ flex: 1, minHeight: 0, padding: '10px 12px', position: 'relative', zIndex: 1, overflow: 'hidden' }}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" style={{ height: '100%', gridAutoRows: '1fr' }}>
           {projects.map(p => {
             const contributors = p.contributors?.length > 0
               ? p.contributors
@@ -322,7 +322,7 @@ export default function FeaturedProjects() {
                 onClick={() => go(p.id, p.event_id)}
                 className="group"
                 style={{
-                  position: 'relative', overflow: 'hidden', minHeight: 150,
+                  position: 'relative', overflow: 'hidden', minHeight: 120,
                   border: '1px solid rgba(51,65,85,.5)', background: '#0f172a',
                   cursor: 'pointer', transition: 'border-color 200ms ease, box-shadow 200ms ease',
                 }}
