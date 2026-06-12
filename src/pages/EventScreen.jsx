@@ -246,8 +246,22 @@ function EventScreen() {
 
     try {
       if (!isUserCheckedIn) {
-        await checkInToEvent(eventId, email, selectedProjects);
-        addUserToCheckedInList();
+        try {
+          await checkInToEvent(eventId, email, selectedProjects);
+          addUserToCheckedInList();
+        } catch (checkInErr) {
+          // If already checked in (stale local state), add as contributor directly
+          const msg = checkInErr?.response?.data?.message || '';
+          if (msg === 'Already checked in') {
+            await Promise.all(
+              selectedProjects.map((projectId) =>
+                addContributorToIdeaEvent(projectId, eventId, email)
+              )
+            );
+          } else {
+            throw checkInErr;
+          }
+        }
       } else {
         await Promise.all(
           selectedProjects.map((projectId) =>
