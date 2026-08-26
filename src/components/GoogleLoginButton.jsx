@@ -2,9 +2,9 @@ import googleLogo from '../assets/google-logo.png'; // Adjust the path based on 
 
 function GoogleLoginButton({ onClick, isLoading }) {
     return (
-        <div className="flex justify-center">
+        <div className="w-full">
             <button
-                className={`bg-white text-gray-600 py-4 px-6 rounded-lg shadow-md transition duration-300 ease-in-out hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center ${
+                className={`w-full bg-white text-gray-700 py-4 px-6 rounded-xl shadow-lg shadow-black/20 ring-2 ring-site_orange/40 hover:ring-site_orange transition duration-300 ease-in-out hover:shadow-xl hover:shadow-site_orange/20 hover:-translate-y-0.5 flex items-center justify-center ${
                     isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
                 onClick={onClick}
@@ -36,12 +36,12 @@ function GoogleLoginButton({ onClick, isLoading }) {
                     </>
                 ) : (
                     <>
-                        <img 
-                            src={googleLogo} 
-                            alt="Google logo" 
-                            className="h-5 w-5 mr-4" 
+                        <img
+                            src={googleLogo}
+                            alt="Google logo"
+                            className="h-6 w-6 mr-3"
                         />
-                        <span className="text-sm font-medium">Continue with Google</span>
+                        <span className="text-base font-semibold">Continue with Google</span>
                     </>
                 )}
             </button>

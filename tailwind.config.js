@@ -4,9 +4,17 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        // Flushing Tech brand palette (from flushingtech.org)
+        site_orange: "#F29040",
+        site_red: "#BB2828",
+        site_navy: "#1E2A3A",
+        peach: "#FFE4CE",
+      },
       animation: {
         shimmer: "shimmer 4s linear forwards",
         "slide-down": "slide-down 0.3s ease-out",
+        "border-spin": "border-spin 4s linear infinite",
       },
       keyframes: {
         shimmer: {
@@ -22,6 +30,10 @@ export default {
             opacity: "1",
             transform: "translateY(0)",
           },
+        },
+        "border-spin": {
+          "0%": { transform: "translate(-50%, -50%) rotate(0deg)" },
+          "100%": { transform: "translate(-50%, -50%) rotate(360deg)" },
         },
       },
     },
