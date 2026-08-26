@@ -4,7 +4,7 @@ function GoogleLoginButton({ onClick, isLoading }) {
     return (
         <div className="w-full">
             <button
-                className={`w-full bg-white text-gray-700 py-4 px-6 rounded-xl shadow-lg shadow-black/20 ring-2 ring-site_orange/40 hover:ring-site_orange transition duration-300 ease-in-out hover:shadow-xl hover:shadow-site_orange/20 hover:-translate-y-0.5 flex items-center justify-center ${
+                className={`w-full bg-white text-gray-700 py-4 px-6 shadow-lg shadow-black/20 ring-2 ring-site_orange/40 hover:ring-site_orange transition duration-300 ease-in-out hover:shadow-xl hover:shadow-site_orange/20 hover:-translate-y-0.5 flex items-center justify-center ${
                     isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 }`}
                 onClick={onClick}
