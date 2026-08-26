@@ -6,6 +6,7 @@ import LandingNavbar from '../components/LandingNavbar';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import ConnectWithUs from '../components/ConnectWithUs';
 import UpcomingEventsSection from '../components/UpcomingEventsSection';
+import Footer from '../components/Footer';
 import { SiMeetup, SiEventbrite } from 'react-icons/si';
 import backgroundImage from '../assets/background.webp';
 import lumaIcon from '../assets/luma-icon.png';
@@ -141,6 +142,7 @@ function Landing() {
 
       <UpcomingEventsSection />
       <ConnectWithUs />
+      <Footer />
     </>
   );
 }
