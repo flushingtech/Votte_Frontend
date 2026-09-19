@@ -69,7 +69,7 @@ function Landing() {
             {/* Hero copy */}
             <div className="min-w-0 text-center lg:text-left space-y-6 animate-fade-in">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                Flushing<span className="text-site_orange">Tech.org</span>
+                Votte<span className="text-site_orange">.FlushingTech.org</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
