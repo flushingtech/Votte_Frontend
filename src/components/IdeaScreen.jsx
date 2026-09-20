@@ -469,10 +469,10 @@ function IdeaScreen() {
   // repositories all live in the same bordered container (per-section thin
   // dividers only) instead of being split into separate floating boxes.
   const ProjectSummaryPanel = () => (
-    <aside className="bg-slate-900 border border-slate-700">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-        <h2 className="text-white text-sm font-bold uppercase tracking-wide flex items-center gap-2">
-          <span className="w-6 h-6 flex-shrink-0 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs shadow shadow-blue-500/30">📊</span>
+    <aside className="bg-slate-900 border border-slate-700 h-full flex flex-col">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 flex-shrink-0">
+        <h2 className="text-white text-base font-bold uppercase tracking-wide flex items-center gap-2.5">
+          <span className="w-7 h-7 flex-shrink-0 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm shadow shadow-blue-500/30">📊</span>
           Project Summary
         </h2>
         {isAdmin && (
@@ -481,7 +481,7 @@ function IdeaScreen() {
             className="text-slate-400 hover:text-white transition-colors"
             title={showAdminPanel ? 'Hide admin controls' : 'Show admin controls'}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -489,31 +489,31 @@ function IdeaScreen() {
         )}
       </div>
 
-      <div className="p-4 flex flex-col gap-4">
+      <div className="p-5 flex flex-col gap-5 flex-1">
         {voteTotals.total > 0 && (
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Total Votes</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Total Votes</h3>
             <div className="flex flex-col">
-              <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-300 text-xs font-medium">All Events</span>
-                <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-xs px-2.5 py-1 rounded-full shadow shadow-blue-500/30 tabular-nums">{voteTotals.total}</span>
+              <div className="flex items-center justify-between py-2 border-b border-slate-800">
+                <span className="text-slate-300 text-sm font-medium">All Events</span>
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-sm px-3 py-1 rounded-full shadow shadow-blue-500/30 tabular-nums">{voteTotals.total}</span>
               </div>
               {voteTotals.creative > 0 && (
-                <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400 text-xs">Creative</span>
-                  <span className="text-teal-300 text-xs font-semibold tabular-nums">{voteTotals.creative}</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
+                  <span className="text-slate-400 text-sm">🎨 Creative</span>
+                  <span className="text-teal-300 text-sm font-semibold tabular-nums">{voteTotals.creative}</span>
                 </div>
               )}
               {voteTotals.technical > 0 && (
-                <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                  <span className="text-slate-400 text-xs">Technical</span>
-                  <span className="text-purple-300 text-xs font-semibold tabular-nums">{voteTotals.technical}</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
+                  <span className="text-slate-400 text-sm">⚡ Technical</span>
+                  <span className="text-purple-300 text-sm font-semibold tabular-nums">{voteTotals.technical}</span>
                 </div>
               )}
               {voteTotals.impactful > 0 && (
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 text-xs">Impactful</span>
-                  <span className="text-red-300 text-xs font-semibold tabular-nums">{voteTotals.impactful}</span>
+                <div className="flex items-center justify-between py-1.5">
+                  <span className="text-slate-400 text-sm">🚀 Impactful</span>
+                  <span className="text-red-300 text-sm font-semibold tabular-nums">{voteTotals.impactful}</span>
                 </div>
               )}
             </div>
@@ -521,19 +521,19 @@ function IdeaScreen() {
         )}
 
         {uniqueAwards.length > 0 && (
-          <div className={voteTotals.total > 0 ? 'pt-4 border-t border-slate-800' : ''}>
-            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Awards ({allAwards.length})</h3>
-            <div className="flex flex-col gap-1.5">
+          <div className={voteTotals.total > 0 ? 'pt-5 border-t border-slate-800' : ''}>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Awards ({allAwards.length})</h3>
+            <div className="flex flex-col gap-2">
               {uniqueAwards.map((award) => {
                 const style = AWARD_STYLES[award] || DEFAULT_AWARD_STYLE;
                 return (
                   <div key={award} className="flex items-center justify-between">
-                    <span className={`text-xs font-semibold flex items-center gap-2 ${style.color}`}>
-                      <span className={`w-5 h-5 flex-shrink-0 rounded-md bg-gradient-to-br ${style.grad} shadow ${style.glow} flex items-center justify-center text-[10px]`}>{style.icon}</span>
+                    <span className={`text-sm font-semibold flex items-center gap-2.5 ${style.color}`}>
+                      <span className={`w-6 h-6 flex-shrink-0 rounded-md bg-gradient-to-br ${style.grad} shadow ${style.glow} flex items-center justify-center text-xs`}>{style.icon}</span>
                       {award}
                     </span>
                     {awardCounts[award] > 1 && (
-                      <span className="text-slate-500 text-xs font-bold">×{awardCounts[award]}</span>
+                      <span className="text-slate-500 text-sm font-bold">×{awardCounts[award]}</span>
                     )}
                   </div>
                 );
@@ -543,13 +543,13 @@ function IdeaScreen() {
         )}
 
         {uniqueContributors.length > 0 && (
-          <div className={(voteTotals.total > 0 || uniqueAwards.length > 0) ? 'pt-4 border-t border-slate-800' : ''}>
-            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Contributors ({uniqueContributors.length})</h3>
-            <div className="flex flex-wrap gap-1.5">
+          <div className={(voteTotals.total > 0 || uniqueAwards.length > 0) ? 'pt-5 border-t border-slate-800' : ''}>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Contributors ({uniqueContributors.length})</h3>
+            <div className="flex flex-wrap gap-2">
               {uniqueContributors.map((contributor) => (
                 <span
                   key={contributor}
-                  className="bg-purple-500/10 text-purple-300 border border-purple-500/30 px-2 py-0.5 text-xs"
+                  className="bg-gradient-to-r from-purple-600/25 to-blue-600/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 text-sm"
                 >
                   {getDisplayName(contributor)}
                 </span>
@@ -559,14 +559,14 @@ function IdeaScreen() {
         )}
 
         {voteTotals.total === 0 && uniqueAwards.length === 0 && uniqueContributors.length === 0 && (
-          <p className="text-slate-500 text-xs text-center py-2">No data yet</p>
+          <p className="text-slate-500 text-sm text-center py-2">No data yet</p>
         )}
 
         {/* Repositories — kept inside the same panel, not a separate box */}
-        <div className={(voteTotals.total > 0 || uniqueAwards.length > 0 || uniqueContributors.length > 0) ? 'pt-4 border-t border-slate-800' : ''}>
-          <div className="flex items-center justify-between mb-1.5">
-            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+        <div className={(voteTotals.total > 0 || uniqueAwards.length > 0 || uniqueContributors.length > 0) ? 'pt-5 border-t border-slate-800' : ''}>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-2">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
               Repositories
@@ -574,7 +574,7 @@ function IdeaScreen() {
             {!editingGithubRepos && (
               <button
                 onClick={handleEditGithubRepos}
-                className="text-blue-400 hover:text-blue-300 transition-colors text-[11px] font-semibold"
+                className="text-blue-400 hover:text-blue-300 transition-colors text-xs font-semibold"
               >
                 Edit
               </button>
@@ -584,15 +584,15 @@ function IdeaScreen() {
           {editingGithubRepos ? (
             <div className="flex flex-col gap-2.5">
               {githubRepos.map((repo, index) => (
-                <div key={index} className="bg-slate-800/60 border border-slate-700 p-2.5 flex flex-col gap-1.5">
+                <div key={index} className="bg-slate-800/60 border border-slate-700 p-3 flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 text-[10px] font-semibold">Repository {index + 1}</span>
+                    <span className="text-slate-400 text-xs font-semibold">Repository {index + 1}</span>
                     <button
                       onClick={() => handleRemoveRepo(index)}
                       className="text-red-400 hover:text-red-300 transition-colors"
                       title="Remove repository"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -602,21 +602,21 @@ function IdeaScreen() {
                     value={repo.title}
                     onChange={(e) => handleRepoChange(index, 'title', e.target.value)}
                     placeholder="Title (e.g., Frontend, Backend)"
-                    className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                   <input
                     type="text"
                     value={repo.url}
                     onChange={(e) => handleRepoChange(index, 'url', e.target.value)}
                     placeholder="https://github.com/username/repo"
-                    className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               ))}
 
               <button
                 onClick={handleAddRepo}
-                className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 text-xs font-semibold transition-colors"
+                className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-2 text-sm font-semibold transition-colors"
               >
                 + Add Repository
               </button>
@@ -624,13 +624,13 @@ function IdeaScreen() {
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveGithubRepos}
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 text-sm font-semibold transition-colors"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setEditingGithubRepos(false)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 text-sm font-semibold transition-colors"
                 >
                   Cancel
                 </button>
@@ -640,15 +640,15 @@ function IdeaScreen() {
             try {
               const repos = idea?.github_repo ? JSON.parse(idea.github_repo) : [];
               return Array.isArray(repos) && repos.length > 0 ? (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {repos.map((repo, index) => (
                     <div key={index} className="flex items-center justify-between gap-2">
-                      <span className="text-slate-400 text-xs font-medium flex-shrink-0">{repo.title}</span>
+                      <span className="text-slate-400 text-sm font-medium flex-shrink-0">{repo.title}</span>
                       <a
                         href={repo.url.startsWith('http') ? repo.url : `https://${repo.url}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-xs truncate transition-colors"
+                        className="text-blue-400 hover:text-blue-300 text-sm truncate transition-colors"
                       >
                         {repo.url}
                       </a>
@@ -656,17 +656,17 @@ function IdeaScreen() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-xs italic">No repositories linked</p>
+                <p className="text-slate-500 text-sm italic">No repositories linked</p>
               );
             } catch {
-              return <p className="text-slate-500 text-xs italic">No repositories linked</p>;
+              return <p className="text-slate-500 text-sm italic">No repositories linked</p>;
             }
           })()}
         </div>
 
         {isAdmin && showAdminPanel && (
-          <div className="pt-4 border-t border-slate-800">
-            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Admin</h3>
+          <div className="pt-5 border-t border-slate-800">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Admin</h3>
             <ButtonUpload ideaId={idea?.id} />
           </div>
         )}
