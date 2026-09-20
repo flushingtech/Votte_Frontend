@@ -163,7 +163,7 @@ function Home() {
         </div>
 
         {/* Events + Leaderboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
           <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 overflow-hidden">
             <EventsList today={todayEastern} />
           </div>
