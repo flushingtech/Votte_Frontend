@@ -441,19 +441,19 @@ function EventScreen() {
   const ParticipantsPanel = () => {
     const visible = showAllParticipants ? participants : participants.slice(0, PARTICIPANTS_PREVIEW);
     return (
-      <aside className="bg-slate-900 border border-slate-700 p-4 w-full">
-        <div className="flex items-center justify-between mb-3">
+      <aside className="bg-slate-900 border border-slate-700 w-full">
+        <div className="flex items-center justify-between px-3.5 py-3 border-b border-slate-800">
           <h2 className="text-white text-sm font-bold uppercase tracking-wide">Participants</h2>
-          <span className="bg-blue-500/10 text-blue-300 border border-blue-500/30 px-2 py-0.5 text-xs font-bold">
+          <span className="bg-transparent text-blue-300 border border-blue-500/30 px-2 py-0.5 text-xs font-bold">
             {participants.length}
           </span>
         </div>
 
         {participants.length === 0 ? (
-          <p className="text-slate-500 text-sm">No one has checked in yet.</p>
+          <p className="text-slate-500 text-sm p-3.5">No one has checked in yet.</p>
         ) : (
           <>
-            <ul className="space-y-1.5">
+            <ul className="divide-y divide-slate-800">
               {visible.map((p) => {
                 const profile = participantProfiles[p.toLowerCase()];
                 const uname = profile?.name || usernameOnly(p);
@@ -462,7 +462,7 @@ function EventScreen() {
                 return (
                   <li
                     key={p}
-                    className="flex items-center gap-2.5 px-2.5 py-2 bg-slate-800/60 border border-slate-700/60"
+                    className="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-800/60 transition-colors"
                   >
                     {profilePic ? (
                       <img
@@ -470,7 +470,7 @@ function EventScreen() {
                         alt={uname}
                         loading="lazy"
                         decoding="async"
-                        className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-600"
+                        className="w-7 h-7 rounded-full object-cover shrink-0"
                       />
                     ) : (
                       <div className="flex items-center justify-center w-7 h-7 text-[10px] font-bold shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white">
@@ -492,9 +492,9 @@ function EventScreen() {
             {participants.length > PARTICIPANTS_PREVIEW && (
               <button
                 onClick={() => setShowAllParticipants((v) => !v)}
-                className="mt-2.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                className="w-full text-left px-3.5 py-2.5 text-xs font-semibold text-blue-400 hover:text-blue-300 border-t border-slate-800 transition-colors"
               >
-                {showAllParticipants ? "Show less" : `View all ${participants.length} participants`}
+                {showAllParticipants ? "Show less" : `View all ${participants.length} participants →`}
               </button>
             )}
           </>
@@ -833,30 +833,13 @@ function EventScreen() {
 
           <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full">
 
-            <style>{`
-              .event-layout-grid {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr);
-                grid-template-areas: "hero" "rail-top" "content" "rail-bottom";
-                gap: 0.75rem;
-                min-width: 0;
-              }
-              .event-layout-grid > * {
-                min-width: 0;
-              }
-              @media (min-width: 1024px) {
-                .event-layout-grid {
-                  grid-template-columns: minmax(0, 1fr) 300px;
-                  grid-template-areas: "hero rail-top" "content rail-bottom";
-                  gap: 1rem;
-                  align-items: start;
-                }
-              }
-            `}</style>
-            <div className="event-layout-grid">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-3 sm:gap-4 lg:items-start">
+
+              {/* MAIN — hero + stage content, own independent height */}
+              <div className="min-w-0 flex flex-col gap-3 sm:gap-4">
 
                 {/* HERO */}
-                <div className="bg-slate-900 border border-slate-700 overflow-hidden" style={{ gridArea: 'hero' }}>
+                <div className="bg-slate-900 border border-slate-700 overflow-hidden">
                   <div className="p-4 sm:p-5 border-b border-slate-800">
                     <button
                       onClick={() => navigate('/home')}
@@ -916,8 +899,14 @@ function EventScreen() {
                   </div>
                 </div>
 
+                {/* Mobile only: admin/info panel sits right after the hero here.
+                    Hidden on desktop, where it lives in the sticky right rail instead. */}
+                <div className="lg:hidden min-w-0">
+                  {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
+                </div>
+
                 {/* STAGE CONTENT (submissions / voting / winners) */}
-                <div style={{ gridArea: 'content' }}>
+                <div>
                   {isLiveCoding ? (
                     <Stage_1_Ideas
                       key={ideasRefreshKey}
@@ -948,13 +937,18 @@ function EventScreen() {
                   )}
                 </div>
 
-              {/* RAIL TOP: admin controls (admins) or event info (members) */}
-              <div style={{ gridArea: 'rail-top' }}>
-                {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
+                {/* Mobile only: participants after the winners/stage content */}
+                <div className="lg:hidden min-w-0">
+                  <ParticipantsPanel />
+                </div>
               </div>
 
-              {/* RAIL BOTTOM: participants */}
-              <div style={{ gridArea: 'rail-bottom' }}>
+              {/* Desktop only: one continuous sticky right rail — Event Info /
+                  Admin Controls directly above Participants, no grid-row gap
+                  between them. Starts level with the hero, not fixed, and
+                  scrolls with the page once it reaches the bottom of its column. */}
+              <div className="hidden lg:flex lg:flex-col gap-4 lg:sticky lg:top-6 min-w-0">
+                {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
                 <ParticipantsPanel />
               </div>
 
