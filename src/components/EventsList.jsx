@@ -86,13 +86,13 @@ function EventsList({ today }) {
       {/* Header */}
       <div className="px-3 sm:px-4 py-3 flex items-center justify-between gap-2 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="bg-blue-500 p-1.5 rounded-lg flex-shrink-0">
+          <div className="bg-blue-500 p-1.5 flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
           <h2 className="text-sm sm:text-base font-bold text-white whitespace-nowrap truncate">Upcoming Events</h2>
-          <span className="bg-slate-600/50 px-2 py-0.5 rounded-full text-[11px] text-gray-300 flex-shrink-0">
+          <span className="bg-slate-600/50 px-2 py-0.5 text-[11px] text-gray-300 flex-shrink-0">
             {filteredEvents.length} active
           </span>
         </div>
@@ -174,36 +174,36 @@ function EventsList({ today }) {
             <div
               key={event.id}
               onClick={() => navigate(`/event/${event.id}`)}
-              className="flex items-center gap-3 p-2.5 sm:p-3 bg-slate-800/60 border rounded-lg cursor-pointer hover:border-blue-500/40 transition-colors"
+              className="flex items-center gap-3 p-2.5 sm:p-3 bg-white border cursor-pointer hover:border-blue-400 transition-colors"
               style={{
                 borderColor: event.canceled
-                  ? 'rgba(220,38,38,.4)'
+                  ? '#fca5a5'
                   : isEventToday
-                    ? 'rgba(16,185,129,.4)'
+                    ? '#6ee7b7'
                     : isNextUpcoming
-                      ? 'rgba(59,130,246,.4)'
-                      : 'rgba(51,65,85,.6)',
+                      ? '#93c5fd'
+                      : '#e2e8f0',
               }}
             >
               {/* Date block */}
-              <div className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-md border border-blue-500/30 bg-blue-500/10 flex flex-col items-center justify-center">
-                <span className="text-[9px] font-bold text-blue-300 uppercase tracking-wide leading-none">{monthAbbr}</span>
-                <span className="text-base font-extrabold text-white leading-none mt-0.5">{dayNum}</span>
+              <div className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 border border-blue-200 bg-blue-50 flex flex-col items-center justify-center">
+                <span className="text-[9px] font-bold text-blue-600 uppercase tracking-wide leading-none">{monthAbbr}</span>
+                <span className="text-base font-extrabold text-slate-900 leading-none mt-0.5">{dayNum}</span>
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="text-sm font-bold text-white truncate">{event.title}</h3>
+                  <h3 className="text-sm font-bold text-slate-900 truncate">{event.title}</h3>
                   {event.canceled ? (
-                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 flex-shrink-0">Canceled</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-200 flex-shrink-0">Canceled</span>
                   ) : isEventToday ? (
-                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 flex-shrink-0">Live today</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">Live today</span>
                   ) : isNextUpcoming ? (
-                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-300 flex-shrink-0">Next up</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0">Next up</span>
                   ) : null}
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">
+                <p className="text-xs text-slate-500 mt-0.5 truncate">
                   {dateTimeFormatter.format(easternDate)}
                   {event.location ? ` • ${event.location}` : ''}
                 </p>
@@ -211,7 +211,7 @@ function EventsList({ today }) {
 
               {/* Action */}
               <button
-                className="flex-shrink-0 text-xs sm:text-sm font-semibold text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md hover:opacity-90 transition-opacity"
+                className="flex-shrink-0 text-xs sm:text-sm font-semibold text-white px-3 py-2 sm:px-4 sm:py-2 hover:opacity-90 transition-opacity"
                 onClick={handleButtonClick}
                 style={{ backgroundColor: buttonColor }}
               >

@@ -119,16 +119,6 @@ function Home() {
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
 
-      {/* Subtle white + light blue glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-5%] left-[-5%] w-[420px] h-[420px] bg-blue-400/25 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[0%] left-[15%] w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[5%] right-[5%] w-96 h-96 bg-white/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-[20%] left-[10%] w-80 h-80 bg-white/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[5%] right-[20%] w-96 h-96 bg-blue-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-blue-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
-      </div>
-
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
       {/* Right: content — left padding matches sidebar width. This is the ONLY
@@ -139,47 +129,51 @@ function Home() {
 
       <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
 
-        {/* Welcome */}
-        <div className="relative overflow-hidden rounded-lg border border-slate-700 bg-slate-900 px-5 py-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none" />
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-blue-500 to-purple-500" />
-          <div className="relative pl-2">
-            <p className="text-[11px] font-bold uppercase tracking-[.15em] text-blue-400/80">Welcome back</p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mt-0.5">
-              {userName || 'Guest'}! 👋
-            </h1>
-            <p
-              className="text-sm mt-1 leading-snug"
-              style={{
-                opacity: subtitleVisible ? 1 : 0,
-                transition: 'opacity 350ms ease-in-out',
-                color: subtitleIdx === 0 ? '#93c5fd' : '#c4b5fd',
-              }}
-            >
-              {subtitleIdx === 0
-                ? lastProject
-                  ? `Last project: ${lastProject}`
-                  : 'No projects yet — submit your first idea 💡'
-                : lastEvent
-                  ? `Last event: ${lastEvent}`
-                  : 'No events yet — join your first hackathon 🎯'
-              }
-            </p>
-          </div>
+        {/* Welcome — NYC skyline background, dark navy overlay for contrast */}
+        <div
+          className="relative overflow-hidden border border-slate-700 px-5 py-5 sm:py-6"
+          style={{
+            backgroundImage: `linear-gradient(100deg, rgba(6,12,28,.94) 0%, rgba(6,12,28,.86) 40%, rgba(6,12,28,.62) 100%), url(/images/nyc-welcome-bg.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 42%',
+          }}
+        >
+          <p className="text-[11px] font-bold uppercase tracking-[.15em] text-blue-300">Welcome back</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mt-0.5">
+            {userName || 'Guest'}! 👋
+          </h1>
+          <p
+            className="text-sm mt-1 leading-snug"
+            style={{
+              opacity: subtitleVisible ? 1 : 0,
+              transition: 'opacity 350ms ease-in-out',
+              color: subtitleIdx === 0 ? '#93c5fd' : '#c4b5fd',
+            }}
+          >
+            {subtitleIdx === 0
+              ? lastProject
+                ? `Last project: ${lastProject}`
+                : 'No projects yet — submit your first idea 💡'
+              : lastEvent
+                ? `Last event: ${lastEvent}`
+                : 'No events yet — join your first hackathon 🎯'
+            }
+          </p>
+          <span className="absolute bottom-1.5 right-2 text-[8px] text-white/25">Photo: J. Cunniff, CC BY 2.0</span>
         </div>
 
         {/* Events + Leaderboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 items-start">
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 overflow-hidden">
             <EventsList today={todayEastern} />
           </div>
-          <div className="lg:col-span-1 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 rounded-lg overflow-hidden">
+          <div className="lg:col-span-1 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 overflow-hidden">
             <Leaderboard />
           </div>
         </div>
 
         {/* Featured Projects — grows naturally, no internal scroll */}
-        <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 rounded-lg overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 overflow-hidden">
           <FeaturedProjects />
         </div>
 

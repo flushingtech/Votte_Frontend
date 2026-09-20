@@ -28,11 +28,7 @@ const STYLES = `
   .fp-card:hover, .fp-feed-card:hover {
     border-color:rgba(59,130,246,.55) !important;
   }
-  .fp-card:hover .fp-card-img, .fp-feed-card:hover .fp-card-img {
-    transform:scale(1.03);
-  }
   .fp-card-img {
-    transition:transform 400ms ease;
     width:100%; height:100%; object-fit:cover; display:block;
   }
   .fp-viewall {
@@ -96,7 +92,7 @@ function Badge({ award, size = 'sm' }) {
       padding: lg ? '3px 8px' : '2px 6px',
       background: c.bg, border: `1px solid ${c.border}`, color: c.color,
       fontSize: lg ? 10 : 8.5, fontWeight: 700, letterSpacing: '.03em',
-      borderRadius: 3, whiteSpace: 'nowrap',
+      borderRadius: 0, whiteSpace: 'nowrap',
     }}>
       <span style={{ fontSize: lg ? 11 : 9.5 }}>{c.emoji}</span>{c.label}
     </div>
@@ -112,7 +108,7 @@ function TechPill({ label, size = 'sm' }) {
       padding: lg ? '3px 9px' : '2px 6px',
       fontSize: lg ? 11 : 9, fontWeight: 600,
       color: '#93c5fd', background: 'rgba(59,130,246,.08)',
-      border: '1px solid rgba(59,130,246,.25)', borderRadius: 3,
+      border: '1px solid rgba(59,130,246,.25)', borderRadius: 0,
       whiteSpace: 'nowrap',
     }}>{label}</span>
   );
@@ -128,7 +124,7 @@ function VoteChip({ count, size = 'sm' }) {
       display: 'flex', alignItems: 'center', gap: 3,
       padding: lg ? '4px 8px' : '2px 5px',
       background: 'rgba(15,23,42,.72)', backdropFilter: 'blur(4px)',
-      border: '1px solid rgba(255,255,255,.14)', borderRadius: 3,
+      border: '1px solid rgba(255,255,255,.14)', borderRadius: 0,
       color: '#e2e8f0', fontSize: lg ? 11 : 9, fontWeight: 700,
       fontVariantNumeric: 'tabular-nums',
     }}>
@@ -179,7 +175,7 @@ function ProjectCard({ project: p, navigate }) {
       style={{
         display: 'flex', flexDirection: 'column',
         border: '1px solid rgba(51,65,85,.55)', background: '#0f172a',
-        borderRadius: 6, overflow: 'hidden', height: '100%',
+        borderRadius: 0, overflow: 'hidden', height: '100%',
       }}
     >
       {/* Image */}
@@ -253,7 +249,7 @@ function FeedCard({ project: p, navigate }) {
       onClick={() => navigate(`/idea/${p.id}`, { state: { eventId: p.event_id } })}
       style={{
         display: 'flex', border: '1px solid rgba(51,65,85,.55)', background: '#0f172a',
-        borderRadius: 6, overflow: 'hidden',
+        borderRadius: 0, overflow: 'hidden',
       }}
     >
       {/* Thumbnail — ~38% of card width */}
@@ -318,11 +314,11 @@ function LoadingSkeleton() {
       <div className="bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 flex-shrink-0" style={{ height: 46 }} />
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4" style={{ padding: 14, gap: 14 }}>
         {[0,1,2,3].map(i =>
-          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 6, aspectRatio: '16 / 13' }} />)}
+          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 0, aspectRatio: '16 / 13' }} />)}
       </div>
       <div className="flex md:hidden flex-col" style={{ gap: 12, padding: 14 }}>
         {[0,1].map(i =>
-          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 6, height: 100 }} />)}
+          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 0, height: 100 }} />)}
       </div>
     </div>
   );
@@ -372,7 +368,7 @@ export default function FeaturedProjects() {
       {/* Header */}
       <div className="px-3 sm:px-4 py-3 flex-shrink-0 flex items-center justify-between gap-2 flex-wrap bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="bg-purple-500 p-1.5 rounded-lg flex-shrink-0">
+          <div className="bg-purple-500 p-1.5 flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
