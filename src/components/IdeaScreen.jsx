@@ -15,12 +15,12 @@ import { cldOptimize } from '../utils/cloudinaryImage';
 // Winners section (gold/amber for the top prize, purple for technical,
 // teal for creative, red for impactful).
 const AWARD_STYLES = {
-  'Hackathon Winner': { icon: '🏆', color: 'text-amber-300', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
-  'Most Creative':    { icon: '🎨', color: 'text-teal-300',  bg: 'bg-teal-500/10',  border: 'border-teal-500/30' },
-  'Most Technical':   { icon: '⚡', color: 'text-purple-300', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
-  'Most Impactful':   { icon: '🚀', color: 'text-red-300',   bg: 'bg-red-500/10',   border: 'border-red-500/30' },
+  'Hackathon Winner': { icon: '🏆', color: 'text-amber-300', bg: 'bg-amber-500/10', border: 'border-amber-500/30', grad: 'from-amber-500 to-orange-600', glow: 'shadow-amber-500/30' },
+  'Most Creative':    { icon: '🎨', color: 'text-teal-300',  bg: 'bg-teal-500/10',  border: 'border-teal-500/30', grad: 'from-teal-500 to-emerald-600', glow: 'shadow-teal-500/30' },
+  'Most Technical':   { icon: '⚡', color: 'text-purple-300', bg: 'bg-purple-500/10', border: 'border-purple-500/30', grad: 'from-purple-500 to-fuchsia-600', glow: 'shadow-purple-500/30' },
+  'Most Impactful':   { icon: '🚀', color: 'text-red-300',   bg: 'bg-red-500/10',   border: 'border-red-500/30', grad: 'from-red-500 to-rose-600', glow: 'shadow-red-500/30' },
 };
-const DEFAULT_AWARD_STYLE = { icon: '🏅', color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30' };
+const DEFAULT_AWARD_STYLE = { icon: '🏅', color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30', grad: 'from-slate-500 to-slate-600', glow: 'shadow-slate-500/30' };
 
 function IdeaScreen() {
   const { ideaId: ideaSlug } = useParams();
@@ -471,7 +471,10 @@ function IdeaScreen() {
   const ProjectSummaryPanel = () => (
     <aside className="bg-slate-900 border border-slate-700">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-        <h2 className="text-white text-sm font-bold uppercase tracking-wide">Project Summary</h2>
+        <h2 className="text-white text-sm font-bold uppercase tracking-wide flex items-center gap-2">
+          <span className="w-6 h-6 flex-shrink-0 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs shadow shadow-blue-500/30">📊</span>
+          Project Summary
+        </h2>
         {isAdmin && (
           <button
             onClick={() => setShowAdminPanel(!showAdminPanel)}
@@ -491,9 +494,9 @@ function IdeaScreen() {
           <div>
             <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Total Votes</h3>
             <div className="flex flex-col">
-              <div className="flex items-center justify-between py-1 border-b border-slate-800">
+              <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
                 <span className="text-slate-300 text-xs font-medium">All Events</span>
-                <span className="text-blue-300 font-bold text-sm tabular-nums">{voteTotals.total}</span>
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-xs px-2.5 py-1 rounded-full shadow shadow-blue-500/30 tabular-nums">{voteTotals.total}</span>
               </div>
               {voteTotals.creative > 0 && (
                 <div className="flex items-center justify-between py-1 border-b border-slate-800">
@@ -525,8 +528,9 @@ function IdeaScreen() {
                 const style = AWARD_STYLES[award] || DEFAULT_AWARD_STYLE;
                 return (
                   <div key={award} className="flex items-center justify-between">
-                    <span className={`text-xs font-semibold flex items-center gap-1.5 ${style.color}`}>
-                      <span>{style.icon}</span>{award}
+                    <span className={`text-xs font-semibold flex items-center gap-2 ${style.color}`}>
+                      <span className={`w-5 h-5 flex-shrink-0 rounded-md bg-gradient-to-br ${style.grad} shadow ${style.glow} flex items-center justify-center text-[10px]`}>{style.icon}</span>
+                      {award}
                     </span>
                     {awardCounts[award] > 1 && (
                       <span className="text-slate-500 text-xs font-bold">×{awardCounts[award]}</span>
@@ -757,8 +761,9 @@ function IdeaScreen() {
               {/* PROJECT TIMELINE */}
               <div className="bg-slate-900 border border-slate-700 p-4">
                 <div className="flex items-baseline gap-2">
-                  <h2 className="text-sm font-bold uppercase tracking-wide text-white flex items-center gap-1.5">
-                    <span>🚀</span> Project Timeline
+                  <h2 className="text-sm font-bold uppercase tracking-wide text-white flex items-center gap-2">
+                    <span className="w-6 h-6 flex-shrink-0 rounded-md bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-xs shadow shadow-emerald-500/30">🚀</span>
+                    Project Timeline
                   </h2>
                   <span className="text-xs text-slate-500">{eventCount} {eventCount === 1 ? 'Event' : 'Events'}</span>
                 </div>
@@ -769,7 +774,7 @@ function IdeaScreen() {
 
                 <div className="relative mt-3">
                   {/* Timeline vertical line */}
-                  <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-slate-800"></div>
+                  <div className="absolute left-[13px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-emerald-500/40 via-slate-700 to-blue-500/40"></div>
 
                   {/* Event cards with timeline nodes */}
                   {idea?.events?.map((event, index) => {
@@ -779,16 +784,19 @@ function IdeaScreen() {
                     const isLast = index === idea.events.length - 1;
 
                     return (
-                      <div key={event.event_id} className="relative pl-6 pb-4 last:pb-0">
+                      <div key={event.event_id} className="relative pl-10 pb-3 last:pb-0">
                         {/* Timeline marker */}
-                        <div className="absolute left-0 top-2 w-2.5 h-2.5 rounded-full border-2 z-10"
-                          style={{
-                            background: isFirst ? '#34d399' : isLast ? '#60a5fa' : '#64748b',
-                            borderColor: isFirst ? '#6ee7b7' : isLast ? '#93c5fd' : '#94a3b8',
-                          }}
-                        />
+                        <div
+                          className={`absolute left-0 top-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg z-10 bg-gradient-to-br ${
+                            isFirst ? 'from-emerald-400 to-emerald-600 shadow-emerald-500/40' :
+                            isLast ? 'from-blue-400 to-blue-600 shadow-blue-500/40' :
+                            'from-slate-500 to-slate-600 shadow-slate-500/30'
+                          }`}
+                        >
+                          {isFirst ? '🎯' : isLast ? '🏁' : index + 1}
+                        </div>
                         {eventCount > 1 && (isFirst || isLast) && (
-                          <span className={`inline-block mb-1.5 text-[9px] font-bold uppercase tracking-widest ${isFirst ? 'text-emerald-400' : 'text-blue-400'}`}>
+                          <span className={`inline-block mb-1.5 mt-0.5 text-[9px] font-bold uppercase tracking-widest ${isFirst ? 'text-emerald-400' : 'text-blue-400'}`}>
                             {isFirst ? 'Start' : 'Latest'}
                           </span>
                         )}
@@ -797,7 +805,7 @@ function IdeaScreen() {
                         <div className="bg-slate-900 border border-slate-700 overflow-hidden"
                         >
                     {/* Event Header */}
-                    <div className="bg-slate-800/60 border-b border-slate-800 px-3.5 py-2.5">
+                    <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/30 border-b border-slate-800 px-3.5 py-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-slate-400 font-semibold">
@@ -864,7 +872,7 @@ function IdeaScreen() {
                             return (
                               <div
                                 key={idx}
-                                className={`inline-flex items-center gap-1 px-2 py-1 border ${style.bg} ${style.border} ${style.color} flex-shrink-0`}
+                                className={`inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r ${style.grad} text-white shadow ${style.glow} hover:scale-105 transition-transform flex-shrink-0`}
                               >
                                 <span className="text-xs">{style.icon}</span>
                                 <span className="text-[10px] font-bold whitespace-nowrap">{award}</span>
@@ -876,10 +884,10 @@ function IdeaScreen() {
                     </div>
 
                     {/* Content Grid - Compact */}
-                    <div className="p-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="p-2.5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                         {/* Image Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2.5 hover:border-slate-600/50 transition-all">
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">🖼️</span>
                             <h3 className="text-xs font-bold text-white">Showcase</h3>
@@ -914,7 +922,7 @@ function IdeaScreen() {
                         </div>
 
                         {/* Stats Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2.5 hover:border-slate-600/50 transition-all">
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">📊</span>
                             <h3 className="text-xs font-bold text-white">Votes</h3>
@@ -924,24 +932,24 @@ function IdeaScreen() {
                               {event?.votes > 0 && (
                                 <div className="flex items-center justify-between py-1 border-b border-slate-800">
                                   <span className="text-slate-400 text-[10px] font-medium">Total</span>
-                                  <span className="text-blue-300 font-bold text-xs tabular-nums">{event.votes}</span>
+                                  <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full shadow shadow-blue-500/30 tabular-nums">{event.votes}</span>
                                 </div>
                               )}
                               {event?.most_creative_votes > 0 && (
                                 <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                                  <span className="text-slate-400 text-[10px] font-medium">Creative</span>
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🎨</span>Creative</span>
                                   <span className="text-teal-300 font-bold text-xs tabular-nums">{event.most_creative_votes}</span>
                                 </div>
                               )}
                               {event?.most_technical_votes > 0 && (
                                 <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                                  <span className="text-slate-400 text-[10px] font-medium">Technical</span>
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>⚡</span>Technical</span>
                                   <span className="text-purple-300 font-bold text-xs tabular-nums">{event.most_technical_votes}</span>
                                 </div>
                               )}
                               {event?.most_impactful_votes > 0 && (
                                 <div className="flex items-center justify-between py-1">
-                                  <span className="text-slate-400 text-[10px] font-medium">Impactful</span>
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🚀</span>Impactful</span>
                                   <span className="text-red-300 font-bold text-xs tabular-nums">{event.most_impactful_votes}</span>
                                 </div>
                               )}
@@ -955,7 +963,7 @@ function IdeaScreen() {
                         </div>
 
                         {/* Contributors Card - Compact */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2.5 hover:border-slate-600/50 transition-all">
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-1.5">
                               <span className="text-lg">👥</span>
@@ -994,7 +1002,7 @@ function IdeaScreen() {
                                       <button
                                         key={idx}
                                         onClick={() => navigate(`/profile/${encodeURIComponent(contributorEmail)}`)}
-                                        className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 hover:border-purple-400/50 px-1.5 py-0.5 transition-colors cursor-pointer"
+                                        className="flex items-center gap-1 bg-gradient-to-r from-purple-600/25 to-blue-600/25 border border-purple-500/40 hover:border-purple-400/60 hover:from-purple-600/35 hover:to-blue-600/35 px-1.5 py-0.5 transition-all cursor-pointer"
                                         title={`View ${displayName}'s profile`}
                                       >
                                         <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
@@ -1076,7 +1084,7 @@ function IdeaScreen() {
                         </div>
 
                         {/* Description Card - Full Width */}
-                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2.5 hover:border-slate-600/50 transition-all">
+                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">📝</span>
                             <h3 className="text-xs font-bold text-white">Description</h3>
@@ -1089,7 +1097,7 @@ function IdeaScreen() {
                         </div>
 
                         {/* Tech Stack Card - Full Width */}
-                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2.5 hover:border-slate-600/50 transition-all">
+                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">⚡</span>
                             <h3 className="text-xs font-bold text-white">Tech Stack</h3>
@@ -1100,7 +1108,7 @@ function IdeaScreen() {
                               .map((tech, idx) => (
                                 <span
                                   key={idx}
-                                  className="bg-blue-500/10 text-blue-300 px-1.5 py-0.5 text-[10px] font-semibold border border-blue-500/30"
+                                  className="bg-gradient-to-r from-blue-600/40 to-purple-600/40 text-blue-100 px-1.5 py-0.5 text-[10px] font-semibold border border-blue-500/40"
                                 >
                                   {tech.trim()}
                                 </span>
