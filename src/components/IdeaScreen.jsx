@@ -492,26 +492,25 @@ function IdeaScreen() {
       <div className="p-5 flex flex-col gap-5 flex-1">
         {voteTotals.total > 0 && (
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Total Votes</h3>
+            <div className="text-center pb-3 mb-1">
+              <div className="text-4xl font-extrabold text-white tabular-nums leading-none">{voteTotals.total}</div>
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500 mt-1.5">Total Votes</div>
+            </div>
             <div className="flex flex-col">
-              <div className="flex items-center justify-between py-2 border-b border-slate-800">
-                <span className="text-slate-300 text-sm font-medium">All Events</span>
-                <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-sm px-3 py-1 rounded-full shadow shadow-blue-500/30 tabular-nums">{voteTotals.total}</span>
-              </div>
               {voteTotals.creative > 0 && (
-                <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
+                <div className="flex items-center justify-between py-1.5 border-t border-slate-800">
                   <span className="text-slate-400 text-sm">🎨 Creative</span>
                   <span className="text-teal-300 text-sm font-semibold tabular-nums">{voteTotals.creative}</span>
                 </div>
               )}
               {voteTotals.technical > 0 && (
-                <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
+                <div className="flex items-center justify-between py-1.5 border-t border-slate-800">
                   <span className="text-slate-400 text-sm">⚡ Technical</span>
                   <span className="text-purple-300 text-sm font-semibold tabular-nums">{voteTotals.technical}</span>
                 </div>
               )}
               {voteTotals.impactful > 0 && (
-                <div className="flex items-center justify-between py-1.5">
+                <div className="flex items-center justify-between py-1.5 border-t border-slate-800">
                   <span className="text-slate-400 text-sm">🚀 Impactful</span>
                   <span className="text-red-300 text-sm font-semibold tabular-nums">{voteTotals.impactful}</span>
                 </div>
@@ -545,15 +544,33 @@ function IdeaScreen() {
         {uniqueContributors.length > 0 && (
           <div className={(voteTotals.total > 0 || uniqueAwards.length > 0) ? 'pt-5 border-t border-slate-800' : ''}>
             <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Contributors ({uniqueContributors.length})</h3>
-            <div className="flex flex-wrap gap-2">
-              {uniqueContributors.map((contributor) => (
-                <span
-                  key={contributor}
-                  className="bg-gradient-to-r from-purple-600/25 to-blue-600/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 text-sm"
-                >
-                  {getDisplayName(contributor)}
-                </span>
-              ))}
+            <div className="flex flex-col gap-1.5">
+              {uniqueContributors.map((contributor) => {
+                const displayName = getDisplayName(contributor);
+                const profilePic = contributorProfiles[contributor]?.profile_picture;
+                return (
+                  <button
+                    key={contributor}
+                    onClick={() => navigate(`/profile/${encodeURIComponent(contributor)}`)}
+                    className="flex items-center gap-2 hover:bg-slate-800/60 -mx-1.5 px-1.5 py-1 transition-colors text-left"
+                  >
+                    {profilePic ? (
+                      <img
+                        src={cldOptimize(profilePic, { width: 50, height: 50 })}
+                        alt={displayName}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full flex-shrink-0 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold">
+                        {displayName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-slate-200 text-sm font-medium truncate">{displayName}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -743,12 +760,22 @@ function IdeaScreen() {
                   Submitted by: {idea?.email?.split('@')[0] || 'Unknown'}
                 </p>
                 {(eventCount > 0 || allAwards.length > 0 || voteTotals.total > 0) && (
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-3 pt-3 border-t border-slate-800 text-xs font-semibold text-slate-300">
-                    {eventCount > 0 && <span>{eventCount} {eventCount === 1 ? 'Event' : 'Events'}</span>}
-                    {allAwards.length > 0 && <span className="text-slate-600">•</span>}
-                    {allAwards.length > 0 && <span>{allAwards.length} {allAwards.length === 1 ? 'Award' : 'Awards'}</span>}
-                    {voteTotals.total > 0 && <span className="text-slate-600">•</span>}
-                    {voteTotals.total > 0 && <span>{voteTotals.total} Total Votes</span>}
+                  <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-800">
+                    {eventCount > 0 && (
+                      <div className="px-2.5 py-1 bg-slate-800/60 border border-slate-700 text-xs font-semibold text-blue-300">
+                        {eventCount} {eventCount === 1 ? 'Event' : 'Events'}
+                      </div>
+                    )}
+                    {allAwards.length > 0 && (
+                      <div className="px-2.5 py-1 bg-slate-800/60 border border-slate-700 text-xs font-semibold text-blue-300">
+                        {allAwards.length} {allAwards.length === 1 ? 'Award' : 'Awards'}
+                      </div>
+                    )}
+                    {voteTotals.total > 0 && (
+                      <div className="px-2.5 py-1 bg-slate-800/60 border border-slate-700 text-xs font-semibold text-blue-300">
+                        {voteTotals.total} Total Votes
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -768,13 +795,13 @@ function IdeaScreen() {
                   <span className="text-xs text-slate-500">{eventCount} {eventCount === 1 ? 'Event' : 'Events'}</span>
                 </div>
                 {eventCount > 1 && (
-                  <p className="text-xs text-slate-500 mt-1 mb-4">This project has been worked on across multiple events.</p>
+                  <p className="text-xs text-slate-500 mt-1 mb-4">A history of this project across hackathons and events.</p>
                 )}
                 {eventCount <= 1 && <div className="mb-2" />}
 
                 <div className="relative mt-3">
                   {/* Timeline vertical line */}
-                  <div className="absolute left-[13px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-emerald-500/40 via-slate-700 to-blue-500/40"></div>
+                  <div className="absolute left-[23px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-emerald-500/40 via-slate-700 to-blue-500/40"></div>
 
                   {/* Event cards with timeline nodes */}
                   {idea?.events?.map((event, index) => {
@@ -783,23 +810,30 @@ function IdeaScreen() {
                     const isFirst = index === 0;
                     const isLast = index === idea.events.length - 1;
 
+                    const eventDate = new Date(event.event_date);
+                    const monthAbbr = eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                    const dayNum = eventDate.getDate();
+                    const yearNum = eventDate.getFullYear();
+
                     return (
-                      <div key={event.event_id} className="relative pl-10 pb-3 last:pb-0">
-                        {/* Timeline marker */}
-                        <div
-                          className={`absolute left-0 top-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg z-10 bg-gradient-to-br ${
-                            isFirst ? 'from-emerald-400 to-emerald-600 shadow-emerald-500/40' :
-                            isLast ? 'from-blue-400 to-blue-600 shadow-blue-500/40' :
-                            'from-slate-500 to-slate-600 shadow-slate-500/30'
-                          }`}
-                        >
-                          {isFirst ? '🎯' : isLast ? '🏁' : index + 1}
+                      <div key={event.event_id} className="relative pl-16 pb-4 last:pb-0">
+                        {/* Timeline date marker */}
+                        <div className="absolute left-0 top-0 w-12 flex flex-col items-center z-10">
+                          {eventCount > 1 && (isFirst || isLast) && (
+                            <span className={`mb-1 text-[8px] font-bold uppercase tracking-widest ${isFirst ? 'text-emerald-400' : 'text-blue-400'}`}>
+                              {isFirst ? 'Start' : 'Latest'}
+                            </span>
+                          )}
+                          <div className={`w-12 flex flex-col items-center justify-center border py-1 ${
+                            isFirst && eventCount > 1 ? 'bg-emerald-500/10 border-emerald-500/30' :
+                            isLast && eventCount > 1 ? 'bg-blue-500/10 border-blue-500/30' :
+                            'bg-slate-800/60 border-slate-700'
+                          }`}>
+                            <span className={`text-[9px] font-bold tracking-wide ${isFirst && eventCount > 1 ? 'text-emerald-400' : isLast && eventCount > 1 ? 'text-blue-400' : 'text-slate-400'}`}>{monthAbbr}</span>
+                            <span className="text-base font-extrabold text-white leading-none my-0.5">{dayNum}</span>
+                            <span className="text-[9px] text-slate-500">{yearNum}</span>
+                          </div>
                         </div>
-                        {eventCount > 1 && (isFirst || isLast) && (
-                          <span className={`inline-block mb-1.5 mt-0.5 text-[9px] font-bold uppercase tracking-widest ${isFirst ? 'text-emerald-400' : 'text-blue-400'}`}>
-                            {isFirst ? 'Start' : 'Latest'}
-                          </span>
-                        )}
 
                         {/* Event card */}
                         <div className="bg-slate-900 border border-slate-700 overflow-hidden"
@@ -808,16 +842,7 @@ function IdeaScreen() {
                     <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/30 border-b border-slate-800 px-3.5 py-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-400 font-semibold">
-                            {new Date(event.event_date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </p>
-                          {event.title && (
-                            <h2 className="text-sm font-bold text-white mt-0.5">{event.title}</h2>
-                          )}
+                          <h2 className="text-sm font-bold text-white">{event.title || 'Event'}</h2>
                         </div>
 
                         {/* Admin/Owner Menu - Three Dots */}
@@ -883,11 +908,11 @@ function IdeaScreen() {
                       )}
                     </div>
 
-                    {/* Content Grid - Compact */}
+                    {/* Content — 60/40 split: showcase left, votes+contributors stacked right */}
                     <div className="p-2.5">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {/* Image Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
+                      <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
+                        {/* Showcase — left, ~60% */}
+                        <div className="lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">🖼️</span>
                             <h3 className="text-xs font-bold text-white">Showcase</h3>
@@ -895,17 +920,18 @@ function IdeaScreen() {
                           {event?.image_url ? (
                             <div
                               onClick={() => setExpandedImage(event.image_url)}
-                              className="relative cursor-pointer group"
+                              className="relative cursor-pointer group overflow-hidden"
+                              style={{ aspectRatio: '16 / 10' }}
                             >
                               <img
-                                src={cldOptimize(event.image_url, { width: 400 })}
+                                src={cldOptimize(event.image_url, { width: 700 })}
                                 alt="Project"
-                                className="w-full h-36 object-cover shadow-lg group-hover:opacity-90 transition-opacity"
+                                className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
                                 loading="lazy"
                                 decoding="async"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-medium bg-black/50 px-3 py-1.5 rounded-lg transition-opacity flex items-center gap-1.5">
+                                <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-medium bg-black/50 px-3 py-1.5 transition-opacity flex items-center gap-1.5">
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                   </svg>
@@ -914,12 +940,15 @@ function IdeaScreen() {
                               </div>
                             </div>
                           ) : (
-                            <div className="w-full h-36 bg-slate-800/50 border border-slate-700/30 flex flex-col items-center justify-center">
+                            <div className="w-full flex flex-col items-center justify-center bg-slate-800/50 border border-slate-700/30" style={{ aspectRatio: '16 / 10' }}>
                               <span className="text-3xl text-slate-600 mb-1">🖼️</span>
                               <span className="text-slate-500 text-xs">No image yet</span>
                             </div>
                           )}
                         </div>
+
+                        {/* Votes + Contributors — right, ~40%, stacked */}
+                        <div className="lg:col-span-2 flex flex-col gap-2">
 
                         {/* Stats Card */}
                         <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
@@ -1083,8 +1112,11 @@ function IdeaScreen() {
                           </div>
                         </div>
 
+                        </div>
+                        {/* end votes+contributors column */}
+
                         {/* Description Card - Full Width */}
-                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
+                        <div className="lg:col-span-5 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">📝</span>
                             <h3 className="text-xs font-bold text-white">Description</h3>
@@ -1097,7 +1129,7 @@ function IdeaScreen() {
                         </div>
 
                         {/* Tech Stack Card - Full Width */}
-                        <div className="md:col-span-2 lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
+                        <div className="lg:col-span-5 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">⚡</span>
                             <h3 className="text-xs font-bold text-white">Tech Stack</h3>
