@@ -462,7 +462,9 @@ const Profile = ({ user, viewingEmail = null }) => {
                       <img
                         src={idea.image_url}
                         alt={idea.idea}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   ) : (

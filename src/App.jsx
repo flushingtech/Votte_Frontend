@@ -1,28 +1,42 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
-import Landing from './pages/Landing';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import Faq from './pages/Faq';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Home from './pages/Home';
-import AdminPage from './pages/Admin';
-import EventScreen from './pages/EventScreen';
-import IdeasForEvent from './components/admin/IdeasForEvent'; // Admin Event Screen
-import IdeaScreen from './components/IdeaScreen';
-import ProfilePage from './pages/ProfilePage';
-import PastEvents from './components/PastEvents';
-import UpcomingEvents from './components/UpcomingEvents';
-import AdminDuplicates from './components/AdminDuplicates'; // Admin Duplicates Manager
-import AllProjects from './pages/AllProjects'; // Admin All Projects Manager
-import AllEvents from './pages/AllEvents'; // Admin All Events Manager
-import AdminRequests from './pages/AdminRequests';
-import AdminAnalytics from './pages/AdminAnalytics';
-import LeaderboardPage from './pages/LeaderboardPage';
 import { checkAdminStatus } from './api/API';
+// Landing is the most common first visit, so it stays in the main bundle.
+// Everything else loads on demand — a first-time visitor no longer has to
+// download the admin panel, analytics, and every other page up front.
+import Landing from './pages/Landing';
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Faq = lazy(() => import('./pages/Faq'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Home = lazy(() => import('./pages/Home'));
+const AdminPage = lazy(() => import('./pages/Admin'));
+const EventScreen = lazy(() => import('./pages/EventScreen'));
+const IdeasForEvent = lazy(() => import('./components/admin/IdeasForEvent')); // Admin Event Screen
+const IdeaScreen = lazy(() => import('./components/IdeaScreen'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PastEvents = lazy(() => import('./components/PastEvents'));
+const UpcomingEvents = lazy(() => import('./components/UpcomingEvents'));
+const AdminDuplicates = lazy(() => import('./components/AdminDuplicates')); // Admin Duplicates Manager
+const AllProjects = lazy(() => import('./pages/AllProjects')); // Admin All Projects Manager
+const AllEvents = lazy(() => import('./pages/AllEvents')); // Admin All Events Manager
+const AdminRequests = lazy(() => import('./pages/AdminRequests'));
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+
+const PageLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0e1a' }}>
+    <div style={{
+      width: 32, height: 32, borderRadius: '50%',
+      border: '3px solid rgba(255,255,255,.15)', borderTopColor: '#3b82f6',
+      animation: 'app-spin 0.8s linear infinite',
+    }} />
+    <style>{'@keyframes app-spin { to { transform: rotate(360deg); } }'}</style>
+  </div>
+);
 
 const getUserEmail = () => {
   // Try Google OAuth key first, then fall back to JWT-decoded key
@@ -60,6 +74,7 @@ function App() {
     <GoogleOAuthProvider clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}>
       <Router>
         <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Landing page */}
           <Route path="/" element={<Landing />} />
@@ -159,6 +174,7 @@ function App() {
             }
           />
         </Routes>
+        </Suspense>
       </Router>
     </GoogleOAuthProvider>
   );

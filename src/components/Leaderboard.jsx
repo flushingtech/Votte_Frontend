@@ -117,7 +117,7 @@ const Leaderboard = () => {
               {/* Avatar */}
               <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-black/5">
                 {user.profile_picture
-                  ? <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
+                  ? <img src={user.profile_picture} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   : <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-white"
                       style={{ backgroundColor: color }}>
                       {getInitials(user.display_name, user.email)}
@@ -138,7 +138,7 @@ const Leaderboard = () => {
               {/* Project image */}
               {user.project_image && (
                 <div className="w-8 h-8 flex-shrink-0 overflow-hidden border border-slate-200">
-                  <img src={user.project_image} alt="" className="w-full h-full object-cover" />
+                  <img src={user.project_image} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </div>
               )}
 
