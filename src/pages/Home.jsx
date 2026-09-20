@@ -131,26 +131,29 @@ function Home() {
 
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
-      {/* Right: content — left padding matches sidebar width */}
-  <div className="flex flex-col flex-1 min-w-0 overflow-y-auto lg:overflow-hidden relative"
+      {/* Right: content — left padding matches sidebar width. This is the ONLY
+          scrolling region for the dashboard; every section below sizes to its
+          own content instead of scrolling independently. */}
+  <div className="flex flex-col flex-1 min-w-0 overflow-y-auto relative"
     style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
 
-      {/* Welcome Header */}
-      <div className="px-4 sm:px-6 pt-4 pb-3 flex-shrink-0">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="bg-gradient-to-r from-slate-800 via-slate-850 to-slate-900 border border-slate-700 px-5 py-4 shadow-xl">
+      <div className="px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
 
-            <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
-              Welcome back, {userName || 'Guest'}! 👋
+        {/* Welcome */}
+        <div className="relative overflow-hidden rounded-lg border border-slate-700 bg-slate-900 px-5 py-4">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-blue-500 to-purple-500" />
+          <div className="relative pl-2">
+            <p className="text-[11px] font-bold uppercase tracking-[.15em] text-blue-400/80">Welcome back</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mt-0.5">
+              {userName || 'Guest'}! 👋
             </h1>
-
-            {/* Alternating: last project ↔ last event */}
             <p
-              className="text-sm mt-0.5 leading-snug"
+              className="text-sm mt-1 leading-snug"
               style={{
                 opacity: subtitleVisible ? 1 : 0,
                 transition: 'opacity 350ms ease-in-out',
-                color: subtitleIdx === 0 ? '#93c5fd' : '#bfdbfe',
+                color: subtitleIdx === 0 ? '#93c5fd' : '#c4b5fd',
               }}
             >
               {subtitleIdx === 0
@@ -162,41 +165,24 @@ function Home() {
                   : 'No events yet — join your first hackathon 🎯'
               }
             </p>
-
           </div>
         </div>
-      </div>
 
-      {/* No tabs - community content only */}
-
-      {/* Main Content Grid */}
-      <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-6 pb-6">
-        <div className="flex-1 min-h-0 flex flex-col gap-4 max-w-7xl mx-auto w-full">
-
-            <>
-              {/* Events + Leaderboard — fixed height */}
-              <div className="flex-shrink-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-2xl overflow-hidden" style={{ height: '360px' }}>
-                    <EventsList today={todayEastern} />
-                  </div>
-                </div>
-                <div className="lg:col-span-1">
-                  <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 shadow-2xl overflow-hidden">
-                    <div className="h-[360px]">
-                      <Leaderboard />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Featured Projects — fills remaining height on desktop, fixed min on mobile */}
-              <div className="flex-1 min-h-[420px] lg:min-h-0 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 shadow-2xl overflow-y-auto lg:overflow-hidden">
-                <FeaturedProjects />
-              </div>
-            </>
-
+        {/* Events + Leaderboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-lg overflow-hidden">
+            <EventsList today={todayEastern} />
+          </div>
+          <div className="lg:col-span-1 bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 rounded-lg overflow-hidden">
+            <Leaderboard />
+          </div>
         </div>
+
+        {/* Featured Projects — grows naturally, no internal scroll */}
+        <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/60 rounded-lg overflow-hidden">
+          <FeaturedProjects />
+        </div>
+
       </div>
 
       </div>{/* end right column */}

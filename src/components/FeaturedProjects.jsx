@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getFeaturedProjects } from '../api/API';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,16 +21,15 @@ const aCol = email => PAL[(email||'').charCodeAt(0) % PAL.length];
 
 // ─── Global CSS ──────────────────────────────────────────────────────────────
 const STYLES = `
-  .fp-card {
+  .fp-card, .fp-feed-card {
     cursor:pointer;
-    transition:transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    transition:border-color 150ms ease;
   }
-  .fp-card:hover {
-    border-color:rgba(139,92,246,.5) !important;
-    box-shadow:0 4px 20px rgba(0,0,0,.35), 0 0 0 1px rgba(139,92,246,.15);
+  .fp-card:hover, .fp-feed-card:hover {
+    border-color:rgba(59,130,246,.55) !important;
   }
-  .fp-card:hover .fp-card-img {
-    transform:scale(1.04);
+  .fp-card:hover .fp-card-img, .fp-feed-card:hover .fp-card-img {
+    transform:scale(1.03);
   }
   .fp-card-img {
     transition:transform 400ms ease;
@@ -41,31 +40,7 @@ const STYLES = `
     transition:color 150ms ease;
     background:none; border:none; padding:0;
   }
-  .fp-viewall:hover { color:#c4b5fd !important; }
-
-  /* Mobile swipe carousel */
-  .fp-carousel {
-    display:flex;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-  }
-  .fp-carousel::-webkit-scrollbar { display:none; }
-  .fp-carousel-item {
-    scroll-snap-align:center;
-    flex-shrink:0;
-  }
-  .fp-dot {
-    width:6px; height:6px; border-radius:50%;
-    background:rgba(255,255,255,.2);
-    transition:background 200ms ease, width 200ms ease;
-    cursor:pointer;
-  }
-  .fp-dot.active {
-    background:#a78bfa;
-    width:16px; border-radius:3px;
-  }
+  .fp-viewall:hover { color:#93c5fd !important; }
 `;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -134,8 +109,8 @@ function TechPill({ label, size = 'sm' }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      padding: lg ? '3px 9px' : '2px 7px',
-      fontSize: lg ? 11 : 9.5, fontWeight: 600,
+      padding: lg ? '3px 9px' : '2px 6px',
+      fontSize: lg ? 11 : 9, fontWeight: 600,
       color: '#93c5fd', background: 'rgba(59,130,246,.08)',
       border: '1px solid rgba(59,130,246,.25)', borderRadius: 3,
       whiteSpace: 'nowrap',
@@ -149,15 +124,15 @@ function VoteChip({ count, size = 'sm' }) {
   const lg = size === 'lg';
   return (
     <div style={{
-      position: 'absolute', top: lg ? 10 : 7, right: lg ? 10 : 7,
+      position: 'absolute', top: lg ? 10 : 6, right: lg ? 10 : 6,
       display: 'flex', alignItems: 'center', gap: 3,
-      padding: lg ? '4px 8px' : '3px 6px',
+      padding: lg ? '4px 8px' : '2px 5px',
       background: 'rgba(15,23,42,.72)', backdropFilter: 'blur(4px)',
       border: '1px solid rgba(255,255,255,.14)', borderRadius: 3,
-      color: '#e2e8f0', fontSize: lg ? 11 : 9.5, fontWeight: 700,
+      color: '#e2e8f0', fontSize: lg ? 11 : 9, fontWeight: 700,
       fontVariantNumeric: 'tabular-nums',
     }}>
-      <svg style={{ width: lg ? 11 : 9, height: lg ? 11 : 9, stroke: '#a78bfa', strokeWidth: 2.5 }}
+      <svg style={{ width: lg ? 11 : 8, height: lg ? 11 : 8, stroke: '#a78bfa', strokeWidth: 2.5 }}
         fill="none" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
       </svg>
@@ -173,7 +148,7 @@ function NoImg({ lg }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(135deg,#0a1226 0%,#0d1830 100%)',
     }}>
-      <svg style={{ width: lg ? 34 : 24, height: lg ? 34 : 24, stroke: 'rgba(255,255,255,.1)' }}
+      <svg style={{ width: lg ? 34 : 20, height: lg ? 34 : 20, stroke: 'rgba(255,255,255,.1)' }}
         fill="none" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
           d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
@@ -182,16 +157,18 @@ function NoImg({ lg }) {
   );
 }
 
-// ─── Project card (shared by grid + carousel) ────────────────────────────────
-function ProjectCard({ project: p, navigate, variant = 'grid' }) {
-  const lg = variant === 'carousel';
-  const contributors = p.contributors?.length > 0
-    ? p.contributors
-    : (p.profile_picture || p.contributor_name)
-      ? [{ email: p.email, name: p.contributor_name, profile_picture: p.profile_picture }]
-      : [];
-  const techs = (p.technologies || '')
-    .split(',').map(t => t.trim()).filter(Boolean);
+const getContributors = (p) => p.contributors?.length > 0
+  ? p.contributors
+  : (p.profile_picture || p.contributor_name)
+    ? [{ email: p.email, name: p.contributor_name, profile_picture: p.profile_picture }]
+    : [];
+
+const getTechs = (p) => (p.technologies || '').split(',').map(t => t.trim()).filter(Boolean);
+
+// ─── Desktop / tablet grid card ───────────────────────────────────────────────
+function ProjectCard({ project: p, navigate }) {
+  const contributors = getContributors(p);
+  const techs = getTechs(p);
   const visibleTechs = techs.slice(0, 3);
   const moreTechs = techs.length - visibleTechs.length;
 
@@ -209,49 +186,49 @@ function ProjectCard({ project: p, navigate, variant = 'grid' }) {
       <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', flexShrink: 0, overflow: 'hidden' }}>
         {p.image_url
           ? <img src={p.image_url} alt={p.idea} className="fp-card-img" />
-          : <NoImg lg={lg} />
+          : <NoImg />
         }
         <div style={{ position: 'absolute', inset: 0,
           background: 'linear-gradient(to bottom, rgba(15,23,42,0) 45%, rgba(15,23,42,.75) 78%, rgba(15,23,42,.97) 100%)' }} />
-        <VoteChip count={p.vote_count} size={lg ? 'lg' : 'sm'} />
+        <VoteChip count={p.vote_count} />
 
         {/* Title + awards pinned to the bottom of the image */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: lg ? '0 14px 10px' : '0 10px 8px', display: 'flex', flexDirection: 'column', gap: lg ? 6 : 4 }}>
-          <p style={{ margin: 0, color: '#f8fafc', fontWeight: 800, fontSize: lg ? 16 : 12.5, lineHeight: 1.25,
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 10px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <p style={{ margin: 0, color: '#f8fafc', fontWeight: 800, fontSize: 12.5, lineHeight: 1.25,
             overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
             {p.idea}
           </p>
           {p.awards?.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: lg ? 5 : 3 }}>
-              {p.awards.map(a => <Badge key={a} award={a} size={lg ? 'lg' : 'sm'} />)}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              {p.awards.map(a => <Badge key={a} award={a} />)}
             </div>
           )}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: lg ? 10 : 6, padding: lg ? '14px' : '10px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 10 }}>
         {p.description && (
-          <p style={{ margin: 0, color: '#94a3b8', fontSize: lg ? 13 : 11, lineHeight: 1.4,
+          <p style={{ margin: 0, color: '#94a3b8', fontSize: 11, lineHeight: 1.4,
             overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
             {p.description}
           </p>
         )}
 
         {visibleTechs.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: lg ? 6 : 4 }}>
-            {visibleTechs.map(t => <TechPill key={t} label={t} size={lg ? 'lg' : 'sm'} />)}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {visibleTechs.map(t => <TechPill key={t} label={t} />)}
             {moreTechs > 0 && (
-              <span style={{ fontSize: lg ? 11 : 9.5, color: 'rgba(148,163,184,.55)', alignSelf: 'center' }}>+{moreTechs}</span>
+              <span style={{ fontSize: 9.5, color: 'rgba(148,163,184,.55)', alignSelf: 'center' }}>+{moreTechs}</span>
             )}
           </div>
         )}
 
         <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
-          borderTop: '1px solid rgba(255,255,255,.06)', paddingTop: lg ? 10 : 7 }}>
-          <AvatarStack contributors={contributors} max={4} dim={lg ? 26 : 20} />
+          borderTop: '1px solid rgba(255,255,255,.06)', paddingTop: 7 }}>
+          <AvatarStack contributors={contributors} max={4} dim={20} />
           {contributors.length > 0 && (
-            <span style={{ fontSize: lg ? 11.5 : 10, color: 'rgba(148,163,184,.65)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 10, color: 'rgba(148,163,184,.65)', fontWeight: 500, whiteSpace: 'nowrap' }}>
               {contributors.length} contributor{contributors.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -261,57 +238,70 @@ function ProjectCard({ project: p, navigate, variant = 'grid' }) {
   );
 }
 
-// ─── Mobile swipe carousel ────────────────────────────────────────────────────
-function MobileCarousel({ projects, navigate }) {
-  const trackRef = useRef(null);
-  const itemRefs = useRef([]);
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const items = itemRefs.current.filter(Boolean);
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          const idx = Number(entry.target.dataset.idx);
-          setActive(idx);
-        }
-      });
-    }, { root: track, threshold: [0.6] });
-    items.forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, [projects.length]);
-
-  const scrollTo = (idx) => {
-    itemRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  };
+// ─── Mobile: compact horizontal feed row ──────────────────────────────────────
+function FeedCard({ project: p, navigate }) {
+  const contributors = getContributors(p);
+  const techs = getTechs(p);
+  const visibleTechs = techs.slice(0, 2);
+  const moreTechs = techs.length - visibleTechs.length;
+  const visibleAwards = (p.awards || []).slice(0, 2);
+  const moreAwards = (p.awards?.length || 0) - visibleAwards.length;
 
   return (
-    <div>
-      <div ref={trackRef} className="fp-carousel" style={{ gap: 12, padding: '0 16px', scrollPaddingLeft: 16 }}>
-        {projects.map((p, i) => (
-          <div
-            key={p.id}
-            ref={el => (itemRefs.current[i] = el)}
-            data-idx={i}
-            className="fp-carousel-item"
-            style={{ width: '82%', maxWidth: 360 }}
-          >
-            <ProjectCard project={p} navigate={navigate} variant="carousel" />
-          </div>
-        ))}
-        {/* trailing spacer so the last card can snap fully into view */}
-        <div style={{ flexShrink: 0, width: 4 }} />
+    <div
+      className="fp-feed-card"
+      onClick={() => navigate(`/idea/${p.id}`, { state: { eventId: p.event_id } })}
+      style={{
+        display: 'flex', border: '1px solid rgba(51,65,85,.55)', background: '#0f172a',
+        borderRadius: 6, overflow: 'hidden',
+      }}
+    >
+      {/* Thumbnail — ~38% of card width */}
+      <div style={{ position: 'relative', width: '38%', flexShrink: 0, aspectRatio: '1 / 1', overflow: 'hidden' }}>
+        {p.image_url
+          ? <img src={p.image_url} alt={p.idea} className="fp-card-img" />
+          : <NoImg />
+        }
+        <VoteChip count={p.vote_count} />
       </div>
 
-      {projects.length > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 12 }}>
-          {projects.map((p, i) => (
-            <div key={p.id} className={`fp-dot${i === active ? ' active' : ''}`} onClick={() => scrollTo(i)} />
-          ))}
-        </div>
-      )}
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 3.5 }}>
+        <p style={{ margin: 0, color: '#f8fafc', fontWeight: 800, fontSize: 12.5, lineHeight: 1.25,
+          overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+          {p.idea}
+        </p>
+
+        {visibleAwards.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+            {visibleAwards.map(a => <Badge key={a} award={a} />)}
+            {moreAwards > 0 && <span style={{ fontSize: 9, color: 'rgba(148,163,184,.55)', alignSelf: 'center' }}>+{moreAwards}</span>}
+          </div>
+        )}
+
+        {p.description && (
+          <p style={{ margin: 0, color: '#94a3b8', fontSize: 10.5, lineHeight: 1.35,
+            overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+            {p.description}
+          </p>
+        )}
+
+        {visibleTechs.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+            {visibleTechs.map(t => <TechPill key={t} label={t} />)}
+            {moreTechs > 0 && <span style={{ fontSize: 9, color: 'rgba(148,163,184,.55)', alignSelf: 'center' }}>+{moreTechs}</span>}
+          </div>
+        )}
+
+        {contributors.length > 0 && (
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 6, paddingTop: 3 }}>
+            <AvatarStack contributors={contributors} max={3} dim={16} />
+            <span style={{ fontSize: 9.5, color: 'rgba(148,163,184,.65)', fontWeight: 500 }}>
+              {contributors.length} contributor{contributors.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -320,7 +310,7 @@ function MobileCarousel({ projects, navigate }) {
 function LoadingSkeleton() {
   const ROOT = {
     background: 'linear-gradient(160deg,#050c1b 0%,#070d1e 60%,#060a18 100%)',
-    display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden',
+    display: 'flex', flexDirection: 'column',
   };
   return (
     <div style={ROOT}>
@@ -330,8 +320,9 @@ function LoadingSkeleton() {
         {[0,1,2,3].map(i =>
           <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 6, aspectRatio: '16 / 13' }} />)}
       </div>
-      <div className="flex md:hidden" style={{ gap: 12, padding: '14px 16px' }}>
-        <div className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 6, width: '82%', maxWidth: 360, aspectRatio: '16 / 15', flexShrink: 0 }} />
+      <div className="flex md:hidden flex-col" style={{ gap: 12, padding: 14 }}>
+        {[0,1].map(i =>
+          <div key={i} className="animate-pulse" style={{ background: 'rgba(255,255,255,.04)', borderRadius: 6, height: 100 }} />)}
       </div>
     </div>
   );
@@ -350,10 +341,11 @@ export default function FeaturedProjects() {
       .finally(() => setLoading(false));
   }, []);
 
+  // No fixed height / overflow here — this section grows to fit its content
+  // and the dashboard's outer column is the only thing that scrolls.
   const ROOT = {
     background: 'linear-gradient(160deg,#050c1b 0%,#070d1e 58%,#060a18 100%)',
-    display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden auto',
-    position: 'relative',
+    display: 'flex', flexDirection: 'column',
   };
 
   if (loading) return <LoadingSkeleton />;
@@ -362,7 +354,7 @@ export default function FeaturedProjects() {
   const desktopProjects = projects.slice(0, 4);
 
   if (!total) return (
-    <div style={{ ...ROOT, alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ ...ROOT, alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <svg style={{ width: 36, height: 36, stroke: 'rgba(148,163,184,.25)', marginBottom: 10 }}
         fill="none" viewBox="0 0 24 24">
@@ -378,7 +370,7 @@ export default function FeaturedProjects() {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
 
       {/* Header */}
-      <div className="px-3 sm:px-4 py-3 flex-shrink-0 flex items-center justify-between gap-2 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
+      <div className="px-3 sm:px-4 py-3 flex-shrink-0 flex items-center justify-between gap-2 flex-wrap bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
         <div className="flex items-center gap-2 min-w-0">
           <div className="bg-purple-500 p-1.5 rounded-lg flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -388,25 +380,25 @@ export default function FeaturedProjects() {
           </div>
           <h2 className="text-sm sm:text-base font-bold text-white whitespace-nowrap truncate">Featured Projects</h2>
         </div>
-        {total > 4 && (
-          <button type="button" className="fp-viewall flex-shrink-0 whitespace-nowrap" style={{ color: '#a78bfa', fontSize: 12.5, fontWeight: 600 }}>
-            View all →
-          </button>
-        )}
+        <button type="button" className="fp-viewall flex-shrink-0 whitespace-nowrap" style={{ color: '#60a5fa', fontSize: 12.5, fontWeight: 600 }}>
+          View all projects →
+        </button>
       </div>
 
-      {/* Desktop / tablet: curated grid, up to 4 cards */}
+      {/* Desktop / tablet: curated grid, up to 4 cards, all the same height */}
       <div className="hidden md:block" style={{ padding: 14 }}>
         <div className="grid md:grid-cols-2 lg:grid-cols-4" style={{ gap: 14 }}>
           {desktopProjects.map(p => (
-            <ProjectCard key={p.id} project={p} navigate={navigate} variant="grid" />
+            <ProjectCard key={p.id} project={p} navigate={navigate} />
           ))}
         </div>
       </div>
 
-      {/* Mobile: swipeable carousel */}
-      <div className="block md:hidden" style={{ padding: '14px 0' }}>
-        <MobileCarousel projects={projects} navigate={navigate} />
+      {/* Mobile: compact vertical feed — natural page scroll, no carousel */}
+      <div className="flex md:hidden flex-col" style={{ gap: 12, padding: 14 }}>
+        {projects.map(p => (
+          <FeedCard key={p.id} project={p} navigate={navigate} />
+        ))}
       </div>
     </div>
   );

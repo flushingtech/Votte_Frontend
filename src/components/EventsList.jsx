@@ -9,20 +9,10 @@ function EventsList({ today }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isMobile, setIsMobile] = useState(false); // 👈 NEW
   const [canceledEventPopup, setCanceledEventPopup] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
-
-  // 👇 NEW: listen for viewport changes (mobile < md = 768px)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const handle = () => setIsMobile(mq.matches);
-    handle();
-    mq.addEventListener?.('change', handle);
-    return () => mq.removeEventListener?.('change', handle);
-  }, []);
 
   const toEasternDate = (dateString) => {
     const eastern = new Date(
@@ -66,8 +56,8 @@ function EventsList({ today }) {
     checkAdmin();
   }, [userEmail]);
 
-  if (loading) return <p className="text-center text-sm">Loading events...</p>;
-  if (error) return <p className="text-center text-sm text-red-500">{error}</p>;
+  if (loading) return <p className="text-center text-sm text-slate-400 py-6">Loading events...</p>;
+  if (error) return <p className="text-center text-sm text-red-400 py-6">{error}</p>;
 
   // --- pick candidates ---
   const recentPastEvent = events
@@ -92,52 +82,39 @@ function EventsList({ today }) {
   }
 
   return (
-    <div className="events-container relative flex flex-col h-full">
-      {/* Enhanced Header */}
-      <div className="p-3 sm:p-4 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-white">Upcoming Events</h2>
-          </div>
-          <div className="bg-slate-600/50 px-2 sm:px-3 py-1 rounded-full">
-            <span className="text-xs sm:text-sm text-gray-200">{filteredEvents.length} active</span>
-          </div>
-        </div>
-        <div className="mt-2 flex gap-2 sm:gap-3">
-          <button
-            onClick={() => navigate('/past-events')}
-            className="flex-1 sm:flex-none bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-orange-500 hover:from-orange-500 hover:to-red-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
-          >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:-rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Past Events</span>
-          </button>
-          
-          <button
-            onClick={() => navigate('/upcoming-events')}
-            className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-blue-500 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
-          >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="events-container relative flex flex-col">
+      {/* Header */}
+      <div className="px-3 sm:px-4 py-3 flex items-center justify-between gap-2 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="bg-blue-500 p-1.5 rounded-lg flex-shrink-0">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>Upcoming Events</span>
-          </button>
+          </div>
+          <h2 className="text-sm sm:text-base font-bold text-white whitespace-nowrap truncate">Upcoming Events</h2>
+          <span className="bg-slate-600/50 px-2 py-0.5 rounded-full text-[11px] text-gray-300 flex-shrink-0">
+            {filteredEvents.length} active
+          </span>
         </div>
+        <button
+          onClick={() => navigate('/upcoming-events')}
+          className="flex-shrink-0 whitespace-nowrap text-[12.5px] font-semibold transition-colors"
+          style={{ color: '#60a5fa' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#93c5fd')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#60a5fa')}
+        >
+          View all →
+        </button>
       </div>
 
-      {/* Scrollable content area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-1 sm:p-3">
-        <div className="space-y-2 sm:space-y-3">
+      {/* Event rows — sized to content, no internal scroll */}
+      <div className="p-2.5 sm:p-3 flex flex-col gap-2">
+        {filteredEvents.length === 0 && (
+          <p className="text-sm text-slate-500 text-center py-4">No events to show right now.</p>
+        )}
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
           const isEventToday = isSameDay(event.event_date);
-          // Recompute "next" flag relative to the chosen list
           const isNextUpcoming =
             !isEventToday &&
             nextUpcomingEvent &&
@@ -150,25 +127,27 @@ function EventsList({ today }) {
 
           if (event.canceled) {
             buttonText = 'Canceled';
-            buttonColor = '#DC2626'; // Red
+            buttonColor = '#7f1d1d';
           } else if (event.stage === 3) {
             buttonText = 'View Winners';
-            buttonColor = '#FF5722';
+            buttonColor = '#ea580c';
           } else if (isCheckedIn) {
             buttonText = event.stage === 2 ? 'Vote for a Winner' : 'View Ideas';
-            buttonColor = event.stage === 2 ? '#28A745' : '#1E2A3A';
+            buttonColor = event.stage === 2 ? '#16a34a' : '#334155';
           } else if (isEventToday) {
             buttonText = 'Check In';
-            buttonColor = '#007BFF';
+            buttonColor = '#2563eb';
           } else {
             buttonText = 'Add An Idea';
-            buttonColor = '#1E2A3A';
+            buttonColor = '#334155';
           }
+
+          const monthAbbr = easternDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+          const dayNum = easternDate.getDate();
 
           const handleButtonClick = async (e) => {
             e.stopPropagation();
 
-            // Check if event is canceled
             if (event.canceled) {
               setCanceledEventPopup({
                 title: event.title,
@@ -194,91 +173,53 @@ function EventsList({ today }) {
           return (
             <div
               key={event.id}
-              className="p-3 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between relative bg-gradient-to-r from-white to-gray-50 border-2 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+              onClick={() => navigate(`/event/${event.id}`)}
+              className="flex items-center gap-3 p-2.5 sm:p-3 bg-slate-800/60 border rounded-lg cursor-pointer hover:border-blue-500/40 transition-colors"
               style={{
-                borderColor: isEventToday ? '#10B981' : isNextUpcoming ? '#3B82F6' : '#64748B',
-                boxShadow: isEventToday
-                  ? '0 0 20px 4px rgba(16, 185, 129, 0.3)'
-                  : isNextUpcoming
-                  ? '0 0 15px 3px rgba(59, 130, 246, 0.3)'
-                  : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                borderColor: event.canceled
+                  ? 'rgba(220,38,38,.4)'
+                  : isEventToday
+                    ? 'rgba(16,185,129,.4)'
+                    : isNextUpcoming
+                      ? 'rgba(59,130,246,.4)'
+                      : 'rgba(51,65,85,.6)',
               }}
             >
-              {event.canceled ? (
-                <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg">
-                  ❌ CANCELED
-                </div>
-              ) : (
-                <>
-                  {isEventToday && (
-                    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg animate-pulse">
-                      🔥 LIVE TODAY
-                    </div>
-                  )}
-                  {isNextUpcoming && !isEventToday && (
-                    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-lg shadow-lg">
-                      ⭐ NEXT UP
-                    </div>
-                  )}
-                </>
-              )}
+              {/* Date block */}
+              <div className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-md border border-blue-500/30 bg-blue-500/10 flex flex-col items-center justify-center">
+                <span className="text-[9px] font-bold text-blue-300 uppercase tracking-wide leading-none">{monthAbbr}</span>
+                <span className="text-base font-extrabold text-white leading-none mt-0.5">{dayNum}</span>
+              </div>
 
-              <div className="flex-1 pt-3 sm:pt-8 lg:pt-2 min-w-0">
-                <h3 className="text-base sm:text-lg lg:text-base font-bold text-black truncate">{event.title}</h3>
-                <p className="text-gray-700 text-sm mt-1">
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="text-sm font-bold text-white truncate">{event.title}</h3>
+                  {event.canceled ? (
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 flex-shrink-0">Canceled</span>
+                  ) : isEventToday ? (
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 flex-shrink-0">Live today</span>
+                  ) : isNextUpcoming ? (
+                    <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-300 flex-shrink-0">Next up</span>
+                  ) : null}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">
                   {dateTimeFormatter.format(easternDate)}
+                  {event.location ? ` • ${event.location}` : ''}
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 mt-3 lg:mt-0 lg:ml-4">
-                <div className="relative w-full sm:w-auto">
-                  <button
-                    className="relative text-sm font-semibold text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:scale-105 transition-all duration-200 shadow-lg overflow-hidden group w-full"
-                    onClick={handleButtonClick}
-                    style={{ backgroundColor: buttonColor }}
-                  >
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
-                    <span className="relative">{buttonText}</span>
-                  </button>
-
-                  {/* Floating speech bubble for canceled events */}
-                  {event.canceled && (
-                    <div
-                      className="absolute -top-8 right-0 pointer-events-none hidden sm:block"
-                      style={{
-                        animation: 'float-sway 3s ease-in-out infinite'
-                      }}
-                    >
-                      <div className="bg-white text-gray-800 text-xs rounded-xl px-3 py-2 shadow-xl border-2 border-gray-300 max-w-[250px] relative">
-                        <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{event.cancellation_reason || 'No reason provided'}</p>
-                        {/* Speech bubble tail */}
-                        <div className="absolute -bottom-2 right-4 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white"></div>
-                        <div className="absolute -bottom-2.5 right-4 w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-gray-300"></div>
-                      </div>
-                      <style>{`
-                        @keyframes float-sway {
-                          0%, 100% {
-                            transform: translateY(0px) translateX(0px);
-                          }
-                          25% {
-                            transform: translateY(-4px) translateX(2px);
-                          }
-                          50% {
-                            transform: translateY(-8px) translateX(0px);
-                          }
-                          75% {
-                            transform: translateY(-4px) translateX(-2px);
-                          }
-                        }
-                      `}</style>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {/* Action */}
+              <button
+                className="flex-shrink-0 text-xs sm:text-sm font-semibold text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md hover:opacity-90 transition-opacity"
+                onClick={handleButtonClick}
+                style={{ backgroundColor: buttonColor }}
+              >
+                {buttonText}
+              </button>
             </div>
           );
         })}
-        </div>
       </div>
 
       {/* Canceled Event Popup */}

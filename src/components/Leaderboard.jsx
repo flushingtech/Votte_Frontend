@@ -5,29 +5,29 @@ import { getLeaderboard } from '../api/API';
 const RANK_CFG = [
   {
     medal: '🥇',
-    card: 'bg-gradient-to-r from-yellow-50 to-amber-50',
-    border: '#F59E0B', glow: 'rgba(245,158,11,0.3)',
-    badgeBg: 'bg-yellow-100', badgeText: 'text-yellow-800',
+    card: 'bg-gradient-to-r from-amber-950/40 to-slate-900',
+    border: 'rgba(245,158,11,.4)',
+    badgeBg: 'bg-yellow-500/15', badgeText: 'text-yellow-300',
   },
   {
     medal: '🥈',
-    card: 'bg-gradient-to-r from-slate-50 to-gray-100',
-    border: '#94A3B8', glow: 'rgba(148,163,184,0.25)',
-    badgeBg: 'bg-slate-200', badgeText: 'text-slate-700',
+    card: 'bg-slate-800/60',
+    border: 'rgba(148,163,184,.3)',
+    badgeBg: 'bg-slate-500/15', badgeText: 'text-slate-300',
   },
   {
     medal: '🥉',
-    card: 'bg-gradient-to-r from-orange-50 to-amber-50',
-    border: '#CD7C3A', glow: 'rgba(205,124,58,0.25)',
-    badgeBg: 'bg-orange-100', badgeText: 'text-orange-800',
+    card: 'bg-gradient-to-r from-orange-950/30 to-slate-900',
+    border: 'rgba(205,124,58,.35)',
+    badgeBg: 'bg-orange-500/15', badgeText: 'text-orange-300',
   },
 ];
 
 const DEFAULT_CFG = {
   medal: null,
-  card: 'bg-gradient-to-r from-white to-gray-50',
-  border: '#CBD5E1', glow: null,
-  badgeBg: 'bg-gray-100', badgeText: 'text-gray-600',
+  card: 'bg-slate-800/40',
+  border: 'rgba(51,65,85,.6)',
+  badgeBg: 'bg-slate-700/40', badgeText: 'text-slate-400',
 };
 
 const AVATAR_COLORS = ['#1d4ed8','#7c3aed','#0891b2','#059669','#d97706','#dc2626'];
@@ -103,22 +103,19 @@ const Leaderboard = () => {
             <div
               key={user.email}
               onClick={() => navigate(`/profile/${encodeURIComponent(user.email)}`)}
-              className={`${cfg.card} border-2 rounded-lg px-2.5 py-1.5 flex items-center gap-2 cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all duration-150`}
-              style={{
-                borderColor: cfg.border,
-                boxShadow: cfg.glow ? `0 0 10px 1px ${cfg.glow}` : '0 1px 4px rgba(0,0,0,0.06)',
-              }}
+              className={`${cfg.card} border rounded-md px-2.5 py-1.5 flex items-center gap-2 cursor-pointer hover:border-blue-500/40 transition-colors duration-150`}
+              style={{ borderColor: cfg.border }}
             >
               {/* Medal / rank */}
               <div className="w-6 flex-shrink-0 text-center">
                 {cfg.medal
                   ? <span className="text-base leading-none">{cfg.medal}</span>
-                  : <span className="text-xs font-bold text-gray-400">{index + 1}</span>
+                  : <span className="text-xs font-bold text-slate-500">{index + 1}</span>
                 }
               </div>
 
               {/* Avatar */}
-              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white shadow-sm">
+              <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white/10">
                 {user.profile_picture
                   ? <img src={user.profile_picture} alt="" className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-white"
@@ -130,17 +127,17 @@ const Leaderboard = () => {
 
               {/* Name */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-900 truncate leading-tight">
+                <p className="text-xs font-bold text-white truncate leading-tight">
                   {user.display_name || user.email?.split('@')[0]}
                 </p>
                 {user.project_title && (
-                  <p className="text-[10px] text-gray-400 truncate leading-tight">{user.project_title}</p>
+                  <p className="text-[10px] text-slate-400 truncate leading-tight">{user.project_title}</p>
                 )}
               </div>
 
               {/* Project image */}
               {user.project_image && (
-                <div className="w-8 h-8 flex-shrink-0 rounded overflow-hidden border border-gray-200 shadow-sm">
+                <div className="w-8 h-8 flex-shrink-0 rounded overflow-hidden border border-white/10">
                   <img src={user.project_image} alt="" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -148,7 +145,7 @@ const Leaderboard = () => {
               {/* Wins */}
               <div className={`flex-shrink-0 flex items-center gap-0.5 px-2 py-0.5 rounded-full ${cfg.badgeBg}`}>
                 <span className={`text-xs font-bold ${cfg.badgeText}`}>{user.total_wins}</span>
-                <span className={`text-[10px] ${cfg.badgeText} opacity-60`}>{user.total_wins === 1 ? 'W' : 'W'}</span>
+                <span className={`text-[10px] ${cfg.badgeText} opacity-60`}>W</span>
               </div>
             </div>
           );
