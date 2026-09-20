@@ -1,14 +1,26 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
 import { getIdeaById, checkAdminStatus, getAllUsers, addContributorToIdeaEvent, removeContributorFromIdeaEvent, getDisplayNames, getUserProfile, createContributorRequest, getPendingRequestsForIdea, acceptContributorRequest, declineContributorRequest } from '../api/API';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/dashboard/Sidebar';
 import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
 import MarkdownPreviewer from './MarkdownPreviewer';
 import { extractIdeaId, createIdeaSlug } from '../utils/urlHelpers';
 import { cldOptimize } from '../utils/cloudinaryImage';
+
+// Shared award palette — matches the badge colors used on the event page's
+// Winners section (gold/amber for the top prize, purple for technical,
+// teal for creative, red for impactful).
+const AWARD_STYLES = {
+  'Hackathon Winner': { icon: '🏆', color: 'text-amber-300', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
+  'Most Creative':    { icon: '🎨', color: 'text-teal-300',  bg: 'bg-teal-500/10',  border: 'border-teal-500/30' },
+  'Most Technical':   { icon: '⚡', color: 'text-purple-300', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
+  'Most Impactful':   { icon: '🚀', color: 'text-red-300',   bg: 'bg-red-500/10',   border: 'border-red-500/30' },
+};
+const DEFAULT_AWARD_STYLE = { icon: '🏅', color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30' };
 
 function IdeaScreen() {
   const { ideaId: ideaSlug } = useParams();
@@ -41,8 +53,33 @@ function IdeaScreen() {
   const [requestMessage, setRequestMessage] = useState('');
   const [hasRequestedToContribute, setHasRequestedToContribute] = useState(false);
   const [expandedImage, setExpandedImage] = useState(null);
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Shared aggregates across all events — used by both the header chips and
+  // the right project-summary panel so the numbers can't drift apart.
+  const voteTotals = useMemo(() => {
+    const events = idea?.events || [];
+    return {
+      total: events.reduce((s, e) => s + Number(e.votes || 0), 0),
+      creative: events.reduce((s, e) => s + Number(e.most_creative_votes || 0), 0),
+      technical: events.reduce((s, e) => s + Number(e.most_technical_votes || 0), 0),
+      impactful: events.reduce((s, e) => s + Number(e.most_impactful_votes || 0), 0),
+    };
+  }, [idea]);
+  const allAwards = useMemo(() => idea?.events?.flatMap(e => e.awards || []) || [], [idea]);
+  const awardCounts = useMemo(() => {
+    const counts = {};
+    allAwards.forEach(a => { counts[a] = (counts[a] || 0) + 1; });
+    return counts;
+  }, [allAwards]);
+  const uniqueAwards = useMemo(() => [...new Set(allAwards)], [allAwards]);
+  const allContributors = useMemo(() => idea?.events?.flatMap(e =>
+    e.contributors ? e.contributors.split(',').map(c => c.trim()).filter(Boolean) : []
+  ) || [], [idea]);
+  const uniqueContributors = useMemo(() => [...new Set(allContributors)], [allContributors]);
+  const eventCount = idea?.events?.length || 0;
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || localStorage.getItem('userEmail') || '';
@@ -428,24 +465,214 @@ function IdeaScreen() {
     }
   };
 
-  if (loading)
-    return (
-      <div
-        className="min-h-screen text-white relative overflow-hidden"
-        style={{
-          background: '#000000',
-          minHeight: '100vh'
-        }}
-      >
-        {/* Light blue flashes/glowing effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-          <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+  // One cohesive right-rail panel: overall votes, awards, contributors, and
+  // repositories all live in the same bordered container (per-section thin
+  // dividers only) instead of being split into separate floating boxes.
+  const ProjectSummaryPanel = () => (
+    <aside className="bg-slate-900 border border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+        <h2 className="text-white text-sm font-bold uppercase tracking-wide">Project Summary</h2>
+        {isAdmin && (
+          <button
+            onClick={() => setShowAdminPanel(!showAdminPanel)}
+            className="text-slate-400 hover:text-white transition-colors"
+            title={showAdminPanel ? 'Hide admin controls' : 'Show admin controls'}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      <div className="p-4 flex flex-col gap-4">
+        {voteTotals.total > 0 && (
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Total Votes</h3>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-300 text-xs font-medium">All Events</span>
+                <span className="text-blue-300 font-bold text-sm tabular-nums">{voteTotals.total}</span>
+              </div>
+              {voteTotals.creative > 0 && (
+                <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span className="text-slate-400 text-xs">Creative</span>
+                  <span className="text-teal-300 text-xs font-semibold tabular-nums">{voteTotals.creative}</span>
+                </div>
+              )}
+              {voteTotals.technical > 0 && (
+                <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span className="text-slate-400 text-xs">Technical</span>
+                  <span className="text-purple-300 text-xs font-semibold tabular-nums">{voteTotals.technical}</span>
+                </div>
+              )}
+              {voteTotals.impactful > 0 && (
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-slate-400 text-xs">Impactful</span>
+                  <span className="text-red-300 text-xs font-semibold tabular-nums">{voteTotals.impactful}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {uniqueAwards.length > 0 && (
+          <div className={voteTotals.total > 0 ? 'pt-4 border-t border-slate-800' : ''}>
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Awards ({allAwards.length})</h3>
+            <div className="flex flex-col gap-1.5">
+              {uniqueAwards.map((award) => {
+                const style = AWARD_STYLES[award] || DEFAULT_AWARD_STYLE;
+                return (
+                  <div key={award} className="flex items-center justify-between">
+                    <span className={`text-xs font-semibold flex items-center gap-1.5 ${style.color}`}>
+                      <span>{style.icon}</span>{award}
+                    </span>
+                    {awardCounts[award] > 1 && (
+                      <span className="text-slate-500 text-xs font-bold">×{awardCounts[award]}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {uniqueContributors.length > 0 && (
+          <div className={(voteTotals.total > 0 || uniqueAwards.length > 0) ? 'pt-4 border-t border-slate-800' : ''}>
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Contributors ({uniqueContributors.length})</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {uniqueContributors.map((contributor) => (
+                <span
+                  key={contributor}
+                  className="bg-purple-500/10 text-purple-300 border border-purple-500/30 px-2 py-0.5 text-xs"
+                >
+                  {getDisplayName(contributor)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {voteTotals.total === 0 && uniqueAwards.length === 0 && uniqueContributors.length === 0 && (
+          <p className="text-slate-500 text-xs text-center py-2">No data yet</p>
+        )}
+
+        {/* Repositories — kept inside the same panel, not a separate box */}
+        <div className={(voteTotals.total > 0 || uniqueAwards.length > 0 || uniqueContributors.length > 0) ? 'pt-4 border-t border-slate-800' : ''}>
+          <div className="flex items-center justify-between mb-1.5">
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              Repositories
+            </h3>
+            {!editingGithubRepos && (
+              <button
+                onClick={handleEditGithubRepos}
+                className="text-blue-400 hover:text-blue-300 transition-colors text-[11px] font-semibold"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+
+          {editingGithubRepos ? (
+            <div className="flex flex-col gap-2.5">
+              {githubRepos.map((repo, index) => (
+                <div key={index} className="bg-slate-800/60 border border-slate-700 p-2.5 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400 text-[10px] font-semibold">Repository {index + 1}</span>
+                    <button
+                      onClick={() => handleRemoveRepo(index)}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                      title="Remove repository"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={repo.title}
+                    onChange={(e) => handleRepoChange(index, 'title', e.target.value)}
+                    placeholder="Title (e.g., Frontend, Backend)"
+                    className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={repo.url}
+                    onChange={(e) => handleRepoChange(index, 'url', e.target.value)}
+                    placeholder="https://github.com/username/repo"
+                    className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              ))}
+
+              <button
+                onClick={handleAddRepo}
+                className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 text-xs font-semibold transition-colors"
+              >
+                + Add Repository
+              </button>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveGithubRepos}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditingGithubRepos(false)}
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (() => {
+            try {
+              const repos = idea?.github_repo ? JSON.parse(idea.github_repo) : [];
+              return Array.isArray(repos) && repos.length > 0 ? (
+                <div className="flex flex-col gap-1.5">
+                  {repos.map((repo, index) => (
+                    <div key={index} className="flex items-center justify-between gap-2">
+                      <span className="text-slate-400 text-xs font-medium flex-shrink-0">{repo.title}</span>
+                      <a
+                        href={repo.url.startsWith('http') ? repo.url : `https://${repo.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 text-xs truncate transition-colors"
+                      >
+                        {repo.url}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-500 text-xs italic">No repositories linked</p>
+              );
+            } catch {
+              return <p className="text-slate-500 text-xs italic">No repositories linked</p>;
+            }
+          })()}
         </div>
 
+        {isAdmin && showAdminPanel && (
+          <div className="pt-4 border-t border-slate-800">
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Admin</h3>
+            <ButtonUpload ideaId={idea?.id} />
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+
+  if (loading)
+    return (
+      <div className="min-h-screen text-white" style={{ background: '#0a0e1a' }}>
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
@@ -458,22 +685,7 @@ function IdeaScreen() {
 
   if (error)
     return (
-      <div
-        className="min-h-screen text-white relative overflow-hidden"
-        style={{
-          background: '#000000',
-          minHeight: '100vh'
-        }}
-      >
-        {/* Light blue flashes/glowing effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-          <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        </div>
-
+      <div className="min-h-screen text-white" style={{ background: '#0a0e1a' }}>
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         <div className="flex items-center justify-center min-h-[80vh]">
           <div className="text-center">
@@ -485,74 +697,79 @@ function IdeaScreen() {
     );
 
   return (
-    <div
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        background: '#000000',
-        minHeight: '100vh'
-      }}
-    >
-      {/* Light blue flashes/glowing effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-      </div>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)' }}>
 
-      <div className="sticky top-0 z-50">
+      <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
-      <div className="px-4 sm:px-6 py-6">
-        <div className="max-w-6xl mx-auto relative">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-            {/* MAIN CONTENT (cols 1-4) */}
-            <div className="lg:col-span-4 relative">
-              {/* Back Button */}
-              <button
-                onClick={() => navigate(-1)}
-                className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
-                title="Go back"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+
+        <div className="flex flex-1 min-w-0 min-h-0"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
+
+          <div className="flex flex-col lg:flex-row flex-1 min-h-0 min-w-0 overflow-y-auto lg:overflow-hidden gap-3 sm:gap-4 p-4 sm:p-6">
+
+            {/* CENTER — the only scrolling region on desktop */}
+            <div className="flex-1 min-w-0 flex flex-col gap-3 sm:gap-4 lg:overflow-y-auto lg:min-h-0">
 
               {/* Message Display */}
               {message && (
-                <div className={`mb-4 p-3 rounded-lg ${message.includes('success') || message.includes('successfully') ? 'bg-green-900/20 border border-green-500/30 text-green-200' : message.includes('Uploading') ? 'bg-blue-900/20 border border-blue-500/30 text-blue-200' : 'bg-red-900/20 border border-red-500/30 text-red-200'}`}>
+                <div className={`p-3 text-sm border ${message.includes('success') || message.includes('successfully') ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' : message.includes('Uploading') ? 'bg-blue-500/10 border-blue-500/30 text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-200'}`}>
                   {message}
                 </div>
               )}
 
-              {/* Title Header */}
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl p-4 mb-4">
-                <h1 className="text-2xl font-bold text-white mb-1">
+              {/* PROJECT HEADER */}
+              <div className="bg-slate-900 border border-slate-700 p-4">
+                <button
+                  onClick={() => navigate('/home')}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors mb-2"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Projects
+                </button>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
                   {idea?.idea}
                 </h1>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-400 mt-1">
                   Submitted by: {idea?.email?.split('@')[0] || 'Unknown'}
                 </p>
+                {(eventCount > 0 || allAwards.length > 0 || voteTotals.total > 0) && (
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-3 pt-3 border-t border-slate-800 text-xs font-semibold text-slate-300">
+                    {eventCount > 0 && <span>{eventCount} {eventCount === 1 ? 'Event' : 'Events'}</span>}
+                    {allAwards.length > 0 && <span className="text-slate-600">•</span>}
+                    {allAwards.length > 0 && <span>{allAwards.length} {allAwards.length === 1 ? 'Award' : 'Awards'}</span>}
+                    {voteTotals.total > 0 && <span className="text-slate-600">•</span>}
+                    {voteTotals.total > 0 && <span>{voteTotals.total} Total Votes</span>}
+                  </div>
+                )}
               </div>
 
-              {/* Project Timeline */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="text-xl">🚀</span>
-                    Project Timeline
-                    <span className="text-xs font-normal text-gray-400">({idea?.events?.length || 0} {idea?.events?.length === 1 ? 'Event' : 'Events'})</span>
-                  </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
-                </div>
+              {/* Mobile only: project summary between header and timeline */}
+              <div className="lg:hidden">
+                <ProjectSummaryPanel />
+              </div>
 
-                <div className="relative">
+              {/* PROJECT TIMELINE */}
+              <div className="bg-slate-900 border border-slate-700 p-4">
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-sm font-bold uppercase tracking-wide text-white flex items-center gap-1.5">
+                    <span>🚀</span> Project Timeline
+                  </h2>
+                  <span className="text-xs text-slate-500">{eventCount} {eventCount === 1 ? 'Event' : 'Events'}</span>
+                </div>
+                {eventCount > 1 && (
+                  <p className="text-xs text-slate-500 mt-1 mb-4">This project has been worked on across multiple events.</p>
+                )}
+                {eventCount <= 1 && <div className="mb-2" />}
+
+                <div className="relative mt-3">
                   {/* Timeline vertical line */}
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-blue-500/50"></div>
+                  <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-slate-800"></div>
 
                   {/* Event cards with timeline nodes */}
                   {idea?.events?.map((event, index) => {
@@ -562,51 +779,45 @@ function IdeaScreen() {
                     const isLast = index === idea.events.length - 1;
 
                     return (
-                      <div key={event.event_id} className="relative pl-14 pb-5 last:pb-0">
-                        {/* Timeline node */}
-                        <div className="absolute left-0 top-0 flex flex-col items-center">
-                          {/* Node circle */}
-                          <div className={`w-10 h-10 rounded-full border-3 ${
-                            isFirst ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400/50 shadow-lg shadow-green-500/50' :
-                            isLast ? 'bg-gradient-to-br from-blue-500 to-purple-600 border-blue-400/50 shadow-lg shadow-blue-500/50' :
-                            'bg-gradient-to-br from-slate-600 to-slate-700 border-slate-500/50'
-                          } flex items-center justify-center text-white font-bold text-xs z-10`}>
-                            {isFirst ? '🎯' : isLast ? '🏁' : index + 1}
-                          </div>
-                          {/* Event order label */}
-                          <div className="mt-0.5 text-[10px] text-gray-400 font-semibold">
-                            {isFirst ? 'START' : isLast ? 'LATEST' : `#${index + 1}`}
-                          </div>
-                        </div>
+                      <div key={event.event_id} className="relative pl-6 pb-4 last:pb-0">
+                        {/* Timeline marker */}
+                        <div className="absolute left-0 top-2 w-2.5 h-2.5 rounded-full border-2 z-10"
+                          style={{
+                            background: isFirst ? '#34d399' : isLast ? '#60a5fa' : '#64748b',
+                            borderColor: isFirst ? '#6ee7b7' : isLast ? '#93c5fd' : '#94a3b8',
+                          }}
+                        />
+                        {eventCount > 1 && (isFirst || isLast) && (
+                          <span className={`inline-block mb-1.5 text-[9px] font-bold uppercase tracking-widest ${isFirst ? 'text-emerald-400' : 'text-blue-400'}`}>
+                            {isFirst ? 'Start' : 'Latest'}
+                          </span>
+                        )}
 
                         {/* Event card */}
-                        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 shadow-xl overflow-hidden hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300"
+                        <div className="bg-slate-900 border border-slate-700 overflow-hidden"
                         >
                     {/* Event Header */}
-                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-b border-slate-700/50 px-3 py-2">
+                    <div className="bg-slate-800/60 border-b border-slate-800 px-3.5 py-2.5">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-base font-bold text-white flex items-center gap-1.5">
-                              <span className="text-blue-400 text-sm">📅</span>
-                              {new Date(event.event_date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </h2>
-                          </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-slate-400 font-semibold">
+                            {new Date(event.event_date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </p>
                           {event.title && (
-                            <p className="text-gray-300 text-xs font-medium">{event.title}</p>
+                            <h2 className="text-sm font-bold text-white mt-0.5">{event.title}</h2>
                           )}
                         </div>
 
                         {/* Admin/Owner Menu - Three Dots */}
                         {isLoggedIn && (idea?.email === userEmail || isAdmin) && (
-                          <div className="relative">
+                          <div className="relative flex-shrink-0">
                             <button
                               onClick={() => setMenuOpenEventId(menuOpenEventId === event.event_id ? null : event.event_id)}
-                              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
+                              className="text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-slate-700/60"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -614,30 +825,30 @@ function IdeaScreen() {
                             </button>
 
                             {menuOpenEventId === event.event_id && (
-                              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[150px] z-10">
+                              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-700 shadow-lg py-1 min-w-[150px] z-10">
                                 <button
                                   onClick={() => {
                                     setEditingEvent(event);
                                     setMenuOpenEventId(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
                                 >
-                                  ✏️ Edit
+                                  Edit
                                 </button>
                                 <button
                                   onClick={() => handleUploadImage(event.event_id)}
-                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
                                 >
-                                  🖼️ Upload Image
+                                  Upload Image
                                 </button>
                                 <button
                                   onClick={() => {
                                     setContributorsEvent(event);
                                     setMenuOpenEventId(null);
                                   }}
-                                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
                                 >
-                                  👥 Contributors
+                                  Contributors
                                 </button>
                               </div>
                             )}
@@ -645,53 +856,24 @@ function IdeaScreen() {
                         )}
                       </div>
 
-                    </div>
-
-                    {/* Trophy Showcase - Minimal */}
-                    {hasAwards && (
-                      <div className="bg-gradient-to-r from-yellow-900/20 via-yellow-800/20 to-yellow-900/20 border-y border-yellow-500/30 px-3 py-2">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      {/* Awards row */}
+                      {hasAwards && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
                           {event.awards.map((award, idx) => {
-                            const awardStyles = {
-                              'Hackathon Winner': {
-                                bg: 'from-yellow-500 to-yellow-700',
-                                text: 'text-yellow-100',
-                                icon: '🏆',
-                                glow: 'shadow-yellow-500/50'
-                              },
-                              'Most Creative': {
-                                bg: 'from-green-500 to-emerald-700',
-                                text: 'text-green-100',
-                                icon: '🎨',
-                                glow: 'shadow-green-500/50'
-                              },
-                              'Most Technical': {
-                                bg: 'from-purple-500 to-purple-700',
-                                text: 'text-purple-100',
-                                icon: '⚡',
-                                glow: 'shadow-purple-500/50'
-                              },
-                              'Most Impactful': {
-                                bg: 'from-red-500 to-rose-700',
-                                text: 'text-red-100',
-                                icon: '🚀',
-                                glow: 'shadow-red-500/50'
-                              }
-                            };
-                            const style = awardStyles[award] || awardStyles['Most Creative'];
+                            const style = AWARD_STYLES[award] || DEFAULT_AWARD_STYLE;
                             return (
                               <div
                                 key={idx}
-                                className={`bg-gradient-to-br ${style.bg} ${style.text} px-2 py-1 rounded-md flex items-center gap-1 shadow-lg ${style.glow} hover:scale-105 transition-transform flex-shrink-0`}
+                                className={`inline-flex items-center gap-1 px-2 py-1 border ${style.bg} ${style.border} ${style.color} flex-shrink-0`}
                               >
-                                <span className="text-sm">{style.icon}</span>
+                                <span className="text-xs">{style.icon}</span>
                                 <span className="text-[10px] font-bold whitespace-nowrap">{award}</span>
                               </div>
                             );
                           })}
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {/* Content Grid - Compact */}
                     <div className="p-3">
@@ -738,43 +920,29 @@ function IdeaScreen() {
                             <h3 className="text-xs font-bold text-white">Votes</h3>
                           </div>
                           {hasVotes ? (
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               {event?.votes > 0 && (
-                                <div className="flex items-center justify-between p-1.5 bg-blue-900/20 rounded-lg border border-blue-500/30">
-                                  <span className="text-gray-300 text-[10px] font-medium">Total</span>
-                                  <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
-                                    {event.votes}
-                                  </span>
+                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium">Total</span>
+                                  <span className="text-blue-300 font-bold text-xs tabular-nums">{event.votes}</span>
                                 </div>
                               )}
                               {event?.most_creative_votes > 0 && (
-                                <div className="flex items-center justify-between p-1.5 bg-green-900/20 rounded-lg border border-green-500/30">
-                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
-                                    <span>🎨</span> Creative
-                                  </span>
-                                  <span className="bg-green-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
-                                    {event.most_creative_votes}
-                                  </span>
+                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium">Creative</span>
+                                  <span className="text-teal-300 font-bold text-xs tabular-nums">{event.most_creative_votes}</span>
                                 </div>
                               )}
                               {event?.most_technical_votes > 0 && (
-                                <div className="flex items-center justify-between p-1.5 bg-purple-900/20 rounded-lg border border-purple-500/30">
-                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
-                                    <span>⚡</span> Technical
-                                  </span>
-                                  <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
-                                    {event.most_technical_votes}
-                                  </span>
+                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium">Technical</span>
+                                  <span className="text-purple-300 font-bold text-xs tabular-nums">{event.most_technical_votes}</span>
                                 </div>
                               )}
                               {event?.most_impactful_votes > 0 && (
-                                <div className="flex items-center justify-between p-1.5 bg-red-900/20 rounded-lg border border-red-500/30">
-                                  <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
-                                    <span>🚀</span> Impactful
-                                  </span>
-                                  <span className="bg-red-600 text-white px-2 py-0.5 rounded-full font-bold text-xs">
-                                    {event.most_impactful_votes}
-                                  </span>
+                                <div className="flex items-center justify-between py-1">
+                                  <span className="text-slate-400 text-[10px] font-medium">Impactful</span>
+                                  <span className="text-red-300 font-bold text-xs tabular-nums">{event.most_impactful_votes}</span>
                                 </div>
                               )}
                             </div>
@@ -798,7 +966,7 @@ function IdeaScreen() {
                                 ? event.contributors.split(',').filter(c => c.trim())
                                 : [];
                               return contributorsList.length > 0 && (
-                                <span className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded-full text-[10px] font-bold border border-purple-500/50">
+                                <span className="text-purple-300 border border-purple-500/30 bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-bold">
                                   {contributorsList.length}
                                 </span>
                               );
@@ -826,7 +994,7 @@ function IdeaScreen() {
                                       <button
                                         key={idx}
                                         onClick={() => navigate(`/profile/${encodeURIComponent(contributorEmail)}`)}
-                                        className="flex items-center gap-1 bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 hover:border-purple-400/60 rounded-lg px-1.5 py-0.5 transition-all duration-200 cursor-pointer"
+                                        className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 hover:border-purple-400/50 px-1.5 py-0.5 transition-colors cursor-pointer"
                                         title={`View ${displayName}'s profile`}
                                       >
                                         <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
@@ -883,9 +1051,8 @@ function IdeaScreen() {
                                 } else if (hasPendingRequest) {
                                   // User has a pending request
                                   return (
-                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
-                                      <div className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow-md cursor-default">
-                                        <span className="animate-pulse">⏳</span>
+                                    <div className="mt-2 pt-2 border-t border-slate-800">
+                                      <div className="w-full flex items-center justify-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 px-3 py-1.5 text-xs font-semibold cursor-default">
                                         <span>Request Pending</span>
                                       </div>
                                     </div>
@@ -893,13 +1060,12 @@ function IdeaScreen() {
                                 } else {
                                   // User can request to join
                                   return (
-                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                    <div className="mt-2 pt-2 border-t border-slate-800">
                                       <button
                                         onClick={() => setContributorsEvent(event)}
-                                        className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-md hover:shadow-purple-500/25"
+                                        className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
                                       >
-                                        <span>🙋</span>
-                                        <span>I worked on this</span>
+                                        I worked on this
                                       </button>
                                     </div>
                                   );
@@ -934,7 +1100,7 @@ function IdeaScreen() {
                               .map((tech, idx) => (
                                 <span
                                   key={idx}
-                                  className="bg-gradient-to-r from-blue-600/30 to-purple-600/30 text-blue-200 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-blue-500/40"
+                                  className="bg-blue-500/10 text-blue-300 px-1.5 py-0.5 text-[10px] font-semibold border border-blue-500/30"
                                 >
                                   {tech.trim()}
                                 </span>
@@ -959,300 +1125,16 @@ function IdeaScreen() {
               />
             </div>
 
-            {/* SIDEBAR (col 5) - Summary + Admin */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6 self-start space-y-4" style={{ zIndex: 20 }}>
-                {/* SUMMARY PANEL */}
-                <aside className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 backdrop-blur-sm border border-blue-700/50 shadow-xl p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-white text-lg font-bold flex items-center gap-2">
-                      <span className="text-blue-400">📊</span>
-                      Summary
-                    </h2>
-                    {isAdmin && (
-                      <button
-                        onClick={() => setShowAdminPanel(!showAdminPanel)}
-                        className="text-orange-400 hover:text-orange-300 transition-colors p-1 hover:bg-slate-700/50 rounded"
-                        title={showAdminPanel ? 'Hide admin controls' : 'Show admin controls'}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
 
-                  {/* Total Votes */}
-                  {(() => {
-                    const totalVotes = idea?.events?.reduce((sum, event) => sum + Number(event.votes || 0), 0) || 0;
-                    const totalCreative = idea?.events?.reduce((sum, event) => sum + Number(event.most_creative_votes || 0), 0) || 0;
-                    const totalTechnical = idea?.events?.reduce((sum, event) => sum + Number(event.most_technical_votes || 0), 0) || 0;
-                    const totalImpactful = idea?.events?.reduce((sum, event) => sum + Number(event.most_impactful_votes || 0), 0) || 0;
-
-                    return totalVotes > 0 && (
-                      <div className="mb-4">
-                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
-                          <span className="text-blue-400 text-xs">🗳️</span>
-                          Total Votes
-                        </h3>
-                        <div className="bg-slate-900/40 p-3 border border-slate-700/30 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-300 text-xs">📊 All Events</span>
-                            <span className="bg-blue-600/40 text-blue-200 px-2 py-1 rounded font-bold text-sm border border-blue-500/60">
-                              {totalVotes}
-                            </span>
-                          </div>
-                          {totalCreative > 0 && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400 text-xs">🎨 Creative</span>
-                              <span className="text-green-200 text-xs font-semibold">{totalCreative}</span>
-                            </div>
-                          )}
-                          {totalTechnical > 0 && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400 text-xs">⚡ Technical</span>
-                              <span className="text-purple-200 text-xs font-semibold">{totalTechnical}</span>
-                            </div>
-                          )}
-                          {totalImpactful > 0 && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400 text-xs">🚀 Impactful</span>
-                              <span className="text-red-200 text-xs font-semibold">{totalImpactful}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Total Awards */}
-                  {(() => {
-                    const allAwards = idea?.events?.flatMap(event => event.awards || []) || [];
-                    const uniqueAwards = [...new Set(allAwards)];
-                    const awardCounts = {};
-                    allAwards.forEach(award => {
-                      awardCounts[award] = (awardCounts[award] || 0) + 1;
-                    });
-
-                    return uniqueAwards.length > 0 && (
-                      <div className="mb-4">
-                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
-                          <span className="text-yellow-400 text-xs">🏆</span>
-                          Awards ({allAwards.length})
-                        </h3>
-                        <div className="bg-slate-900/40 p-3 border border-slate-700/30 space-y-2">
-                          {uniqueAwards.map((award, idx) => {
-                            const awardStyles = {
-                              'Hackathon Winner': { icon: '🏆', color: 'text-yellow-200' },
-                              'Most Creative': { icon: '🎨', color: 'text-green-200' },
-                              'Most Technical': { icon: '⚡', color: 'text-purple-200' },
-                              'Most Impactful': { icon: '🚀', color: 'text-red-200' }
-                            };
-                            const style = awardStyles[award] || { icon: '🏆', color: 'text-yellow-200' };
-                            return (
-                              <div key={idx} className="flex items-center justify-between">
-                                <span className={`text-xs ${style.color} flex items-center gap-1`}>
-                                  <span>{style.icon}</span>
-                                  {award}
-                                </span>
-                                {awardCounts[award] > 1 && (
-                                  <span className="bg-slate-700/50 text-gray-300 px-1.5 py-0.5 rounded text-xs font-semibold">
-                                    ×{awardCounts[award]}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* All Contributors */}
-                  {(() => {
-                    const allContributors = idea?.events
-                      ?.flatMap(event =>
-                        event.contributors
-                          ? event.contributors.split(',').map(c => c.trim()).filter(Boolean)
-                          : []
-                      ) || [];
-                    const uniqueContributors = [...new Set(allContributors)];
-
-                    return uniqueContributors.length > 0 && (
-                      <div>
-                        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
-                          <span className="text-purple-400 text-xs">👥</span>
-                          Contributors ({uniqueContributors.length})
-                        </h3>
-                        <div className="bg-slate-900/40 p-3 border border-slate-700/30">
-                          <div className="flex flex-wrap gap-1">
-                            {uniqueContributors.map((contributor, idx) => (
-                              <span
-                                key={idx}
-                                className="bg-purple-600/30 text-purple-200 px-2 py-0.5 rounded text-xs border border-purple-500/50"
-                              >
-                                {getDisplayName(contributor)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Empty state */}
-                  {!idea?.events?.some(e => e.votes > 0) &&
-                   !idea?.events?.some(e => e.awards?.length > 0) &&
-                   !idea?.events?.some(e => e.contributors) && (
-                    <div className="text-center py-8">
-                      <p className="text-gray-400 text-xs">No data yet</p>
-                    </div>
-                  )}
-                </aside>
-
-                {/* GITHUB REPOSITORY PANEL */}
-                <aside className="bg-gradient-to-br from-slate-900/30 to-slate-800/30 backdrop-blur-sm border border-slate-700/50 shadow-xl p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-white text-lg font-bold flex items-center gap-2">
-                      <span className="text-gray-400">
-                        <svg className="w-5 h-5 inline" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                      </span>
-                      Repositories
-                    </h2>
-                    {!editingGithubRepos && (
-                      <button
-                        onClick={handleEditGithubRepos}
-                        className="text-blue-400 hover:text-blue-300 transition-colors p-1 hover:bg-slate-700/50 rounded"
-                        title="Edit repositories"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-
-                  {editingGithubRepos ? (
-                    <div className="space-y-3">
-                      {githubRepos.map((repo, index) => (
-                        <div key={index} className="bg-slate-900/40 p-3 border border-slate-700/30 space-y-2">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-gray-400 text-xs font-medium">Repository {index + 1}</span>
-                            <button
-                              onClick={() => handleRemoveRepo(index)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
-                              title="Remove repository"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                          <input
-                            type="text"
-                            value={repo.title}
-                            onChange={(e) => handleRepoChange(index, 'title', e.target.value)}
-                            placeholder="Title (e.g., Frontend, Backend, Mobile App)"
-                            className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <input
-                            type="text"
-                            value={repo.url}
-                            onChange={(e) => handleRepoChange(index, 'url', e.target.value)}
-                            placeholder="https://github.com/username/repo"
-                            className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      ))}
-
-                      <button
-                        onClick={handleAddRepo}
-                        className="w-full bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500 text-gray-300 px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Repository
-                      </button>
-
-                      <div className="flex gap-2 pt-2">
-                        <button
-                          onClick={handleSaveGithubRepos}
-                          className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
-                        >
-                          Save All
-                        </button>
-                        <button
-                          onClick={() => setEditingGithubRepos(false)}
-                          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (() => {
-                    try {
-                      const repos = idea?.github_repo ? JSON.parse(idea.github_repo) : [];
-                      return Array.isArray(repos) && repos.length > 0 ? (
-                        <div className="space-y-2">
-                          {repos.map((repo, index) => (
-                            <div key={index} className="bg-slate-900/40 p-3 border border-slate-700/30">
-                              <div className="text-gray-400 text-xs font-medium mb-1">{repo.title}</div>
-                              <a
-                                href={repo.url.startsWith('http') ? repo.url : `https://${repo.url}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 hover:text-blue-300 text-sm break-all transition-colors flex items-center gap-2"
-                              >
-                                <span>🔗</span>
-                                <span className="underline">{repo.url}</span>
-                              </a>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="bg-slate-900/40 p-3 border border-slate-700/30">
-                          <p className="text-gray-500 text-sm italic">No repositories linked</p>
-                        </div>
-                      );
-                    } catch {
-                      return (
-                        <div className="bg-slate-900/40 p-3 border border-slate-700/30">
-                          <p className="text-gray-500 text-sm italic">No repositories linked</p>
-                        </div>
-                      );
-                    }
-                  })()}
-                </aside>
-
-                {/* ADMIN PANEL */}
-                {isAdmin && showAdminPanel && (
-                  <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm border border-orange-700/50 shadow-xl p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-white text-base font-bold whitespace-nowrap">
-                        ⚙️ Admin Controls
-                      </h2>
-                      <button
-                        onClick={() => setShowAdminPanel(false)}
-                        className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-slate-700/50 rounded"
-                        title="Hide admin controls"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <ButtonUpload ideaId={idea?.id} />
-                  </aside>
-                )}
-              </div>
+            {/* Desktop only: persistent project summary rail, sticky/bounded
+                to the viewport, independent from the center's scroll. */}
+            <div className="hidden lg:flex lg:flex-col lg:w-[320px] lg:flex-shrink-0 lg:overflow-y-auto lg:min-h-0">
+              <ProjectSummaryPanel />
             </div>
           </div>
         </div>
       </div>
+
 
       {/* Edit Event Modal */}
       {editingEvent && createPortal(
