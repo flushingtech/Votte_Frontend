@@ -58,131 +58,114 @@ function Stage_3_Ideas({ eventId }) {
 
   const categoryStyles = {
     "Most Creative": {
-      bg: "from-green-600/30 to-green-800/20",
-      border: "border-green-500/50",
-      text: "text-green-200",
-      icon: "🎨",
+      bg: "bg-teal-500/10", border: "border-teal-500/30", text: "text-teal-300", icon: "🎨",
     },
     "Most Technical": {
-      bg: "from-purple-600/30 to-purple-800/20",
-      border: "border-purple-500/50",
-      text: "text-purple-200",
-      icon: "⚡",
+      bg: "bg-purple-500/10", border: "border-purple-500/30", text: "text-purple-300", icon: "⚡",
     },
     "Most Impactful": {
-      bg: "from-red-600/30 to-red-800/20",
-      border: "border-red-500/50",
-      text: "text-red-200",
-      icon: "🚀",
+      bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-300", icon: "🚀",
     },
     "Hackathon Winner": {
-      bg: "from-yellow-600/30 to-yellow-800/20",
-      border: "border-yellow-500/50",
-      text: "text-yellow-200",
-      icon: "🏆",
+      bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-300", icon: "🏆",
     },
   };
+  const defaultStyle = { bg: "bg-slate-500/10", border: "border-slate-500/30", text: "text-slate-300", icon: "🏅" };
 
   return (
-    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-4 h-[500px] flex flex-col">
+    <div className="bg-slate-900 border border-slate-700">
       {/* Header with Toggle */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-white">
-          {showAllIdeas ? "📋 All Ideas" : "🎉 Winners"}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-white">
+          {showAllIdeas ? "All Ideas" : "Winners"}
         </h2>
         <button
           onClick={handleToggle}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+          className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
         >
-          {showAllIdeas ? "🏆 Show Winners" : "📋 View All Ideas"}
+          {showAllIdeas ? "Show Winners" : "View All Ideas →"}
         </button>
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto pr-2">
+      {/* Content — no internal scrollbar, grows with the page */}
+      <div className="p-3 sm:p-4">
         {showAllIdeas ? (
           allIdeas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="text-6xl mb-4">💡</div>
-              <p className="text-gray-400">No ideas submitted</p>
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="text-4xl mb-3">💡</div>
+              <p className="text-slate-400 text-sm">No ideas submitted</p>
             </div>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="flex flex-col gap-2">
               {allIdeas.map((idea) => (
                 <li
                   key={idea.id}
-                  className="relative p-2 rounded-md border bg-gradient-to-br from-slate-700/30 to-slate-800/20 border-slate-600/50 transition-all duration-300 hover:scale-[1.01]"
+                  className="flex items-center gap-3 p-3 bg-slate-800/60 border border-slate-700/60"
                 >
-                  <button
-                    onClick={() => navigate(`/idea/${idea.id}`)}
-                    className="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-medium px-2 py-1 rounded hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-                  >
-                    👁️ View
-                  </button>
-                  <div className="pr-16">
-                    <h3 className="text-sm font-bold text-white leading-tight mb-0.5">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-bold text-white leading-tight truncate">
                       {idea.idea}
                     </h3>
-                    <div className="text-[10px] text-gray-300 line-clamp-1 leading-tight mb-1">
-                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-[10px]">
+                    <div className="text-xs text-slate-400 line-clamp-1 leading-tight mt-0.5">
+                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-xs">
                         {idea.description}
                       </MarkdownWithPlugins>
                     </div>
-                    {idea.votes !== undefined && (
-                      <span className="text-[10px] text-gray-400">
-                        👍 {idea.votes}
-                      </span>
-                    )}
                   </div>
+                  {idea.votes !== undefined && (
+                    <span className="flex-shrink-0 text-xs text-slate-400 font-semibold tabular-nums">
+                      {idea.votes} votes
+                    </span>
+                  )}
+                  <button
+                    onClick={() => navigate(`/idea/${idea.id}`)}
+                    className="flex-shrink-0 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+                  >
+                    View
+                  </button>
                 </li>
               ))}
             </ul>
           )
         ) : winners.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="text-6xl mb-4">⏳</div>
-            <p className="text-gray-400">No winners determined yet</p>
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="text-4xl mb-3">⏳</div>
+            <p className="text-slate-400 text-sm">No winners determined yet</p>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="flex flex-col gap-2">
             {winners.map((winner) => {
-              const isHackathon = winner.category === "Hackathon Winner";
-              const style = categoryStyles[winner.category];
+              const style = categoryStyles[winner.category] || defaultStyle;
               return (
                 <li
                   key={winner.category}
-                  className={`relative p-3 rounded-lg border bg-gradient-to-br ${style.bg} ${style.border} transition-all duration-300 hover:scale-[1.01] shadow-xl`}
-                  style={{
-                    boxShadow: isHackathon
-                      ? "0 0 30px rgba(234, 179, 8, 0.4)"
-                      : "0 0 20px rgba(255, 255, 255, 0.1)",
-                  }}
+                  className={`flex items-center gap-3 p-3 border ${style.bg} ${style.border}`}
                 >
-                  <button
-                    onClick={() => navigate(`/idea/${winner.winning_idea_id}`)}
-                    className="absolute top-3 right-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-medium px-2 py-1 rounded hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-                  >
-                    👁️ View
-                  </button>
-                  <div className="pr-16">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">{style.icon}</span>
-                      <h3 className={`text-sm font-bold ${style.text}`}>
+                  <span className="text-xl flex-shrink-0">{style.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-wide ${style.text}`}>
                         {winner.category}
-                      </h3>
+                      </span>
                     </div>
-                    <h4 className="text-base font-bold text-white mb-0.5 leading-tight">
+                    <h4 className="text-sm font-bold text-white leading-tight truncate">
                       {winner.idea_title || "Unknown"}
                     </h4>
-                    <div className="text-[10px] text-gray-300 line-clamp-1 leading-tight mb-1">
-                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-[10px]">
+                    <div className="text-xs text-slate-400 line-clamp-1 leading-tight mt-0.5">
+                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-xs">
                         {winner.idea_description || "No description"}
                       </MarkdownWithPlugins>
                     </div>
-                    <span className="text-[10px] text-gray-400">
-                      👍 {winner.votes} votes
-                    </span>
                   </div>
+                  <span className="flex-shrink-0 text-xs text-slate-400 font-semibold tabular-nums">
+                    {winner.votes} votes
+                  </span>
+                  <button
+                    onClick={() => navigate(`/idea/${winner.winning_idea_id}`)}
+                    className="flex-shrink-0 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+                  >
+                    View
+                  </button>
                 </li>
               );
             })}

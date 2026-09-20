@@ -15,12 +15,14 @@ import {
   getIdeasByEvent,
 } from "../api/API";
 import Navbar from "../components/Navbar";
+import Sidebar from "../components/dashboard/Sidebar";
 import IdeaSubmission from "../components/IdeaSubmission";
 import Stage_1_Ideas from "../components/Stage_1_Ideas";
 import Stage_2 from "../components/Stage_2";
 import Stage_3_Ideas from "../components/Stage_3_Ideas";
 import ButtonUploadEvent from "../components/ButtonUploadEvent";
 import { extractEventId, createEventSlug } from "../utils/urlHelpers";
+import { cldOptimize } from "../utils/cloudinaryImage";
 
 function EventScreen() {
   const { eventId: eventSlug } = useParams();
@@ -49,6 +51,8 @@ function EventScreen() {
   const [participantProfiles, setParticipantProfiles] = useState({});
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
+  const [showAllParticipants, setShowAllParticipants] = useState(false);
 
   // Fetch user display name
   useEffect(() => {
@@ -127,6 +131,30 @@ function EventScreen() {
   }, [email, eventProjects]);
 
   const checkedInFlag = searchParams.get("checkedIn") === "true";
+
+  // Single source of truth for the stage badge shown in the hero and the
+  // right rail — same conditions the page already branched on, just
+  // consolidated so the label/color isn't duplicated in multiple places.
+  const stageBadge = useMemo(() => {
+    if (isLiveCoding) {
+      return eventStage === "1"
+        ? { label: "Ideas Open", cls: "bg-teal-500/10 text-teal-300 border-teal-500/30" }
+        : { label: "Session Complete", cls: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" };
+    }
+    if (eventStage === "1" && subStage === "2") {
+      return { label: "Submissions Locked", cls: "bg-orange-500/10 text-orange-300 border-orange-500/30" };
+    }
+    if (eventStage === "1") {
+      return { label: "Submissions Open", cls: "bg-blue-500/10 text-blue-300 border-blue-500/30" };
+    }
+    if (eventStage === "2") {
+      return { label: "Voting Time", cls: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" };
+    }
+    if (eventStage === "3") {
+      return { label: "Our Winners!", cls: "bg-amber-500/10 text-amber-300 border-amber-500/30" };
+    }
+    return { label: `Stage ${eventStage}`, cls: "bg-slate-500/10 text-slate-300 border-slate-500/30" };
+  }, [isLiveCoding, eventStage, subStage]);
 
   // Only allow project selection in stage 1.2 or stage 2 (for hackathons only in stage 2)
   const isStageAllowingSelection =
@@ -385,67 +413,95 @@ function EventScreen() {
     return (first + second).toUpperCase();
   };
 
-  const ParticipantsPanel = () => (
-    <aside className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-sm border border-purple-700/50 shadow-2xl p-4 w-full max-h-[600px] flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-white text-lg font-bold">Participants</h2>
-        <span className="bg-purple-600/50 text-purple-200 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/50">
-          {participants.length}
-        </span>
-      </div>
+  const PARTICIPANTS_PREVIEW = 8;
 
-      {participants.length === 0 ? (
-        <p className="text-gray-400 text-sm">No one has checked in yet.</p>
-      ) : (
-        <ul className="participants-scroll space-y-2 flex-1 overflow-auto pr-1">
-          {participants.map((p) => {
-            const profile = participantProfiles[p.toLowerCase()];
-            const uname = profile?.name || usernameOnly(p);
-            const profilePic = profile?.profile_picture;
-            const isYou = p.toLowerCase() === (email || "").toLowerCase();
-            return (
-              <li
-                key={p}
-                className="flex items-center justify-between gap-3 px-3 py-3 bg-purple-800/20 rounded-lg border border-purple-700/30 hover:bg-purple-800/30 transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  {profilePic ? (
-                    <img
-                      src={profilePic}
-                      alt={uname}
-                      className="w-9 h-9 rounded-lg object-cover shrink-0 shadow-lg border-2 border-purple-500/30"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-9 h-9 text-sm font-bold shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg text-white shadow-lg">
-                      {getInitials(p)}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-white text-sm font-medium truncate">
+  const EventInfoPanel = () => (
+    <aside className="bg-slate-900 border border-slate-700 p-4 w-full">
+      <h2 className="text-white text-sm font-bold uppercase tracking-wide mb-3">Event Info</h2>
+      <div className="flex flex-col gap-2.5">
+        <span className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold border ${stageBadge.cls}`}>
+          {stageBadge.label}
+        </span>
+        <div className="flex items-center justify-between text-sm border-t border-slate-800 pt-2.5">
+          <span className="text-slate-400">Participants</span>
+          <span className="text-white font-semibold">{participants.length}</span>
+        </div>
+        {isUserCheckedIn && (
+          <div className="flex items-center gap-1.5 text-sm text-emerald-300 border-t border-slate-800 pt-2.5">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            You're Checked In
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+
+  const ParticipantsPanel = () => {
+    const visible = showAllParticipants ? participants : participants.slice(0, PARTICIPANTS_PREVIEW);
+    return (
+      <aside className="bg-slate-900 border border-slate-700 p-4 w-full">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-white text-sm font-bold uppercase tracking-wide">Participants</h2>
+          <span className="bg-blue-500/10 text-blue-300 border border-blue-500/30 px-2 py-0.5 text-xs font-bold">
+            {participants.length}
+          </span>
+        </div>
+
+        {participants.length === 0 ? (
+          <p className="text-slate-500 text-sm">No one has checked in yet.</p>
+        ) : (
+          <>
+            <ul className="space-y-1.5">
+              {visible.map((p) => {
+                const profile = participantProfiles[p.toLowerCase()];
+                const uname = profile?.name || usernameOnly(p);
+                const profilePic = profile?.profile_picture;
+                const isYou = p.toLowerCase() === (email || "").toLowerCase();
+                return (
+                  <li
+                    key={p}
+                    className="flex items-center gap-2.5 px-2.5 py-2 bg-slate-800/60 border border-slate-700/60"
+                  >
+                    {profilePic ? (
+                      <img
+                        src={cldOptimize(profilePic, { width: 60, height: 60 })}
+                        alt={uname}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-600"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-7 h-7 text-[10px] font-bold shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                        {getInitials(p)}
+                      </div>
+                    )}
+                    <p className="text-white text-sm font-medium truncate flex-1 min-w-0">
                       {uname}
                     </p>
                     {isYou && (
-                      <span className="bg-blue-600/50 text-blue-200 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-500/50">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-blue-300 flex-shrink-0">
                         You
                       </span>
                     )}
-                  </div>
-                </div>
-                {isYou && (
-                  <span
-                    className="bg-green-600/50 text-green-200 text-xs font-bold px-2 py-1 rounded-lg border border-green-500/50"
-                    title="Checked in"
-                  >
-                    ✓
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </aside>
-  );
+                  </li>
+                );
+              })}
+            </ul>
+            {participants.length > PARTICIPANTS_PREVIEW && (
+              <button
+                onClick={() => setShowAllParticipants((v) => !v)}
+                className="mt-2.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                {showAllParticipants ? "Show less" : `View all ${participants.length} participants`}
+              </button>
+            )}
+          </>
+        )}
+      </aside>
+    );
+  };
 
   const AdminControlPanel = () => {
     const handleToggleSubStage = async () => {
@@ -600,118 +656,87 @@ function EventScreen() {
       }
     };
 
+    const btnPrimary = "w-full bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
+    const btnNeutral = "w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
+    const btnDanger = "w-full bg-red-600/15 hover:bg-red-600/25 border border-red-500/40 text-red-300 px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
+
     return (
-      <aside className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-sm border border-orange-700/50 shadow-2xl p-2 sm:p-3 lg:p-4 flex flex-col gap-2 lg:gap-3 w-full">
-        {/* Stacked, no-wrap header */}
-        <div className="flex flex-col items-start mb-1 lg:mb-2">
-          <h2 className="text-white text-sm sm:text-base font-bold whitespace-nowrap mb-1">
-            ⚙️ Admin Controls
-          </h2>
-          {isLiveCoding ? (
-            <span className="bg-teal-600/50 text-teal-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-teal-500/50">
-              {eventStage === "1" ? "Stage 1 (Open)" : "Stage 2 (Complete)"}
-            </span>
-          ) : (
-            <span className="bg-orange-600/50 text-orange-200 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-orange-500/50">
-              Stage {eventStage}{eventStage === "1" && `.${subStage}`}
-            </span>
-          )}
+      <aside className="bg-slate-900 border border-slate-700 p-4 flex flex-col gap-2.5 w-full">
+        <div className="flex items-center justify-between mb-0.5">
+          <h2 className="text-white text-sm font-bold uppercase tracking-wide">Admin Controls</h2>
+          <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold border ${stageBadge.cls}`}>
+            {stageBadge.label}
+          </span>
         </div>
+
+        <button onClick={() => navigate('/home')} className={btnNeutral}>
+          ← Back to Community
+        </button>
+
+        <hr className="border-slate-800 my-0.5" />
 
         {isLiveCoding ? (
           <>
-            {/* Live Coding Stage 1 controls */}
             {eventStage === "1" && (
-              <button
-                onClick={handleCompleteSession}
-                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-teal-500 hover:to-cyan-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-              >
-                ✅ Complete Session
+              <button onClick={handleCompleteSession} className={btnPrimary}>
+                Complete Session
               </button>
             )}
-
-            {/* Live Coding Stage 2 controls */}
             {eventStage === "2" && (
-              <button
-                onClick={handleReopenSession}
-                className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-              >
-                🔓 Reopen Session
+              <button onClick={handleReopenSession} className={btnNeutral}>
+                Reopen Session
               </button>
             )}
           </>
         ) : (
           <>
-            {/* Stage 1.1 controls */}
             {eventStage === "1" && subStage === "1" && (
-              <button
-                onClick={handleToggleSubStage}
-                className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-              >
-                🔒 Lock
+              <button onClick={handleToggleSubStage} className={btnPrimary}>
+                Lock Submissions
               </button>
             )}
 
-            {/* Stage 1.2 controls */}
             {eventStage === "1" && subStage === "2" && (
               <>
-                <button
-                  onClick={handleStartVoting}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-green-500 hover:to-emerald-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-                >
-                  🗳️ Voting
+                <button onClick={handleStartVoting} className={btnPrimary}>
+                  Start Voting
                 </button>
-                <button
-                  onClick={handleBackToSubmissionsOpen}
-                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
-                >
-                  🔓 Unlock
+                <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
+                  Unlock Submissions
                 </button>
               </>
             )}
 
-            {/* Stage 2 controls */}
             {eventStage === "2" && (
               <>
-                <button
-                  onClick={handleShowResults}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-                >
-                  🏆 Results
+                <button onClick={handleShowResults} className={btnPrimary}>
+                  Show Results
                 </button>
-                <button
-                  onClick={handleBackToSubmissionsOpen}
-                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 lg:px-3 lg:py-2 rounded-lg font-semibold hover:from-red-500 hover:to-rose-500 transition-all duration-200 shadow-lg text-xs"
-                >
-                  ← Back
+                <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
+                  ← Back to Submissions
                 </button>
               </>
             )}
 
-            {/* Stage 3 controls */}
             {eventStage === "3" && (
-              <button
-                onClick={handleBackToVoting}
-                className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-amber-500 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-              >
-                ← Back
+              <button onClick={handleBackToVoting} className={btnNeutral}>
+                ← Back to Voting
               </button>
             )}
           </>
         )}
 
-        {/* Divider + Upload */}
-        <hr className="border-slate-600/40 my-1 lg:my-2" />
-        <div className="transform scale-90 sm:scale-95">
+        <hr className="border-slate-800 my-0.5" />
+
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Event Image</p>
           <ButtonUploadEvent eventId={eventId} />
         </div>
 
-        {/* Cancel Event Button */}
-        <button
-          onClick={() => setShowCancelConfirm(true)}
-          className="w-full bg-gradient-to-r from-red-700 to-red-800 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg text-xs sm:text-sm"
-        >
-          ❌ Cancel Event
+        <hr className="border-slate-800 my-0.5" />
+
+        <button onClick={() => setShowCancelConfirm(true)} className={btnDanger}>
+          Cancel Event
         </button>
       </aside>
     );
@@ -794,184 +819,146 @@ function EventScreen() {
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col text-white relative overflow-hidden"
-      style={{
-        background: "#000000",
-      }}
-    >
-      {/* Light blue flashes/glowing effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)' }}>
+
+      <div className="relative z-50 flex-shrink-0">
+        <Navbar userName={userName || email} profilePicture={profilePicture} backToHome={true} />
       </div>
 
-      <Navbar userName={userName || email} profilePicture={profilePicture} backToHome={true} />
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
-      <div className="flex-1 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
-        <div className="relative max-w-6xl mx-auto">
-          {/* ONE GRID: top-aligned header+admin (no extra gap), then ideas row */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 items-start">
-            {/* HEADER (cols 1–4) */}
-            <div className="lg:col-span-4 relative">
-              <button
-                onClick={() => navigate(-1)}
-                className="absolute -left-12 top-6 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg hidden lg:block"
-                title="Go back"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </button>
+        <div className="flex flex-col flex-1 min-w-0 overflow-y-auto relative"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
 
-              <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 overflow-hidden">
-                <h1 className="text-sm sm:text-lg lg:text-2xl xl:text-3xl font-bold text-white mb-1 sm:mb-2 lg:mb-3">
-                  {event?.title}
-                </h1>
-                <p className="text-gray-300 text-xs sm:text-sm lg:text-base xl:text-lg mb-3 sm:mb-4 lg:mb-6">
-                  {new Date(event?.event_date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
+          <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full">
 
-                {event?.image_url && (
-                  <div className="mb-3 sm:mb-4 lg:mb-6">
-                    <img
-                      src={event.image_url}
-                      alt="Event Banner"
-                      className="w-full h-32 sm:h-40 lg:h-56 object-cover rounded-lg shadow-lg"
-                    />
+            <style>{`
+              .event-layout-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas: "hero" "rail-top" "content" "rail-bottom";
+                gap: 0.75rem;
+                min-width: 0;
+              }
+              .event-layout-grid > * {
+                min-width: 0;
+              }
+              @media (min-width: 1024px) {
+                .event-layout-grid {
+                  grid-template-columns: minmax(0, 1fr) 300px;
+                  grid-template-areas: "hero rail-top" "content rail-bottom";
+                  gap: 1rem;
+                  align-items: start;
+                }
+              }
+            `}</style>
+            <div className="event-layout-grid">
+
+                {/* HERO */}
+                <div className="bg-slate-900 border border-slate-700 overflow-hidden" style={{ gridArea: 'hero' }}>
+                  <div className="p-4 sm:p-5 border-b border-slate-800">
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors mb-2"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                      </svg>
+                      Back to Community
+                    </button>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight">
+                          {event?.title}
+                        </h1>
+                        <p className="text-sm text-slate-400 mt-1">
+                          {new Date(event?.event_date).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-1 text-xs font-bold border ${stageBadge.cls}`}>
+                        {stageBadge.label}
+                      </span>
+                    </div>
                   </div>
-                )}
 
-                <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-6 sm:mb-8 lg:mb-12">
-                  {isLiveCoding ? (
-                    <>
-                      {eventStage === "1" && (
-                        <span className="bg-teal-600/50 text-teal-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-teal-500/50">
-                          💻 Ideas Open
-                        </span>
-                      )}
-                      {eventStage === "2" && (
-                        <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
-                          ✅ Session Complete
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {eventStage === "1" && subStage === "1" && (
-                        <span className="bg-blue-600/50 text-blue-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-blue-500/50">
-                          📝 Submissions Open
-                        </span>
-                      )}
-                      {eventStage === "1" && subStage === "2" && (
-                        <span className="bg-orange-600/50 text-orange-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-orange-500/50">
-                          🔒 Submissions Locked
-                        </span>
-                      )}
-                      {eventStage === "2" && (
-                        <span className="bg-green-600/50 text-green-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-green-500/50">
-                          🗳️ Voting Time
-                        </span>
-                      )}
-                      {eventStage === "3" && (
-                        <span className="bg-yellow-600/50 text-yellow-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-yellow-500/50">
-                          🏆 Our Winners!
-                        </span>
-                      )}
-                    </>
+                  {event?.image_url && (
+                    <img
+                      src={cldOptimize(event.image_url, { width: 1000 })}
+                      alt="Event Banner"
+                      className="w-full h-48 sm:h-64 lg:h-80 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   )}
-                  {(event?.checked_in || "")
-                    .split(",")
-                    .map((e) => e.trim())
-                    .includes(email) && (
-                      <span className="bg-emerald-600/50 text-emerald-200 px-2 py-1 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm border border-emerald-500/50">
-                        ✅ Checked In
+
+                  {/* CTA row: status + primary action, content-tight (no dead space) */}
+                  <div className="p-3 sm:p-4 flex flex-wrap items-center gap-2">
+                    {isUserCheckedIn && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
+                        Checked In
                       </span>
                     )}
+                    {eventStage === "1" && (isLiveCoding || subStage === "1") && (
+                      <div className="ml-auto">
+                        <IdeaSubmission
+                          email={email}
+                          eventId={eventId}
+                          refreshIdeas={refreshIdeas}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Add New Idea inside header, bottom-right */}
-                {eventStage === "1" && (isLiveCoding || subStage === "1") && (
-                  <div className="absolute bottom-4 right-4">
-                    <IdeaSubmission
-                      email={email}
+                {/* STAGE CONTENT (submissions / voting / winners) */}
+                <div style={{ gridArea: 'content' }}>
+                  {isLiveCoding ? (
+                    <Stage_1_Ideas
+                      key={ideasRefreshKey}
                       eventId={eventId}
                       refreshIdeas={refreshIdeas}
+                      isAdmin={isAdmin}
+                      eventStage={eventStage}
+                      eventSubStage={subStage}
+                      readOnly={eventStage === "2"}
                     />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ADMIN (col 5) */}
-            {isAdmin && (
-              <div className="lg:col-span-1">
-                {/* self-start ensures no extra vertical stretch */}
-                <div className="sticky top-6 self-start" style={{ zIndex: 20 }}>
-                  <AdminControlPanel />
+                  ) : eventStage === "1" ? (
+                    <Stage_1_Ideas
+                      key={ideasRefreshKey}
+                      eventId={eventId}
+                      refreshIdeas={refreshIdeas}
+                      isAdmin={isAdmin}
+                      eventStage={eventStage}
+                      eventSubStage={subStage}
+                    />
+                  ) : eventStage === "2" ? (
+                    <Stage_2 key={ideasRefreshKey} eventId={eventId} />
+                  ) : eventStage === "3" ? (
+                    <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
+                  ) : (
+                    <p className="text-white text-center">
+                      Unknown event stage: {eventStage}
+                    </p>
+                  )}
                 </div>
+
+              {/* RAIL TOP: admin controls (admins) or event info (members) */}
+              <div style={{ gridArea: 'rail-top' }}>
+                {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
               </div>
-            )}
 
-            {/* IDEAS (cols 1–3) */}
-            <div className="lg:col-span-3">
-              {isLiveCoding ? (
-                <Stage_1_Ideas
-                  key={ideasRefreshKey}
-                  eventId={eventId}
-                  refreshIdeas={refreshIdeas}
-                  isAdmin={isAdmin}
-                  eventStage={eventStage}
-                  eventSubStage={subStage}
-                  readOnly={eventStage === "2"}
-                />
-              ) : eventStage === "1" ? (
-                <Stage_1_Ideas
-                  key={ideasRefreshKey}
-                  eventId={eventId}
-                  refreshIdeas={refreshIdeas}
-                  isAdmin={isAdmin}
-                  eventStage={eventStage}
-                  eventSubStage={subStage}
-                />
-              ) : eventStage === "2" ? (
-                <Stage_2 key={ideasRefreshKey} eventId={eventId} />
-              ) : eventStage === "3" ? (
-                <Stage_3_Ideas key={ideasRefreshKey} eventId={eventId} />
-              ) : (
-                <p className="text-white text-center">
-                  Unknown event stage: {eventStage}
-                </p>
-              )}
-            </div>
-
-            {/* PARTICIPANTS (col 4) */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
+              {/* RAIL BOTTOM: participants */}
+              <div style={{ gridArea: 'rail-bottom' }}>
                 <ParticipantsPanel />
               </div>
-            </div>
 
-            {/* SPACER (col 5) to mirror admin column below */}
-            <div className="hidden lg:block lg:col-span-1" />
+            </div>
           </div>
         </div>
       </div>
