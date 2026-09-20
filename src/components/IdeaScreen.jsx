@@ -54,8 +54,10 @@ function IdeaScreen() {
   const [hasRequestedToContribute, setHasRequestedToContribute] = useState(false);
   const [expandedImage, setExpandedImage] = useState(null);
   const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
+  const [showScrollHint, setShowScrollHint] = useState(false);
   const editDescRef = useRef(null);
   const fileInputRef = useRef(null);
+  const centerScrollRef = useRef(null);
 
   // Shared aggregates across all events — used by both the header chips and
   // the right project-summary panel so the numbers can't drift apart.
@@ -185,6 +187,42 @@ function IdeaScreen() {
       loadPendingRequests(contributorsEvent.event_id);
     }
   }, [contributorsEvent]);
+
+  // Scroll hint for the Project Timeline: only relevant once the timeline has
+  // rendered, and only on desktop where the center column is the thing that
+  // actually scrolls (on mobile scrollHeight === clientHeight here, so this
+  // naturally stays false without needing a separate breakpoint check).
+  useEffect(() => {
+    const el = centerScrollRef.current;
+    if (!el || !idea?.events?.length) {
+      setShowScrollHint(false);
+      return;
+    }
+
+    const NEAR_BOTTOM_PX = 48;
+    const updateHint = () => {
+      const hasMore = el.scrollHeight - el.scrollTop - el.clientHeight > NEAR_BOTTOM_PX;
+      setShowScrollHint(hasMore);
+    };
+
+    updateHint();
+    el.addEventListener('scroll', updateHint, { passive: true });
+    window.addEventListener('resize', updateHint);
+    // Content (images) can load after mount and change scrollHeight.
+    const raf = requestAnimationFrame(updateHint);
+
+    return () => {
+      el.removeEventListener('scroll', updateHint);
+      window.removeEventListener('resize', updateHint);
+      cancelAnimationFrame(raf);
+    };
+  }, [idea, loading]);
+
+  const handleScrollHintClick = () => {
+    const el = centerScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ top: el.clientHeight * 0.7, behavior: 'smooth' });
+  };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -719,6 +757,16 @@ function IdeaScreen() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)' }}>
+      <style>{`
+        @keyframes scrollHintBounce {
+          0%, 100% { transform: translateY(0); opacity: 0.7; }
+          50% { transform: translateY(6px); opacity: 1; }
+        }
+        .scroll-hint-arrow { animation: scrollHintBounce 1.7s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .scroll-hint-arrow { animation: none; }
+        }
+      `}</style>
 
       <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
@@ -732,8 +780,11 @@ function IdeaScreen() {
 
           <div className="flex flex-col lg:flex-row flex-1 min-h-0 min-w-0 overflow-y-auto lg:overflow-hidden gap-3 sm:gap-4 p-4 sm:p-6">
 
-            {/* CENTER — the only scrolling region on desktop */}
-            <div className="flex-1 min-w-0 flex flex-col gap-3 sm:gap-4 lg:overflow-y-auto lg:min-h-0">
+            {/* CENTER — the only scrolling region on desktop. Wrapped in a non-scrolling,
+                relatively-positioned box so the scroll-hint overlay below can stay pinned
+                near the bottom of the viewport instead of scrolling away with the content. */}
+            <div className="flex-1 min-w-0 relative lg:min-h-0">
+            <div ref={centerScrollRef} className="h-full flex flex-col gap-3 sm:gap-4 lg:overflow-y-auto lg:min-h-0">
 
               {/* Message Display */}
               {message && (
@@ -1165,6 +1216,43 @@ function IdeaScreen() {
               />
             </div>
 
+            {/* Scroll hint overlay — sits outside the scrolling content so it stays
+                pinned near the bottom of the visible timeline area instead of scrolling
+                away, positioned in the gutter beside the timeline's date-marker column. */}
+            <div
+              className="hidden lg:flex absolute bottom-4 justify-center pointer-events-none"
+              style={{ left: '40px', zIndex: 20 }}
+            >
+              <button
+                type="button"
+                onClick={handleScrollHintClick}
+                aria-hidden={!showScrollHint}
+                tabIndex={showScrollHint ? 0 : -1}
+                className={`scroll-hint-btn flex flex-col items-center gap-0.5 bg-transparent border-0 p-0 cursor-pointer transition-opacity duration-300 ${
+                  showScrollHint ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}
+                style={{ width: '46px' }}
+                aria-label="Scroll down to explore more of the timeline"
+              >
+                <svg
+                  className="scroll-hint-arrow"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#60a5fa"
+                  strokeWidth="2.5"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.5))' }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 14l6 6 6-6" opacity="0.55" />
+                </svg>
+                <span className="text-[8px] font-semibold uppercase tracking-wide text-blue-400 leading-tight text-center">
+                  Scroll<br />down
+                </span>
+              </button>
+            </div>
+            </div>
 
             {/* Desktop only: persistent project summary rail, sticky/bounded
                 to the viewport, independent from the center's scroll. */}
