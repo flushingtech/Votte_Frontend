@@ -12,6 +12,7 @@ import {
   updateSocialLinks
 } from '../api/API';
 import { clearNameCache } from '../utils/displayNames';
+import { cldOptimize } from '../utils/cloudinaryImage';
 import githubLogo from '../assets/github-logo.png';
 import linkedinLogo from '../assets/linkedin-logo.png';
 
@@ -206,7 +207,7 @@ const Profile = ({ user, viewingEmail = null }) => {
             <div className="relative group">
               {profilePicture ? (
                 <img
-                  src={profilePicture}
+                  src={cldOptimize(profilePicture, { width: 300, height: 300 })}
                   alt="Profile"
                   className="w-28 h-28 object-cover border-2 border-slate-600 shadow-xl"
                 />
@@ -460,7 +461,7 @@ const Profile = ({ user, viewingEmail = null }) => {
                   {idea.image_url ? (
                     <div className="w-32 flex-shrink-0 overflow-hidden bg-slate-900 flex items-stretch">
                       <img
-                        src={idea.image_url}
+                        src={cldOptimize(idea.image_url, { width: 350 })}
                         alt={idea.idea}
                         className="w-full h-full object-cover"
                         loading="lazy"

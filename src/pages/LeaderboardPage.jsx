@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/dashboard/Sidebar';
 import { getFullLeaderboard, getVotesLeaderboard, getEventsLeaderboard, getUserProfile } from '../api/API';
+import { cldOptimize } from '../utils/cloudinaryImage';
 
 // ─── CSS keyframes injected once ────────────────────────────────────────────
 const GLOBAL_STYLES = `
@@ -139,7 +140,7 @@ function Avatar({ user, size = 48, ring, glow }) {
       {/* Image / initials */}
       <div className="absolute inset-[3px] rounded-full overflow-hidden" style={{border:'1px solid rgba(255,255,255,.1)'}}>
         {user?.profile_picture
-          ? <img src={user.profile_picture} alt="" className="w-full h-full object-cover"/>
+          ? <img src={cldOptimize(user.profile_picture, { width: size * 2, height: size * 2 })} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async"/>
           : <div className="w-full h-full flex items-center justify-center text-white font-black"
               style={{backgroundColor:bg,fontSize:size*.28}}>{initials}</div>
         }
@@ -375,7 +376,7 @@ function LeaderboardPanel({ title, subtitle, accentColor, glowColor, data, loadi
               {/* Avatar */}
               <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{border:`1px solid ${tier.border}`}}>
                 {user.profile_picture
-                  ? <img src={user.profile_picture} alt="" className="w-full h-full object-cover"/>
+                  ? <img src={cldOptimize(user.profile_picture, { width: 60, height: 60 })} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async"/>
                   : <div className="w-full h-full flex items-center justify-center text-[9px] font-black text-white"
                       style={{backgroundColor:avatarColor(user.email)}}>{getInitials(user.display_name, user.email)}</div>
                 }

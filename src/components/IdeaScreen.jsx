@@ -8,6 +8,7 @@ import ButtonUpload from '../components/ButtonUpload';
 import MarkdownWithPlugins from './MarkdownWithPluggins';
 import MarkdownPreviewer from './MarkdownPreviewer';
 import { extractIdeaId, createIdeaSlug } from '../utils/urlHelpers';
+import { cldOptimize } from '../utils/cloudinaryImage';
 
 function IdeaScreen() {
   const { ideaId: ideaSlug } = useParams();
@@ -707,9 +708,11 @@ function IdeaScreen() {
                               className="relative cursor-pointer group"
                             >
                               <img
-                                src={event.image_url}
+                                src={cldOptimize(event.image_url, { width: 400 })}
                                 alt="Project"
                                 className="w-full h-36 object-cover shadow-lg group-hover:opacity-90 transition-opacity"
+                                loading="lazy"
+                                decoding="async"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                                 <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-medium bg-black/50 px-3 py-1.5 rounded-lg transition-opacity flex items-center gap-1.5">
@@ -829,9 +832,11 @@ function IdeaScreen() {
                                         <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
                                           {profilePic ? (
                                             <img
-                                              src={profilePic}
+                                              src={cldOptimize(profilePic, { width: 50, height: 50 })}
                                               alt={displayName}
                                               className="w-full h-full object-cover"
+                                              loading="lazy"
+                                              decoding="async"
                                             />
                                           ) : (
                                             <div className="w-full h-full bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-[10px]">
@@ -1415,7 +1420,7 @@ function IdeaScreen() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 {request.requester_picture && (
-                                  <img src={request.requester_picture} alt="" className="w-8 h-8 rounded-full" />
+                                  <img src={cldOptimize(request.requester_picture, { width: 60, height: 60 })} alt="" className="w-8 h-8 rounded-full" loading="lazy" decoding="async" />
                                 )}
                                 <div>
                                   <p className="text-white font-semibold">{request.requester_name || request.requester_email}</p>
@@ -1609,7 +1614,7 @@ function IdeaScreen() {
                 </svg>
               </button>
               <img
-                src={expandedImage}
+                src={cldOptimize(expandedImage, { width: 1400 })}
                 alt="Project (expanded)"
                 className="w-full h-full object-contain shadow-2xl"
                 onClick={(e) => e.stopPropagation()}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import votteLogo from "../assets/votte_favicon.png";
 import { checkAdminStatus, getContributorRequestCount, search } from "../api/API";
+import { cldOptimize } from "../utils/cloudinaryImage";
 
 function Navbar({ userName, profilePicture }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -146,7 +147,7 @@ function Navbar({ userName, profilePicture }) {
               className="flex items-center space-x-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-600 rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg group"
             >
               {profilePicture ? (
-                <img src={profilePicture} alt="Profile" className="w-8 h-8 rounded-lg object-cover border border-slate-500" />
+                <img src={cldOptimize(profilePicture, { width: 60, height: 60 })} alt="Profile" className="w-8 h-8 rounded-lg object-cover border border-slate-500" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">{(userName || userEmail?.split('@')[0])?.charAt(0)?.toUpperCase() || 'G'}</div>
               )}
@@ -296,7 +297,7 @@ function Navbar({ userName, profilePicture }) {
                                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/70 transition-colors text-left">
                                 <div className="w-8 h-8 rounded flex-shrink-0 overflow-hidden bg-slate-800">
                                   {p.image_url
-                                    ? <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                                    ? <img src={cldOptimize(p.image_url, { width: 60, height: 60 })} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                     : <div className="w-full h-full flex items-center justify-center">
                                         <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
@@ -321,7 +322,7 @@ function Navbar({ userName, profilePicture }) {
                               <button key={d.email} onMouseDown={() => { navigate(`/profile/${encodeURIComponent(d.email)}`); setSearchOpen(false); setQuery(''); }}
                                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/70 transition-colors text-left">
                                 {d.profile_picture
-                                  ? <img src={d.profile_picture} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                  ? <img src={cldOptimize(d.profile_picture, { width: 60, height: 60 })} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" decoding="async" />
                                   : <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
                                       style={{ backgroundColor: avatarColor(d.email) }}>
                                       {(d.name || d.email || 'U').slice(0,2).toUpperCase()}

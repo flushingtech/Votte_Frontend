@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getFeaturedProjects } from '../api/API';
 import { useNavigate } from 'react-router-dom';
+import { cldOptimize } from '../utils/cloudinaryImage';
 
 // ─── Award palette ───────────────────────────────────────────────────────────
 const AWARD_CFG = {
@@ -49,7 +50,7 @@ function AvatarBubble({ email, pic, name, dim = 22 }) {
     border: '1.5px solid #0f172a',
   };
   return pic
-    ? <img src={pic} alt={ini} title={name || email?.split('@')[0]} loading="lazy" decoding="async"
+    ? <img src={cldOptimize(pic, { width: 80, height: 80 })} alt={ini} title={name || email?.split('@')[0]} loading="lazy" decoding="async"
         style={{ ...shared, objectFit: 'cover' }} />
     : <div style={{
         ...shared, background: col,
@@ -181,7 +182,7 @@ function ProjectCard({ project: p, navigate }) {
       {/* Image */}
       <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', flexShrink: 0, overflow: 'hidden' }}>
         {p.image_url
-          ? <img src={p.image_url} alt={p.idea} className="fp-card-img" loading="lazy" decoding="async" />
+          ? <img src={cldOptimize(p.image_url, { width: 500 })} alt={p.idea} className="fp-card-img" loading="lazy" decoding="async" />
           : <NoImg />
         }
         <div style={{ position: 'absolute', inset: 0,
@@ -255,7 +256,7 @@ function FeedCard({ project: p, navigate }) {
       {/* Thumbnail — ~38% of card width */}
       <div style={{ position: 'relative', width: '38%', flexShrink: 0, aspectRatio: '1 / 1', overflow: 'hidden' }}>
         {p.image_url
-          ? <img src={p.image_url} alt={p.idea} className="fp-card-img" loading="lazy" decoding="async" />
+          ? <img src={cldOptimize(p.image_url, { width: 300, height: 300 })} alt={p.idea} className="fp-card-img" loading="lazy" decoding="async" />
           : <NoImg />
         }
         <VoteChip count={p.vote_count} />
