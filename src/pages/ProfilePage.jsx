@@ -54,7 +54,7 @@ const ProfilePage = ({ user }) => {
   if (loading) {
     return (
       <div
-        className="flex flex-col min-h-screen relative overflow-hidden"
+        className="flex flex-col h-screen relative overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 30%, #dbeafe 60%, #93c5fd 85%, #3b82f6 100%)',
         }}
@@ -68,7 +68,9 @@ const ProfilePage = ({ user }) => {
           <div className="absolute top-[50%] right-[5%] w-72 h-72 bg-blue-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
         </div>
 
-        <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
+        <div className="relative z-50 flex-shrink-0">
+          <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
+        </div>
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -81,7 +83,7 @@ const ProfilePage = ({ user }) => {
 
   return (
     <div
-      className="flex flex-col min-h-screen relative overflow-hidden"
+      className="flex flex-col h-screen relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #ffffff 0%, #f5eeff 30%, #e9d5ff 60%, #d8b4fe 85%, #c084fc 100%)',
       }}
@@ -95,13 +97,15 @@ const ProfilePage = ({ user }) => {
         <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
       </div>
 
-      <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
+      <div className="relative z-50 flex-shrink-0">
+        <Navbar userName={navbarUserName} profilePicture={navbarProfilePicture} />
+      </div>
 
       {/* Below navbar: sidebar + content side by side */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
         <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
 
-        <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative"
+        <div className="flex flex-col flex-1 min-w-0 overflow-y-auto relative"
           style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
           <div className="flex-1 px-4 sm:px-6 py-6">
             <div className="max-w-7xl mx-auto">
