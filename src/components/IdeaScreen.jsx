@@ -1161,13 +1161,9 @@ function IdeaScreen() {
                               })()}
                             </div>
                           </div>
-                        </div>
 
-                        </div>
-                        {/* end votes+contributors column */}
-
-                        {/* Description Card - Full Width */}
-                        <div className="lg:col-span-5 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
+                        {/* Description Card */}
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">📝</span>
                             <h3 className="text-xs font-bold text-white">Description</h3>
@@ -1179,8 +1175,8 @@ function IdeaScreen() {
                           </div>
                         </div>
 
-                        {/* Tech Stack Card - Full Width */}
-                        <div className="lg:col-span-5 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
+                        {/* Tech Stack Card */}
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
                           <div className="flex items-center gap-1.5 mb-2">
                             <span className="text-lg">⚡</span>
                             <h3 className="text-xs font-bold text-white">Tech Stack</h3>
@@ -1197,6 +1193,10 @@ function IdeaScreen() {
                                 </span>
                               ))}
                           </div>
+                        </div>
+
+                        </div>
+                        {/* end votes+contributors+description+techstack column */}
                         </div>
                       </div>
                     </div>
