@@ -959,14 +959,14 @@ function IdeaScreen() {
                       )}
                     </div>
 
-                    {/* Content — 60/40 split: showcase left, votes+contributors stacked right */}
+                    {/* Content — 60/40 split: showcase left, event info stacked right */}
                     <div className="p-2.5">
                       <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
                         {/* Showcase — left, ~60% */}
-                        <div className="lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <span className="text-lg">🖼️</span>
-                            <h3 className="text-xs font-bold text-white">Showcase</h3>
+                        <div className="lg:col-span-3 bg-slate-900/40 border border-slate-700/50 p-1.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1 mb-1">
+                            <span className="text-sm">🖼️</span>
+                            <h3 className="text-[11px] font-bold text-white">Showcase</h3>
                           </div>
                           {event?.image_url ? (
                             <div
@@ -998,56 +998,28 @@ function IdeaScreen() {
                           )}
                         </div>
 
-                        {/* Votes + Contributors — right, ~40%, stacked */}
-                        <div className="lg:col-span-2 flex flex-col gap-2">
+                        {/* Description, Contributors, Tech Stack, Votes — right, ~40%, stacked */}
+                        <div className="lg:col-span-2 flex flex-col gap-1">
 
-                        {/* Stats Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <span className="text-lg">📊</span>
-                            <h3 className="text-xs font-bold text-white">Votes</h3>
+                        {/* Description Card */}
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-1.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1 mb-1">
+                            <span className="text-sm">📝</span>
+                            <h3 className="text-[11px] font-bold text-white">Description</h3>
                           </div>
-                          {hasVotes ? (
-                            <div className="space-y-1">
-                              {event?.votes > 0 && (
-                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                                  <span className="text-slate-400 text-[10px] font-medium">Total</span>
-                                  <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full shadow shadow-blue-500/30 tabular-nums">{event.votes}</span>
-                                </div>
-                              )}
-                              {event?.most_creative_votes > 0 && (
-                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🎨</span>Creative</span>
-                                  <span className="text-teal-300 font-bold text-xs tabular-nums">{event.most_creative_votes}</span>
-                                </div>
-                              )}
-                              {event?.most_technical_votes > 0 && (
-                                <div className="flex items-center justify-between py-1 border-b border-slate-800">
-                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>⚡</span>Technical</span>
-                                  <span className="text-purple-300 font-bold text-xs tabular-nums">{event.most_technical_votes}</span>
-                                </div>
-                              )}
-                              {event?.most_impactful_votes > 0 && (
-                                <div className="flex items-center justify-between py-1">
-                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🚀</span>Impactful</span>
-                                  <span className="text-red-300 font-bold text-xs tabular-nums">{event.most_impactful_votes}</span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-4">
-                              <span className="text-2xl text-slate-600 mb-1">📊</span>
-                              <span className="text-slate-500 text-xs">No votes yet</span>
-                            </div>
-                          )}
+                          <div className="prose prose-invert prose-sm max-w-none">
+                            <MarkdownWithPlugins className="text-gray-300 text-[11px] leading-snug [&_p]:my-0.5">
+                              {event?.description || 'No description provided'}
+                            </MarkdownWithPlugins>
+                          </div>
                         </div>
 
                         {/* Contributors Card - Compact */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-lg">👥</span>
-                              <h3 className="text-xs font-bold text-white">Contributors</h3>
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-1.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm">👥</span>
+                              <h3 className="text-[11px] font-bold text-white">Contributors</h3>
                             </div>
                             {(() => {
                               const contributorsList = event?.contributors
@@ -1060,9 +1032,9 @@ function IdeaScreen() {
                               );
                             })()}
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-1">
                               {/* Contributor Avatars */}
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap gap-1">
                                 {(() => {
                                   const contributorsList = event?.contributors
                                     ? event.contributors.split(',').filter(c => c.trim())
@@ -1129,7 +1101,7 @@ function IdeaScreen() {
                                 } else if (isContributor) {
                                   // Contributors see success badge
                                   return (
-                                    <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                    <div className="mt-1 pt-1 border-t border-slate-700/50">
                                       <div className="flex items-center gap-1.5 text-green-400">
                                         <span className="text-xs">✓</span>
                                         <span className="text-[10px] font-medium">You're a contributor</span>
@@ -1139,7 +1111,7 @@ function IdeaScreen() {
                                 } else if (hasPendingRequest) {
                                   // User has a pending request
                                   return (
-                                    <div className="mt-2 pt-2 border-t border-slate-800">
+                                    <div className="mt-1 pt-1 border-t border-slate-800">
                                       <div className="w-full flex items-center justify-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 px-3 py-1.5 text-xs font-semibold cursor-default">
                                         <span>Request Pending</span>
                                       </div>
@@ -1148,7 +1120,7 @@ function IdeaScreen() {
                                 } else {
                                   // User can request to join
                                   return (
-                                    <div className="mt-2 pt-2 border-t border-slate-800">
+                                    <div className="mt-1 pt-1 border-t border-slate-800">
                                       <button
                                         onClick={() => setContributorsEvent(event)}
                                         className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold transition-colors"
@@ -1162,24 +1134,11 @@ function IdeaScreen() {
                             </div>
                           </div>
 
-                        {/* Description Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <span className="text-lg">📝</span>
-                            <h3 className="text-xs font-bold text-white">Description</h3>
-                          </div>
-                          <div className="prose prose-invert prose-sm max-w-none">
-                            <MarkdownWithPlugins className="text-gray-300 text-xs leading-relaxed">
-                              {event?.description || 'No description provided'}
-                            </MarkdownWithPlugins>
-                          </div>
-                        </div>
-
                         {/* Tech Stack Card */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 p-2 hover:border-slate-600/50 transition-all">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <span className="text-lg">⚡</span>
-                            <h3 className="text-xs font-bold text-white">Tech Stack</h3>
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-1.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1 mb-1">
+                            <span className="text-sm">⚡</span>
+                            <h3 className="text-[11px] font-bold text-white">Tech Stack</h3>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {(event?.technologies || 'None listed')
@@ -1195,8 +1154,49 @@ function IdeaScreen() {
                           </div>
                         </div>
 
+                        {/* Stats Card */}
+                        <div className="bg-slate-900/40 border border-slate-700/50 p-1.5 hover:border-slate-600/50 transition-all">
+                          <div className="flex items-center gap-1 mb-1">
+                            <span className="text-sm">📊</span>
+                            <h3 className="text-[11px] font-bold text-white">Votes</h3>
+                          </div>
+                          {hasVotes ? (
+                            <div className="space-y-0.5">
+                              {event?.votes > 0 && (
+                                <div className="flex items-center justify-between py-0.5 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium">Total</span>
+                                  <span className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full shadow shadow-blue-500/30 tabular-nums">{event.votes}</span>
+                                </div>
+                              )}
+                              {event?.most_creative_votes > 0 && (
+                                <div className="flex items-center justify-between py-0.5 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🎨</span>Creative</span>
+                                  <span className="text-teal-300 font-bold text-xs tabular-nums">{event.most_creative_votes}</span>
+                                </div>
+                              )}
+                              {event?.most_technical_votes > 0 && (
+                                <div className="flex items-center justify-between py-0.5 border-b border-slate-800">
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>⚡</span>Technical</span>
+                                  <span className="text-purple-300 font-bold text-xs tabular-nums">{event.most_technical_votes}</span>
+                                </div>
+                              )}
+                              {event?.most_impactful_votes > 0 && (
+                                <div className="flex items-center justify-between py-0.5">
+                                  <span className="text-slate-400 text-[10px] font-medium flex items-center gap-1"><span>🚀</span>Impactful</span>
+                                  <span className="text-red-300 font-bold text-xs tabular-nums">{event.most_impactful_votes}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-2">
+                              <span className="text-xl text-slate-600 mb-0.5">📊</span>
+                              <span className="text-slate-500 text-xs">No votes yet</span>
+                            </div>
+                          )}
                         </div>
-                        {/* end votes+contributors+description+techstack column */}
+
+                        </div>
+                        {/* end description+contributors+techstack+votes column */}
                         </div>
                       </div>
                     </div>
