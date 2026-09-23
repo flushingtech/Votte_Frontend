@@ -17,26 +17,28 @@ import slide13 from "./slide_13.png";
 // Once slide management moves server-side (the event_slides table already
 // exists for this), this map can be dropped in favor of `event.slides` from
 // the API — EventScreen already prefers that when it's populated.
-// id 75 = the upcoming "Flushing Tech Bi-Weekly Hackathon" (2026-03-22).
 //
 // `qrType` marks the slides that get a live QR code overlaid into their
 // blank space (PresentationMode renders it and picks the destination URL
 // based on the type): "checkin" -> /events/:eventId/check-in,
 // "vote" -> /events/:eventId/vote.
+const HACKATHON_DECK = [
+  { imageUrl: slide1, order: 1 },
+  { imageUrl: slide2, order: 2 },
+  { imageUrl: slide3, order: 3 },
+  { imageUrl: slide4, order: 4 },
+  { imageUrl: slide5, order: 5, qrType: "checkin" },
+  { imageUrl: slide6, order: 6 },
+  { imageUrl: slide7, order: 7 },
+  { imageUrl: slide8, order: 8 },
+  { imageUrl: slide9, order: 9 },
+  { imageUrl: slide10, order: 10 },
+  { imageUrl: slide11, order: 11 },
+  { imageUrl: slide12, order: 12, qrType: "vote" },
+  { imageUrl: slide13, order: 13 },
+];
+
 export const LOCAL_EVENT_SLIDES = {
-  75: [
-    { imageUrl: slide1, order: 1 },
-    { imageUrl: slide2, order: 2 },
-    { imageUrl: slide3, order: 3 },
-    { imageUrl: slide4, order: 4 },
-    { imageUrl: slide5, order: 5, qrType: "checkin" },
-    { imageUrl: slide6, order: 6 },
-    { imageUrl: slide7, order: 7 },
-    { imageUrl: slide8, order: 8 },
-    { imageUrl: slide9, order: 9 },
-    { imageUrl: slide10, order: 10 },
-    { imageUrl: slide11, order: 11 },
-    { imageUrl: slide12, order: 12, qrType: "vote" },
-    { imageUrl: slide13, order: 13 },
-  ],
+  75: HACKATHON_DECK, // "Flushing Tech Bi-Weekly Hackathon" (2026-03-22), now past
+  107: HACKATHON_DECK, // "Test Event" (2026-09-23)
 };
