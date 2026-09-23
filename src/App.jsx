@@ -15,6 +15,8 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Home = lazy(() => import('./pages/Home'));
 const AdminPage = lazy(() => import('./pages/Admin'));
 const EventScreen = lazy(() => import('./pages/EventScreen'));
+const CheckIn = lazy(() => import('./pages/CheckIn'));
+const VoteEntry = lazy(() => import('./pages/VoteEntry'));
 const IdeasForEvent = lazy(() => import('./components/admin/IdeasForEvent')); // Admin Event Screen
 const IdeaScreen = lazy(() => import('./components/IdeaScreen'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -89,6 +91,8 @@ function App() {
           {/* Regular user routes */}
           <Route path="/home" element={<Home />} />
           <Route path="/event/:eventId" element={<EventScreen />} />
+          <Route path="/events/:eventId/check-in" element={<CheckIn />} />
+          <Route path="/events/:eventId/vote" element={<VoteEntry />} />
 
           {/* New route for single idea screen */}
           <Route path="/idea/:ideaId" element={<IdeaScreen />} />

@@ -21,6 +21,8 @@ import Stage_1_Ideas from "../components/Stage_1_Ideas";
 import Stage_2 from "../components/Stage_2";
 import Stage_3_Ideas from "../components/Stage_3_Ideas";
 import ButtonUploadEvent from "../components/ButtonUploadEvent";
+import PresentationMode from "../components/PresentationMode";
+import { LOCAL_EVENT_SLIDES } from "../slides";
 import { extractEventId, createEventSlug } from "../utils/urlHelpers";
 import { cldOptimize } from "../utils/cloudinaryImage";
 
@@ -53,6 +55,10 @@ function EventScreen() {
   const [cancellationReason, setCancellationReason] = useState('');
   const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [showAllParticipants, setShowAllParticipants] = useState(false);
+  const [isPresenting, setIsPresenting] = useState(false);
+
+  const slides = event?.slides?.length ? event.slides : LOCAL_EVENT_SLIDES[event?.id] || [];
+  const hasSlides = slides.length > 0;
 
   // Fetch user display name
   useEffect(() => {
@@ -887,13 +893,23 @@ function EventScreen() {
                         Checked In
                       </span>
                     )}
-                    {eventStage === "1" && (isLiveCoding || subStage === "1") && (
-                      <div className="ml-auto">
-                        <IdeaSubmission
-                          email={email}
-                          eventId={eventId}
-                          refreshIdeas={refreshIdeas}
-                        />
+                    {(hasSlides || (eventStage === "1" && (isLiveCoding || subStage === "1"))) && (
+                      <div className="ml-auto flex items-center gap-2">
+                        {hasSlides && (
+                          <button
+                            onClick={() => setIsPresenting(true)}
+                            className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                          >
+                            <span aria-hidden="true">▶</span> Present
+                          </button>
+                        )}
+                        {eventStage === "1" && (isLiveCoding || subStage === "1") && (
+                          <IdeaSubmission
+                            email={email}
+                            eventId={eventId}
+                            refreshIdeas={refreshIdeas}
+                          />
+                        )}
                       </div>
                     )}
                   </div>
@@ -1201,6 +1217,9 @@ function EventScreen() {
             </div>
           </div>
         </>
+      )}
+      {isPresenting && (
+        <PresentationMode slides={slides} eventId={eventId} onExit={() => setIsPresenting(false)} />
       )}
     </div>
   );

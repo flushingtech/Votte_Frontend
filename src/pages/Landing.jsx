@@ -20,6 +20,21 @@ const eventListings = [
 function Landing() {
   const navigate = useNavigate();
   const [isLoadingWithGoogle, setIsLoadingWithGoogle] = useState(false);
+  const [devEmail, setDevEmail] = useState('flushingtech.nyc@gmail.com');
+  const [isLoadingDevLogin, setIsLoadingDevLogin] = useState(false);
+  const [devLoginError, setDevLoginError] = useState('');
+
+  // Persist the session, then continue wherever the user was headed before
+  // being sent here to log in (e.g. a QR check-in link) — falling back to /home.
+  const completeLogin = (data) => {
+    localStorage.setItem('authToken', JSON.stringify(data.token));
+    localStorage.setItem('user', JSON.stringify({ email: data.user.email }));
+    localStorage.setItem('userEmail', data.user.email);
+
+    const redirectTo = localStorage.getItem('postLoginRedirect');
+    localStorage.removeItem('postLoginRedirect');
+    navigate(redirectTo || '/home');
+  };
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -27,12 +42,7 @@ function Landing() {
       try {
         const url = `${import.meta.env.VITE_BASE_URL}/googlelogin`;
         const { data } = await axios.post(url, { access_token: tokenResponse.access_token });
-
-        // Save token and user email in localStorage
-        localStorage.setItem('authToken', JSON.stringify(data.token));
-        localStorage.setItem('user', JSON.stringify({ email: data.user.email }));
-
-        navigate('/home'); // Redirect to the home page after successful login
+        completeLogin(data);
       } catch (error) {
         console.error('Login failed:', error);
       } finally {
@@ -43,6 +53,25 @@ function Landing() {
       console.error('Non-OAuth error:', err);
     },
   });
+
+  // Dev-only bypass for when Google OAuth can't be used locally (e.g. localhost
+  // isn't an authorized origin yet). Backend 404s this outside of local dev
+  // and unless the email is explicitly allow-listed, so this button existing
+  // in a dev build is harmless.
+  const handleDevLogin = async () => {
+    setDevLoginError('');
+    setIsLoadingDevLogin(true);
+    try {
+      const url = `${import.meta.env.VITE_BASE_URL}/dev-login`;
+      const { data } = await axios.post(url, { email: devEmail });
+      completeLogin(data);
+    } catch (error) {
+      console.error('Dev login failed:', error);
+      setDevLoginError(error.response?.data?.message || 'Dev login failed');
+    } finally {
+      setIsLoadingDevLogin(false);
+    }
+  };
 
   return (
     <>
@@ -130,6 +159,33 @@ function Landing() {
                     onClick={googleLogin}
                     isLoading={isLoadingWithGoogle}
                   />
+
+                  {import.meta.env.DEV && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                        Dev bypass (local only)
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          value={devEmail}
+                          onChange={(e) => setDevEmail(e.target.value)}
+                          placeholder="allow-listed email"
+                          className="flex-1 min-w-0 bg-slate-900/60 border border-white/10 text-white text-sm px-3 py-2 focus:outline-none focus:border-site_orange/50"
+                        />
+                        <button
+                          onClick={handleDevLogin}
+                          disabled={isLoadingDevLogin || !devEmail}
+                          className="bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold px-4 py-2 transition-colors disabled:opacity-50"
+                        >
+                          {isLoadingDevLogin ? '...' : 'Go'}
+                        </button>
+                      </div>
+                      {devLoginError && (
+                        <p className="text-xs text-red-400 mt-2">{devLoginError}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
