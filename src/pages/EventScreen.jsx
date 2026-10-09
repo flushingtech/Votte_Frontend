@@ -23,7 +23,7 @@ import Stage_2 from "../components/Stage_2";
 import Stage_3_Ideas from "../components/Stage_3_Ideas";
 import ButtonUploadEvent from "../components/ButtonUploadEvent";
 import PresentationMode from "../components/PresentationMode";
-import { LOCAL_EVENT_SLIDES } from "../slides";
+import { LOCAL_EVENT_SLIDES_BY_TITLE } from "../slides";
 import { extractEventId, createEventSlug } from "../utils/urlHelpers";
 import { cldOptimize } from "../utils/cloudinaryImage";
 
@@ -58,7 +58,7 @@ function EventScreen() {
   const [showAllParticipants, setShowAllParticipants] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
 
-  const slides = event?.slides?.length ? event.slides : LOCAL_EVENT_SLIDES[event?.id] || [];
+  const slides = event?.slides?.length ? event.slides : LOCAL_EVENT_SLIDES_BY_TITLE[event?.title] || [];
   const hasSlides = slides.length > 0;
 
   // Fetch user display name

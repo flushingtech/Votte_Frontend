@@ -13,10 +13,10 @@ import slide12 from "./slide_12.png";
 import slide13 from "./slide_13.png";
 
 // Local-only slide data for the presentation-mode MVP. Slides are bundled
-// from src/slides instead of uploaded to Cloudinary, keyed by event id.
-// Once slide management moves server-side (the event_slides table already
-// exists for this), this map can be dropped in favor of `event.slides` from
-// the API — EventScreen already prefers that when it's populated.
+// from src/slides instead of uploaded to Cloudinary. Once slide management
+// moves server-side (the event_slides table already exists for this), this
+// map can be dropped in favor of `event.slides` from the API — EventScreen
+// already prefers that when it's populated.
 //
 // `qrType` marks the slides that get a live QR code overlaid into their
 // blank space (PresentationMode renders it and picks the destination URL
@@ -38,7 +38,11 @@ const HACKATHON_DECK = [
   { imageUrl: slide13, order: 13 },
 ];
 
-export const LOCAL_EVENT_SLIDES = {
-  75: HACKATHON_DECK, // "Flushing Tech Bi-Weekly Hackathon" (2026-03-22), now past
-  107: HACKATHON_DECK, // "Test Event" (2026-09-23)
+// The deck is generic (QR codes are overlaid per-event at render time, not
+// baked into the images), so it's keyed by the recurring event's *title*
+// rather than its id — ids drift every two weeks as new events sync in from
+// Meetup, which made the "Present" button silently disappear once the
+// current event moved past whatever id was hardcoded here.
+export const LOCAL_EVENT_SLIDES_BY_TITLE = {
+  "Flushing Tech Bi-Weekly Hackathon": HACKATHON_DECK,
 };
