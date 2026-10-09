@@ -33,17 +33,18 @@ const AddEvent = ({ userEmail, onSuccess }) => {
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-white">Create Event</h2>
+      <div className="flex items-center gap-2">
+        <span className="w-6 h-6 flex-shrink-0 rounded-md bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-xs shadow shadow-emerald-500/30">✨</span>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-white">Create Event</h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="space-y-2">
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1">Event Title</label>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Event Title</label>
             <input
               type="text"
-              className="w-full px-3 py-2 bg-slate-700/30 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all text-sm"
+              className="w-full px-3 py-2 bg-slate-800/60 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors text-sm"
               placeholder="e.g., Spring Hackathon"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -51,25 +52,25 @@ const AddEvent = ({ userEmail, onSuccess }) => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1">Event Date</label>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Event Date</label>
             <input
               type="date"
-              className="w-full px-3 py-2 bg-slate-700/30 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all [color-scheme:dark] text-sm"
+              className="w-full px-3 py-2 bg-slate-800/60 border border-slate-700 text-white focus:outline-none focus:border-blue-500/50 transition-colors [color-scheme:dark] text-sm"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1">Event Type</label>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Event Type</label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setEventType('hackathon')}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                className={`flex-1 py-2 px-3 text-xs font-semibold border transition-colors ${
                   eventType === 'hackathon'
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-blue-500/50 text-white shadow-lg'
-                    : 'bg-slate-700/30 border-slate-600/50 text-gray-400 hover:border-slate-500'
+                    ? 'bg-blue-600 border-blue-500 text-white'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-600'
                 }`}
               >
                 🏆 Hackathon
@@ -77,10 +78,10 @@ const AddEvent = ({ userEmail, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setEventType('live_coding')}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                className={`flex-1 py-2 px-3 text-xs font-semibold border transition-colors ${
                   eventType === 'live_coding'
-                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 border-teal-500/50 text-white shadow-lg'
-                    : 'bg-slate-700/30 border-slate-600/50 text-gray-400 hover:border-slate-500'
+                    ? 'bg-teal-600 border-teal-500 text-white'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-600'
                 }`}
               >
                 💻 Live Coding
@@ -91,7 +92,7 @@ const AddEvent = ({ userEmail, onSuccess }) => {
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 px-4 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           disabled={loading}
         >
           {loading ? (
@@ -108,10 +109,10 @@ const AddEvent = ({ userEmail, onSuccess }) => {
       {notification && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[9999] animate-slide-down">
           <div
-            className={`px-4 py-3 rounded-xl border shadow-2xl backdrop-blur-sm ${
+            className={`px-4 py-3 border shadow-2xl backdrop-blur-sm ${
               notification.type === 'success'
-                ? 'bg-gradient-to-br from-green-600/90 to-emerald-600/90 border-green-500/50 text-green-50'
-                : 'bg-gradient-to-br from-red-600/90 to-rose-600/90 border-red-500/50 text-red-50'
+                ? 'bg-emerald-600/90 border-emerald-500/50 text-emerald-50'
+                : 'bg-red-600/90 border-red-500/50 text-red-50'
             }`}
           >
             <p className="text-sm font-semibold whitespace-nowrap">{notification.message}</p>
