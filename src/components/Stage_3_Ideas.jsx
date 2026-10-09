@@ -138,7 +138,7 @@ function Stage_3_Ideas({ eventId }) {
               const style = categoryStyles[winner.category] || defaultStyle;
               return (
                 <li
-                  key={winner.category}
+                  key={winner.id ?? `${winner.category}-${winner.winning_idea_id}`}
                   className={`flex items-center gap-3 p-3 border ${style.bg} ${style.border}`}
                 >
                   <span className="text-xl flex-shrink-0">{style.icon}</span>
