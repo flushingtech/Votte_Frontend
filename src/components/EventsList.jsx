@@ -60,8 +60,19 @@ function EventsList({ today }) {
   if (error) return <p className="text-center text-sm text-red-400 py-6">{error}</p>;
 
   // --- pick candidates ---
+  // Only surface a "recent past" event if it actually happened recently (within
+  // one bi-weekly cycle). Without this bound, a hackathon that never got closed
+  // out (stuck at an earlier stage) stays "the most recent past event" forever
+  // and shows up here looking like it's upcoming, no matter how stale it is.
+  const RECENT_PAST_WINDOW_DAYS = 16;
+  const recentPastCutoff = new Date(today);
+  recentPastCutoff.setDate(recentPastCutoff.getDate() - RECENT_PAST_WINDOW_DAYS);
+
   const recentPastEvent = events
-    .filter((e) => toEasternDate(e.event_date) < today)
+    .filter((e) => {
+      const d = toEasternDate(e.event_date);
+      return d < today && d >= recentPastCutoff;
+    })
     .reduce((latest, e) =>
       !latest || toEasternDate(e.event_date) > toEasternDate(latest.event_date) ? e : latest
     , null);
