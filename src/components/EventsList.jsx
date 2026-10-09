@@ -5,6 +5,17 @@ import axios from 'axios';
 import { dateTimeFormatter } from '/src/utils/intlUtils';
 import { checkInToEvent, checkAdminStatus } from '../api/API';
 
+// event_date only stores a date (no time-of-day — admins pick a plain date
+// when creating/editing events), so the real start time for our recurring
+// Meetup series is tracked here instead. Lets two same-day events (e.g. the
+// Flushing and Jamaica hackathons) show distinct times instead of looking
+// like duplicates.
+const EVENT_TIME_LABELS = {
+  'Flushing Tech Bi-Weekly Hackathon': '4:00 PM – 6:00 PM',
+  'Jamaica Tech Bi-Weekly Hackathon': '3:00 PM – 5:00 PM',
+  'Flushing Tech Bi-weekly Online Workshops': '11:00 AM',
+};
+
 function EventsList({ today }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,37 +71,46 @@ function EventsList({ today }) {
   if (error) return <p className="text-center text-sm text-red-400 py-6">{error}</p>;
 
   // --- pick candidates ---
-  // Only surface a "recent past" event if it actually happened recently (within
-  // one bi-weekly cycle). Without this bound, a hackathon that never got closed
-  // out (stuck at an earlier stage) stays "the most recent past event" forever
-  // and shows up here looking like it's upcoming, no matter how stale it is.
+  // Only surface "recent past" events if they actually happened recently
+  // (within one bi-weekly cycle). Without this bound, a hackathon that never
+  // got closed out (stuck at an earlier stage) stays "the most recent past
+  // event" forever and shows up here looking like it's upcoming, no matter
+  // how stale it is.
   const RECENT_PAST_WINDOW_DAYS = 16;
   const recentPastCutoff = new Date(today);
   recentPastCutoff.setDate(recentPastCutoff.getDate() - RECENT_PAST_WINDOW_DAYS);
 
-  const recentPastEvent = events
-    .filter((e) => {
-      const d = toEasternDate(e.event_date);
-      return d < today && d >= recentPastCutoff;
-    })
-    .reduce((latest, e) =>
-      !latest || toEasternDate(e.event_date) > toEasternDate(latest.event_date) ? e : latest
-    , null);
+  // Multiple events (e.g. the Flushing and Jamaica hackathons) can land on the
+  // same date, so find the closest date on each side first, then take every
+  // event that falls on it — not just one — so none of them get hidden.
+  const pastDates = events
+    .map((e) => toEasternDate(e.event_date))
+    .filter((d) => d < today && d >= recentPastCutoff);
+  const mostRecentPastDate = pastDates.length
+    ? new Date(Math.max(...pastDates.map((d) => d.getTime())))
+    : null;
+  const recentPastEvents = mostRecentPastDate
+    ? events.filter((e) => toEasternDate(e.event_date).getTime() === mostRecentPastDate.getTime())
+    : [];
 
-  const nextUpcomingEvent = events
-    .filter((e) => toEasternDate(e.event_date) >= today)
-    .reduce((closest, e) =>
-      !closest || toEasternDate(e.event_date) < toEasternDate(closest.event_date) ? e : closest
-    , null);
+  const upcomingDates = events
+    .map((e) => toEasternDate(e.event_date))
+    .filter((d) => d >= today);
+  const nextUpcomingDate = upcomingDates.length
+    ? new Date(Math.min(...upcomingDates.map((d) => d.getTime())))
+    : null;
+  const nextUpcomingEvents = nextUpcomingDate
+    ? events.filter((e) => toEasternDate(e.event_date).getTime() === nextUpcomingDate.getTime())
+    : [];
 
-  const eventToday = events.find((e) => isSameDay(e.event_date)) || null;
+  const isNextUpcoming = (event) => nextUpcomingEvents.some((e) => e.id === event.id);
 
-  // --- both events on all screen sizes ---
-  const filteredEvents = [];
-  if (recentPastEvent) filteredEvents.push(recentPastEvent);
-  if (nextUpcomingEvent && (!recentPastEvent || nextUpcomingEvent.id !== recentPastEvent.id)) {
-    filteredEvents.push(nextUpcomingEvent);
-  }
+  // --- both dates' events on all screen sizes ---
+  const recentPastIds = new Set(recentPastEvents.map((e) => e.id));
+  const filteredEvents = [
+    ...recentPastEvents,
+    ...nextUpcomingEvents.filter((e) => !recentPastIds.has(e.id)),
+  ];
 
   return (
     <div className="events-container relative flex flex-col">
@@ -126,10 +146,8 @@ function EventsList({ today }) {
         {filteredEvents.map((event) => {
           const easternDate = toEasternDate(event.event_date);
           const isEventToday = isSameDay(event.event_date);
-          const isNextUpcoming =
-            !isEventToday &&
-            nextUpcomingEvent &&
-            event.id === nextUpcomingEvent.id;
+          const isUpcomingBadge = !isEventToday && isNextUpcoming(event);
+          const timeLabel = EVENT_TIME_LABELS[event.title];
 
           const isCheckedIn = (event.checked_in || '').split(',').includes(userEmail);
 
@@ -191,7 +209,7 @@ function EventsList({ today }) {
                   ? '#fca5a5'
                   : isEventToday
                     ? '#6ee7b7'
-                    : isNextUpcoming
+                    : isUpcomingBadge
                       ? '#93c5fd'
                       : '#e2e8f0',
               }}
@@ -210,12 +228,13 @@ function EventsList({ today }) {
                     <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-200 flex-shrink-0">Canceled</span>
                   ) : isEventToday ? (
                     <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">Live today</span>
-                  ) : isNextUpcoming ? (
+                  ) : isUpcomingBadge ? (
                     <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0">Next up</span>
                   ) : null}
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5 truncate">
                   {dateTimeFormatter.format(easternDate)}
+                  {timeLabel ? ` • ${timeLabel}` : ''}
                   {event.location ? ` • ${event.location}` : ''}
                 </p>
               </div>
