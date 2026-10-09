@@ -6,7 +6,7 @@ import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
 import IdeaSubmission from "./IdeaSubmission";
 
-function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1", readOnly = false, profilePicture }) {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1", readOnly = false, profilePicture, canManageReuse = false }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -95,6 +95,7 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", event
           eventId={eventId}
           refreshIdeas={refreshIdeas}
           profilePicture={profilePicture}
+          canManageReuse={canManageReuse}
         />
       )}
       {ideas.length === 0 ? (

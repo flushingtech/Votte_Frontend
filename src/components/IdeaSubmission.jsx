@@ -14,9 +14,9 @@ import { cldOptimize } from "../utils/cloudinaryImage";
 // single post replaces the old title/description split (both get set to
 // the same text) and tech stack is no longer required up front — it can
 // still be added later via Edit. Reusing a previous/archived project is
-// still supported, just moved into the toolbar as small icon buttons
-// instead of a full-screen picker screen.
-function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture }) {
+// still supported, as a row below the composer, but only for admins and
+// hosts (canManageReuse) — regular members just get the plain composer.
+function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManageReuse = false }) {
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
@@ -189,8 +189,8 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture }) {
   };
 
   return (
-    <div className="border-b border-slate-700/60 pb-3 mb-2">
-      <div className="flex gap-3 px-1 pt-2">
+    <div className="bg-slate-950/70 border border-slate-800 rounded-xl mb-2 px-2 pb-2">
+      <div className="flex gap-3 px-1 pt-3">
         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
           {profilePicture ? (
             <img
@@ -218,30 +218,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture }) {
             className="w-full bg-transparent text-white placeholder-slate-500 text-sm sm:text-base resize-none focus:outline-none leading-snug"
           />
 
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800">
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={openPreviousProjects}
-                title="Reuse a previous project"
-                className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
-              >
-                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M4.5 9.75V8.25A2.25 2.25 0 016.75 6h3.879a1.5 1.5 0 011.06.44l1.122 1.12a1.5 1.5 0 001.06.44H17.25A2.25 2.25 0 0119.5 9.75v0" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={openArchivedProjects}
-                title="Reuse an archived project"
-                className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
-              >
-                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                </svg>
-              </button>
-            </div>
-
+          <div className="flex items-center justify-end mt-2 pt-2 border-t border-slate-800">
             <button
               onClick={handlePost}
               disabled={!text.trim() || posting}
@@ -252,6 +229,33 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture }) {
           </div>
 
           {error && <p className="text-xs text-red-400 mt-1.5">{error}</p>}
+
+          {canManageReuse && (
+            <div className="flex items-center gap-1 mt-1 pt-1.5 border-t border-slate-800/60">
+              <button
+                type="button"
+                onClick={openPreviousProjects}
+                title="Reuse a previous project"
+                className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M4.5 9.75V8.25A2.25 2.25 0 016.75 6h3.879a1.5 1.5 0 011.06.44l1.122 1.12a1.5 1.5 0 001.06.44H17.25A2.25 2.25 0 0119.5 9.75v0" />
+                </svg>
+                Previous Projects
+              </button>
+              <button
+                type="button"
+                onClick={openArchivedProjects}
+                title="Reuse an archived project"
+                className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Archived Projects
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

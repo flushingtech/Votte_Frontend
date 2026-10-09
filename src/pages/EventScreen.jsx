@@ -999,6 +999,7 @@ function EventScreen() {
                       eventSubStage={subStage}
                       readOnly={eventStage === "2"}
                       profilePicture={profilePicture}
+                      canManageReuse={isAdmin || isHost}
                     />
                   ) : eventStage === "1" ? (
                     <Stage_1_Ideas
@@ -1009,6 +1010,7 @@ function EventScreen() {
                       eventStage={eventStage}
                       eventSubStage={subStage}
                       profilePicture={profilePicture}
+                      canManageReuse={isAdmin || isHost}
                     />
                   ) : eventStage === "2" ? (
                     <Stage_2 key={ideasRefreshKey} eventId={eventId} />
