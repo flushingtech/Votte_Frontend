@@ -175,10 +175,9 @@ function EventScreen() {
     return { label: `Stage ${eventStage}`, cls: "bg-slate-500/10 text-slate-300 border-slate-500/30" };
   }, [isLiveCoding, eventStage, subStage]);
 
-  // Only allow project selection in stage 1.2 or stage 2 (for hackathons only in stage 2)
-  const isStageAllowingSelection =
-    (eventStage === "1" && subStage === "2") ||
-    (eventStage === "2" && !isLiveCoding);
+  // Only prompt for project selection once voting has actually started
+  // (hackathons only — live coding events don't have a voting stage).
+  const isStageAllowingSelection = eventStage === "2" && !isLiveCoding;
 
   const selectionRequired =
     !userHasProjectSelection &&
