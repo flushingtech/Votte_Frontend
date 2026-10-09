@@ -995,10 +995,14 @@ function EventScreen() {
                 </div>
 
                 {/* Mobile only: admin/info panel sits right after the hero here.
-                    Hidden on desktop, where it lives in the sticky right rail instead. */}
-                <div className="lg:hidden min-w-0">
-                  {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
-                </div>
+                    Hidden on desktop, where it lives in the sticky right rail instead.
+                    Regular (non-host) users don't get a panel here — everything it
+                    would show (stage badge, checked-in state) is already in the hero. */}
+                {(isAdmin || canPresent) && (
+                  <div className="lg:hidden min-w-0">
+                    {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
+                  </div>
+                )}
 
                 {/* STAGE CONTENT (submissions / voting / winners) */}
                 <div>
@@ -1045,9 +1049,11 @@ function EventScreen() {
               {/* Desktop only: one continuous sticky right rail — Event Info /
                   Admin Controls directly above Participants, no grid-row gap
                   between them. Starts level with the hero, not fixed, and
-                  scrolls with the page once it reaches the bottom of its column. */}
+                  scrolls with the page once it reaches the bottom of its column.
+                  Regular (non-host) users skip straight to Participants — the
+                  Event Info panel has nothing for them that isn't already in the hero. */}
               <div className="hidden lg:flex lg:flex-col gap-4 lg:sticky lg:top-6 min-w-0">
-                {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
+                {isAdmin ? <AdminControlPanel /> : canPresent ? <EventInfoPanel /> : null}
                 <ParticipantsPanel />
               </div>
 
