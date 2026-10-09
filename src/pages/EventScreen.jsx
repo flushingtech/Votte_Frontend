@@ -705,120 +705,125 @@ function EventScreen() {
     const btnNeutral = "w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
     const btnDanger = "w-full bg-red-600/15 hover:bg-red-600/25 border border-red-500/40 text-red-300 px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
 
+    const sectionLabel = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+
     return (
-      <aside className="bg-slate-900 border border-slate-700 p-4 flex flex-col gap-2.5 w-full">
-        <div className="flex items-center justify-between mb-0.5">
+      <aside className="bg-slate-900 border border-slate-700 w-full flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
           <h2 className="text-white text-sm font-bold uppercase tracking-wide">Admin Controls</h2>
           <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold border ${stageBadge.cls}`}>
             {stageBadge.label}
           </span>
         </div>
 
-        <button onClick={() => navigate('/home')} className={btnNeutral}>
-          ← Back to Community
-        </button>
+        <div className="p-4 flex flex-col gap-4">
+          {/* Stage controls — the primary, most-used actions */}
+          <div className="flex flex-col gap-2">
+            <p className={sectionLabel}>Stage</p>
 
-        <hr className="border-slate-800 my-0.5" />
-
-        {isLiveCoding ? (
-          <>
-            {eventStage === "1" && (
-              <button onClick={handleCompleteSession} className={btnPrimary}>
-                Complete Session
-              </button>
-            )}
-            {eventStage === "2" && (
-              <button onClick={handleReopenSession} className={btnNeutral}>
-                Reopen Session
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            {eventStage === "1" && subStage === "1" && (
-              <button onClick={handleToggleSubStage} className={btnPrimary}>
-                Lock Submissions
-              </button>
-            )}
-
-            {eventStage === "1" && subStage === "2" && (
+            {isLiveCoding ? (
               <>
-                <button onClick={handleStartVoting} className={btnPrimary}>
-                  Start Voting
-                </button>
-                <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
-                  Unlock Submissions
-                </button>
+                {eventStage === "1" && (
+                  <button onClick={handleCompleteSession} className={btnPrimary}>
+                    Complete Session
+                  </button>
+                )}
+                {eventStage === "2" && (
+                  <button onClick={handleReopenSession} className={btnNeutral}>
+                    Reopen Session
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {eventStage === "1" && subStage === "1" && (
+                  <button onClick={handleToggleSubStage} className={btnPrimary}>
+                    Lock Submissions
+                  </button>
+                )}
+
+                {eventStage === "1" && subStage === "2" && (
+                  <>
+                    <button onClick={handleStartVoting} className={btnPrimary}>
+                      Start Voting
+                    </button>
+                    <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
+                      Unlock Submissions
+                    </button>
+                  </>
+                )}
+
+                {eventStage === "2" && (
+                  <>
+                    <button onClick={handleShowResults} className={btnPrimary}>
+                      Show Results
+                    </button>
+                    <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
+                      ← Back to Submissions
+                    </button>
+                  </>
+                )}
+
+                {eventStage === "3" && (
+                  <button onClick={handleBackToVoting} className={btnNeutral}>
+                    ← Back to Voting
+                  </button>
+                )}
               </>
             )}
+          </div>
 
-            {eventStage === "2" && (
-              <>
-                <button onClick={handleShowResults} className={btnPrimary}>
-                  Show Results
+          {/* Event settings — configuration, used less often than stage actions */}
+          <div className="flex flex-col gap-3 pt-3 border-t border-slate-800">
+            <p className={sectionLabel}>Event Settings</p>
+
+            <div>
+              <p className="text-xs font-medium text-slate-400 mb-1.5">Event Image</p>
+              <ButtonUploadEvent eventId={eventId} />
+            </div>
+
+            {hasSlides && (
+              <div>
+                <p className="text-xs font-medium text-slate-400 mb-1.5">
+                  Hosts <span className="text-slate-600">— can use Present</span>
+                </p>
+                <Select
+                  isMulti
+                  menuPortalTarget={document.body}
+                  styles={{
+                    control: (base) => ({ ...base, backgroundColor: '#1e293b', borderColor: '#334155', minHeight: '38px' }),
+                    menu: (base) => ({ ...base, backgroundColor: '#1e293b', color: 'white', zIndex: 9999 }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? '#334155' : '#1e293b', color: 'white', cursor: 'pointer' }),
+                    multiValue: (base) => ({ ...base, backgroundColor: '#334155' }),
+                    multiValueLabel: (base) => ({ ...base, color: 'white' }),
+                    input: (base) => ({ ...base, color: 'white' }),
+                    placeholder: (base) => ({ ...base, color: '#94a3b8' }),
+                  }}
+                  options={allUsers.map((u) => ({ label: `${u.name} (${u.email})`, value: u.email }))}
+                  value={selectedHosts.map((hostEmail) => {
+                    const user = allUsers.find((u) => u.email === hostEmail);
+                    return { label: user ? `${user.name} (${user.email})` : hostEmail, value: hostEmail };
+                  })}
+                  onChange={(selected) => setSelectedHosts((selected || []).map((s) => s.value))}
+                  placeholder="Select host(s)..."
+                  className="text-sm mb-2"
+                />
+                <button onClick={handleSaveHosts} disabled={savingHosts} className={btnNeutral}>
+                  {savingHosts ? 'Saving...' : 'Save Hosts'}
                 </button>
-                <button onClick={handleBackToSubmissionsOpen} className={btnNeutral}>
-                  ← Back to Submissions
-                </button>
-              </>
+              </div>
             )}
-
-            {eventStage === "3" && (
-              <button onClick={handleBackToVoting} className={btnNeutral}>
-                ← Back to Voting
-              </button>
-            )}
-          </>
-        )}
-
-        <hr className="border-slate-800 my-0.5" />
-
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Event Image</p>
-          <ButtonUploadEvent eventId={eventId} />
+          </div>
         </div>
 
-        {hasSlides && (
-          <>
-            <hr className="border-slate-800 my-0.5" />
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">
-                Hosts <span className="normal-case text-slate-600">— can use Present</span>
-              </p>
-              <Select
-                isMulti
-                menuPortalTarget={document.body}
-                styles={{
-                  control: (base) => ({ ...base, backgroundColor: '#1e293b', borderColor: '#334155', minHeight: '38px' }),
-                  menu: (base) => ({ ...base, backgroundColor: '#1e293b', color: 'white', zIndex: 9999 }),
-                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                  option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? '#334155' : '#1e293b', color: 'white', cursor: 'pointer' }),
-                  multiValue: (base) => ({ ...base, backgroundColor: '#334155' }),
-                  multiValueLabel: (base) => ({ ...base, color: 'white' }),
-                  input: (base) => ({ ...base, color: 'white' }),
-                  placeholder: (base) => ({ ...base, color: '#94a3b8' }),
-                }}
-                options={allUsers.map((u) => ({ label: `${u.name} (${u.email})`, value: u.email }))}
-                value={selectedHosts.map((hostEmail) => {
-                  const user = allUsers.find((u) => u.email === hostEmail);
-                  return { label: user ? `${user.name} (${user.email})` : hostEmail, value: hostEmail };
-                })}
-                onChange={(selected) => setSelectedHosts((selected || []).map((s) => s.value))}
-                placeholder="Select host(s)..."
-                className="text-sm mb-2"
-              />
-              <button onClick={handleSaveHosts} disabled={savingHosts} className={btnNeutral}>
-                {savingHosts ? 'Saving...' : 'Save Hosts'}
-              </button>
-            </div>
-          </>
-        )}
-
-        <hr className="border-slate-800 my-0.5" />
-
-        <button onClick={() => setShowCancelConfirm(true)} className={btnDanger}>
-          Cancel Event
-        </button>
+        {/* Danger zone — visually separated so it's never mistaken for a routine action */}
+        <div className="p-4 pt-3 border-t border-slate-800">
+          <button onClick={() => setShowCancelConfirm(true)} className={btnDanger}>
+            Cancel Event
+          </button>
+        </div>
       </aside>
     );
   };
