@@ -71,6 +71,7 @@ function EventScreen() {
   );
   const isHost = eventHosts.includes(email);
   const canPresent = hasSlides && (isAdmin || isHost);
+  const showAdminPanel = isAdmin || canPresent;
 
   // Fetch user display name
   useEffect(() => {
@@ -938,7 +939,16 @@ function EventScreen() {
 
           <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full">
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-3 sm:gap-4 lg:items-start">
+            <div className={`grid grid-cols-1 ${showAdminPanel ? 'lg:grid-cols-[280px_minmax(0,1fr)_300px]' : 'lg:grid-cols-[minmax(0,1fr)_300px]'} gap-3 sm:gap-4 lg:items-start`}>
+
+              {/* Desktop only: Admin Controls / Event Info sits to the left of
+                  the hero + ideas, its own sticky column. Mobile keeps it
+                  inline at the top of the main column instead (below). */}
+              {showAdminPanel && (
+                <div className="hidden lg:flex lg:flex-col gap-4 lg:sticky lg:top-6 min-w-0">
+                  {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
+                </div>
+              )}
 
               {/* MAIN — hero + stage content, own independent height */}
               <div className="min-w-0 flex flex-col gap-3 sm:gap-4">
@@ -995,10 +1005,10 @@ function EventScreen() {
                 </div>
 
                 {/* Mobile only: admin/info panel sits right after the hero here.
-                    Hidden on desktop, where it lives in the sticky right rail instead.
+                    Hidden on desktop, where it lives in its own sticky left column instead.
                     Regular (non-host) users don't get a panel here — everything it
                     would show (stage badge, checked-in state) is already in the hero. */}
-                {(isAdmin || canPresent) && (
+                {showAdminPanel && (
                   <div className="lg:hidden min-w-0">
                     {isAdmin ? <AdminControlPanel /> : <EventInfoPanel />}
                   </div>
@@ -1046,14 +1056,9 @@ function EventScreen() {
                 </div>
               </div>
 
-              {/* Desktop only: one continuous sticky right rail — Event Info /
-                  Admin Controls directly above Participants, no grid-row gap
-                  between them. Starts level with the hero, not fixed, and
-                  scrolls with the page once it reaches the bottom of its column.
-                  Regular (non-host) users skip straight to Participants — the
-                  Event Info panel has nothing for them that isn't already in the hero. */}
+              {/* Desktop only: sticky right rail — Participants only. Admin
+                  Controls / Event Info now lives in its own left column instead. */}
               <div className="hidden lg:flex lg:flex-col gap-4 lg:sticky lg:top-6 min-w-0">
-                {isAdmin ? <AdminControlPanel /> : canPresent ? <EventInfoPanel /> : null}
                 <ParticipantsPanel />
               </div>
 
