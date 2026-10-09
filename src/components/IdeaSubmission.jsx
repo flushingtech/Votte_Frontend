@@ -126,24 +126,24 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
     );
 
     return (
-      <div className="space-y-3">
-        <div className="relative mb-4">
+      <div className="space-y-2">
+        <div className="relative mb-3">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects by title..."
-            className="w-full px-4 py-3 pl-11 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+            className="w-full px-3 py-2 pl-9 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
           />
-          <svg className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-1.5">
           {filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
+            <div className="text-center py-8">
+              <p className="text-gray-400 text-sm">
                 {search ? "No projects found matching your search." : "No projects available."}
               </p>
             </div>
@@ -157,41 +157,37 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
               return (
                 <div
                   key={project.id}
-                  className="flex items-stretch gap-4 bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
+                  className="flex items-center gap-3 bg-slate-800/30 border border-slate-600/50 rounded-lg p-2 hover:bg-slate-700/30 transition-colors"
                 >
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-white text-lg mb-2">{project.idea}</h4>
-
-                    {project.event_title && project.event_date && (
-                      <p className="text-gray-400 text-sm mb-1">
-                        📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: "UTC" })}
-                      </p>
-                    )}
-
-                    {project.contributors && (
-                      <p className="text-gray-400 text-sm mb-3">👥 {contributorNames}</p>
-                    )}
-
-                    {!isSameEvent && (
-                      <button
-                        onClick={() => handleSelectProjectToAdd(project)}
-                        className={`${accentClass} px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors`}
-                      >
-                        ➕ Add to This Event
-                      </button>
-                    )}
-                  </div>
-
                   {project.image_url && (
-                    <div className="w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 rounded-lg overflow-hidden border border-slate-700">
+                    <div className="w-12 h-12 flex-shrink-0 rounded-md overflow-hidden border border-slate-700">
                       <img
-                        src={cldOptimize(project.image_url, { width: 240, height: 240 })}
+                        src={cldOptimize(project.image_url, { width: 100, height: 100 })}
                         alt=""
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"
                       />
                     </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-white text-sm truncate">{project.idea}</h4>
+                    <p className="text-gray-400 text-xs truncate">
+                      {project.event_title && project.event_date && (
+                        <>{project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: "UTC" })}</>
+                      )}
+                      {project.contributors && <> • 👥 {contributorNames}</>}
+                    </p>
+                  </div>
+
+                  {!isSameEvent && (
+                    <button
+                      onClick={() => handleSelectProjectToAdd(project)}
+                      className={`${accentClass} flex-shrink-0 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors whitespace-nowrap`}
+                    >
+                      ➕ Add
+                    </button>
                   )}
                 </div>
               );
@@ -277,7 +273,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
         <>
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: "2147483647", position: "fixed" }}></div>
           <div className="fixed inset-0 flex items-start justify-center p-4 pt-16 pb-8" style={{ zIndex: "2147483647", position: "fixed", isolation: "isolate" }}>
-            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-3xl max-h-[88vh] overflow-y-auto">
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-4 sm:p-5 w-full max-w-3xl max-h-[88vh] overflow-y-auto">
               <button
                 onClick={closePicker}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
@@ -340,7 +336,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
                 </div>
               ) : (
                 <>
-                  <h3 className="text-xl font-semibold text-white mb-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">
                     {pickerMode === "previous" ? "Previous Projects" : "Archived Projects (Stage 1)"}
                   </h3>
                   {pickerMode === "previous"
