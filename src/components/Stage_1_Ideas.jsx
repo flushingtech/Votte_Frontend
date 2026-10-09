@@ -4,8 +4,9 @@ import { createPortal } from "react-dom";
 import { getIdeasByEvent, deleteIdea, setIdeaStage } from "../api/API";
 import EditIdea from "./EditIdea";
 import MarkdownWithPlugins from "./MarkdownWithPluggins";
+import IdeaSubmission from "./IdeaSubmission";
 
-function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1", readOnly = false }) {
+function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", eventSubStage = "1", readOnly = false, profilePicture }) {
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -81,10 +82,23 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", event
   if (loading) return <p className="text-center text-gray-500">Loading ideas...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
+  // Matches the old CTA-row trigger's visibility: only while this event is
+  // actually accepting new submissions (not read-only, and not locked into
+  // Stage 1.2 ahead of voting).
+  const canSubmit = !readOnly && eventSubStage === "1";
+
   return (
-    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-1.5 sm:p-2 h-[500px] overflow-y-auto">
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-2xl p-1.5 sm:p-2 h-[500px] overflow-y-auto flex flex-col">
+      {canSubmit && (
+        <IdeaSubmission
+          email={userEmail}
+          eventId={eventId}
+          refreshIdeas={refreshIdeas}
+          profilePicture={profilePicture}
+        />
+      )}
       {ideas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-center">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">💡</div>
           <h3 className="text-base sm:text-xl font-semibold text-white mb-1 sm:mb-2">No Ideas Yet</h3>
           <p className="text-sm sm:text-base text-gray-400">Be the first to share your innovative concept!</p>
@@ -95,7 +109,11 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", event
             const isYourIdea = idea?.email === userEmail;
             const techLabel = Array.isArray(idea?.technologies)
               ? idea.technologies.join(", ")
-              : (idea?.technologies ?? "No tech listed");
+              : (idea?.technologies || "No tech listed");
+            // Compose-box posts store the same text as both idea and
+            // description (there's no separate title field in that flow),
+            // so skip the redundant second line when they're identical.
+            const showDescription = idea?.description && idea.description !== idea?.idea;
 
             return (
               <li
@@ -123,11 +141,13 @@ function Stage_1_Ideas({ eventId, refreshIdeas, isAdmin, eventStage = "1", event
                       {idea?.idea}
                     </h3>
 
-                    <div className="text-[10px] sm:text-xs text-gray-200 mb-1 sm:mb-1.5 line-clamp-2 leading-tight">
-                      <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-[10px] sm:text-xs">
-                        {idea?.description ?? ""}
-                      </MarkdownWithPlugins>
-                    </div>
+                    {showDescription && (
+                      <div className="text-[10px] sm:text-xs text-gray-200 mb-1 sm:mb-1.5 line-clamp-2 leading-tight">
+                        <MarkdownWithPlugins className="prose prose-invert max-w-none [&>*]:my-0 [&>*]:leading-tight text-[10px] sm:text-xs">
+                          {idea.description}
+                        </MarkdownWithPlugins>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-400">
                       <span className="bg-slate-700/50 px-1 sm:px-1.5 py-0.5 rounded border border-slate-600/50">

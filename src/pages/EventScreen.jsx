@@ -20,7 +20,6 @@ import {
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/dashboard/Sidebar";
 import { formatEventDate } from "../utils/eventDate";
-import IdeaSubmission from "../components/IdeaSubmission";
 import Stage_1_Ideas from "../components/Stage_1_Ideas";
 import Stage_2 from "../components/Stage_2";
 import Stage_3_Ideas from "../components/Stage_3_Ideas";
@@ -969,23 +968,14 @@ function EventScreen() {
                         Checked In
                       </span>
                     )}
-                    {(canPresent || (eventStage === "1" && (isLiveCoding || subStage === "1"))) && (
+                    {canPresent && (
                       <div className="ml-auto flex items-center gap-2">
-                        {canPresent && (
-                          <button
-                            onClick={() => setIsPresenting(true)}
-                            className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-                          >
-                            <span aria-hidden="true">▶</span> Present
-                          </button>
-                        )}
-                        {eventStage === "1" && (isLiveCoding || subStage === "1") && (
-                          <IdeaSubmission
-                            email={email}
-                            eventId={eventId}
-                            refreshIdeas={refreshIdeas}
-                          />
-                        )}
+                        <button
+                          onClick={() => setIsPresenting(true)}
+                          className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                        >
+                          <span aria-hidden="true">▶</span> Present
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1008,6 +998,7 @@ function EventScreen() {
                       eventStage={eventStage}
                       eventSubStage={subStage}
                       readOnly={eventStage === "2"}
+                      profilePicture={profilePicture}
                     />
                   ) : eventStage === "1" ? (
                     <Stage_1_Ideas
@@ -1017,6 +1008,7 @@ function EventScreen() {
                       isAdmin={isAdmin}
                       eventStage={eventStage}
                       eventSubStage={subStage}
+                      profilePicture={profilePicture}
                     />
                   ) : eventStage === "2" ? (
                     <Stage_2 key={ideasRefreshKey} eventId={eventId} />

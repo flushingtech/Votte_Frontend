@@ -1,78 +1,96 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   submitIdea,
-  getEventStage,
   getPreviousProjects,
   getArchivedProjects,
   addIdeaToEvent,
 } from "../api/API";
 import MarkdownPreviewer from "./MarkdownPreviewer";
+import { cldOptimize } from "../utils/cloudinaryImage";
 
-function IdeaSubmission({ email, eventId, refreshIdeas }) {
-  const [idea, setIdea] = useState("");
-  const [description, setDescription] = useState("");
-  const [technologies, setTechnologies] = useState("");
-  const [githubRepos, setGithubRepos] = useState([]);
-  const [isBuilt, setIsBuilt] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [selectedMode, setSelectedMode] = useState(null);
-  const [eventStage, setEventStage] = useState(1);
-  const [loading, setLoading] = useState(true);
+// Twitter/X-style inline composer: no "Add New Idea" modal to open first,
+// just a "What's your idea?" box sitting at the top of the ideas feed. A
+// single post replaces the old title/description split (both get set to
+// the same text) and tech stack is no longer required up front — it can
+// still be added later via Edit. Reusing a previous/archived project is
+// still supported, just moved into the toolbar as small icon buttons
+// instead of a full-screen picker screen.
+function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture }) {
+  const [text, setText] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState("");
+  const textareaRef = useRef(null);
+
+  const [pickerMode, setPickerMode] = useState(null); // null | "previous" | "archived"
   const [previousProjects, setPreviousProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [eventSpecificDescription, setEventSpecificDescription] = useState("");
   const [previousProjectsSearch, setPreviousProjectsSearch] = useState("");
   const [archivedProjectsSearch, setArchivedProjectsSearch] = useState("");
-  const textRef = useRef(null);
+  const [pickerMessage, setPickerMessage] = useState("");
   const eventDescRef = useRef(null);
 
-  useEffect(() => {
-    const fetchEventStage = async () => {
-      try {
-        const eventStageData = await getEventStage(eventId);
-        setEventStage(eventStageData.stage);
-      } catch (error) {
-        console.error("Error fetching event stage:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const initial = (email || "?").charAt(0).toUpperCase();
 
-    fetchEventStage();
-  }, [eventId]);
+  const autoGrow = (el) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
 
-  const handleIdeaSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!idea || !description || !technologies) {
-      setMessage("Please fill in all fields: idea, description, and technologies");
-      return;
-    }
-
+  const handlePost = async () => {
+    const trimmed = text.trim();
+    if (!trimmed || posting) return;
+    setPosting(true);
+    setError("");
     try {
-      const response = await submitIdea(email, idea, description, technologies, eventId, isBuilt, githubRepos);
+      const response = await submitIdea(email, trimmed, trimmed, "", eventId, false, []);
       if (response.status === 201) {
-        setMessage("Idea submitted successfully!");
-        setIdea("");
-        setDescription("");
-        setTechnologies("");
-        setGithubRepos([]);
-        setIsBuilt(false);
-        setIsFormVisible(false);
-        setSelectedMode(null);
+        setText("");
+        if (textareaRef.current) autoGrow(textareaRef.current);
         if (refreshIdeas) refreshIdeas();
       }
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        setMessage(error.response.data.message);
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        setError(err.response.data.message);
       } else {
-        console.error("Error submitting idea:", error);
-        setMessage("An error occurred while submitting your idea.");
+        console.error("Error submitting idea:", err);
+        setError("Something went wrong posting your idea.");
       }
+    } finally {
+      setPosting(false);
     }
+  };
+
+  const openPreviousProjects = async () => {
+    try {
+      const data = await getPreviousProjects();
+      setPreviousProjects(data.ideas || data);
+      setPickerMode("previous");
+    } catch (err) {
+      console.error("Failed to load previous projects:", err);
+    }
+  };
+
+  const openArchivedProjects = async () => {
+    try {
+      const data = await getArchivedProjects();
+      setArchivedProjects(data || []);
+      setPickerMode("archived");
+    } catch (err) {
+      console.error("Failed to load archived projects:", err);
+    }
+  };
+
+  const closePicker = () => {
+    setPickerMode(null);
+    setSelectedProject(null);
+    setEventSpecificDescription("");
+    setPreviousProjectsSearch("");
+    setArchivedProjectsSearch("");
+    setPickerMessage("");
   };
 
   const handleSelectProjectToAdd = (project) => {
@@ -80,28 +98,12 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
     setEventSpecificDescription("");
   };
 
-  const handleAddRepo = () => {
-    setGithubRepos([...githubRepos, { title: '', url: '' }]);
-  };
-
-  const handleRemoveRepo = (index) => {
-    setGithubRepos(githubRepos.filter((_, i) => i !== index));
-  };
-
-  const handleRepoChange = (index, field, value) => {
-    const updated = [...githubRepos];
-    updated[index][field] = value;
-    setGithubRepos(updated);
-  };
-
   const handleConfirmAddToEvent = async (e) => {
     e.preventDefault();
-
     if (!eventSpecificDescription.trim()) {
-      setMessage("Please provide a description for this event.");
+      setPickerMessage("Please provide a description for this event.");
       return;
     }
-
     try {
       await addIdeaToEvent(
         selectedProject.id,
@@ -110,45 +112,156 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
         selectedProject.technologies,
         selectedProject.is_built
       );
-      setMessage("Added to event successfully!");
-      setSelectedProject(null);
-      setEventSpecificDescription("");
       if (refreshIdeas) refreshIdeas();
-    } catch (error) {
-      console.error("Failed to add idea to event:", error);
-      setMessage(error.response?.data?.message || "Failed to add idea to event.");
+      closePicker();
+    } catch (err) {
+      console.error("Failed to add idea to event:", err);
+      setPickerMessage(err.response?.data?.message || "Failed to add idea to event.");
     }
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-500">Loading...</p>;
-  }
+  const renderProjectList = (projects, search, setSearch, accentClass) => {
+    const filtered = projects.filter((project) =>
+      project.idea.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+      <div className="space-y-3">
+        <div className="relative mb-4">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search projects by title..."
+            className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+          />
+          <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        <div className="space-y-3 max-h-96 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400">
+                {search ? "No projects found matching your search." : "No projects available."}
+              </p>
+            </div>
+          ) : (
+            filtered.map((project) => {
+              const isSameEvent = String(project.event_id) === String(eventId);
+              const contributorNames = project.contributors
+                ? project.contributors.split(",").map((c) => c.trim().split("@")[0]).join(", ")
+                : "";
+
+              return (
+                <div
+                  key={project.id}
+                  className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
+                >
+                  <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
+
+                  {project.event_title && project.event_date && (
+                    <p className="text-gray-400 text-sm mb-1">
+                      📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: "UTC" })}
+                    </p>
+                  )}
+
+                  {project.contributors && (
+                    <p className="text-gray-400 text-sm mb-3">👥 {contributorNames}</p>
+                  )}
+
+                  {!isSameEvent && (
+                    <button
+                      onClick={() => handleSelectProjectToAdd(project)}
+                      className={`${accentClass} px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors`}
+                    >
+                      ➕ Add to This Event
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="w-full text-center">
-      {eventStage === 2 ? (
-        <p className="text-yellow-500 font-bold text-lg">
-          Votte Time - Submissions are closed.
-        </p>
-      ) : (
-        <button
-          onClick={() => setIsFormVisible(true)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-blue-500/50 hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-        >
-          💡 Add New Idea
-        </button>
-      )}
+    <div className="border-b border-slate-700/60 pb-3 mb-2">
+      <div className="flex gap-3 px-1 pt-2">
+        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+          {profilePicture ? (
+            <img
+              src={cldOptimize(profilePicture, { width: 80, height: 80 })}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            initial
+          )}
+        </div>
 
-      {isFormVisible && createPortal(
+        <div className="flex-1 min-w-0">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              autoGrow(e.target);
+            }}
+            placeholder="What's your idea?"
+            rows={1}
+            className="w-full bg-transparent text-white placeholder-slate-500 text-sm sm:text-base resize-none focus:outline-none leading-snug"
+          />
+
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={openPreviousProjects}
+                title="Reuse a previous project"
+                className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M4.5 9.75V8.25A2.25 2.25 0 016.75 6h3.879a1.5 1.5 0 011.06.44l1.122 1.12a1.5 1.5 0 001.06.44H17.25A2.25 2.25 0 0119.5 9.75v0" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={openArchivedProjects}
+                title="Reuse an archived project"
+                className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+              </button>
+            </div>
+
+            <button
+              onClick={handlePost}
+              disabled={!text.trim() || posting}
+              className="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold px-4 py-1.5 rounded-full text-sm transition-colors"
+            >
+              {posting ? "Posting..." : "Post"}
+            </button>
+          </div>
+
+          {error && <p className="text-xs text-red-400 mt-1.5">{error}</p>}
+        </div>
+      </div>
+
+      {pickerMode && createPortal(
         <>
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: '2147483647', position: 'fixed' }}></div>
-          <div className="fixed inset-0 flex items-start justify-center p-4 pt-16 pb-8" style={{ zIndex: '2147483647', position: 'fixed', isolation: 'isolate' }}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: "2147483647", position: "fixed" }}></div>
+          <div className="fixed inset-0 flex items-start justify-center p-4 pt-16 pb-8" style={{ zIndex: "2147483647", position: "fixed", isolation: "isolate" }}>
             <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
               <button
-                onClick={() => {
-                  setIsFormVisible(false);
-                  setSelectedMode(null);
-                }}
+                onClick={closePicker}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,480 +269,81 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
                 </svg>
               </button>
 
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Submit Your Idea
-                </h2>
-                <p className="text-gray-400">Share your innovative concept with the community</p>
-              </div>
-
-              {!selectedMode ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <button
-                    onClick={() => setSelectedMode("new")}
-                    className="bg-gradient-to-br from-blue-600/30 to-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-500/50 p-6 hover:from-blue-500/40 hover:to-blue-700/30 transition-all duration-200 hover:scale-105 text-center group"
-                  >
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🧠</div>
-                    <h3 className="text-white font-semibold mb-2">New Idea</h3>
-                    <p className="text-gray-400 text-sm">Start fresh with a brand new concept</p>
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const data = await getPreviousProjects();
-                        setPreviousProjects(data.ideas || data);
-                        setSelectedMode("previous");
-                      } catch (err) {
-                        console.error("Failed to load previous projects:", err);
-                      }
-                    }}
-                    className="bg-gradient-to-br from-green-600/30 to-green-800/20 backdrop-blur-sm rounded-xl border border-green-500/50 p-6 hover:from-green-500/40 hover:to-green-700/30 transition-all duration-200 hover:scale-105 text-center group"
-                  >
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">📂</div>
-                    <h3 className="text-white font-semibold mb-2">Previous Projects</h3>
-                    <p className="text-gray-400 text-sm">Reuse ideas from past events</p>
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const data = await getArchivedProjects();
-                        setArchivedProjects(data || []);
-                        setSelectedMode("archived");
-                      } catch (err) {
-                        console.error("Failed to load archived projects:", err);
-                      }
-                    }}
-                    className="bg-gradient-to-br from-purple-600/30 to-purple-800/20 backdrop-blur-sm rounded-xl border border-purple-500/50 p-6 hover:from-purple-500/40 hover:to-purple-700/30 transition-all duration-200 hover:scale-105 text-center group"
-                  >
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🗃️</div>
-                    <h3 className="text-white font-semibold mb-2">Archived Projects</h3>
-                    <p className="text-gray-400 text-sm">Browse archived concepts</p>
-                  </button>
-                </div>
-              ) : selectedMode === "previous" ? (
-                selectedProject ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <button
-                        onClick={() => setSelectedProject(null)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <h3 className="text-xl font-semibold text-white">Add "{selectedProject.idea}" to This Event</h3>
-                    </div>
-
-                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
-                      <p className="text-blue-200 text-sm">
-                        ℹ️ Provide a description specific to what you'll work on for this event.
-                      </p>
-                    </div>
-
-                    <form onSubmit={handleConfirmAddToEvent} className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-300 mb-3">
-                          📝 What will you work on for this event?
-                        </label>
-                        <MarkdownPreviewer textRef={eventDescRef}>
-                          <textarea
-                            ref={eventDescRef}
-                            className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                            value={eventSpecificDescription}
-                            onChange={(e) => setEventSpecificDescription(e.target.value)}
-                            placeholder="Describe what you'll build or improve for this event..."
-                            rows={6}
-                          />
-                        </MarkdownPreviewer>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedProject(null)}
-                          className="flex-1 bg-slate-700/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-600/50 transition-all duration-200 border border-slate-600/50"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
-                        >
-                          ✅ Add to Event
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-4">
-                    <button
-                      onClick={() => setSelectedMode(null)}
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <h3 className="text-xl font-semibold text-white">Previous Projects</h3>
-                  </div>
-
-                  {/* Search Bar */}
-                  <div className="relative mb-4">
-                    <input
-                      type="text"
-                      value={previousProjectsSearch}
-                      onChange={(e) => setPreviousProjectsSearch(e.target.value)}
-                      placeholder="Search projects by title..."
-                      className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-                    />
-                    <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {(() => {
-                    const filteredProjects = previousProjects.filter(project =>
-                      project.idea.toLowerCase().includes(previousProjectsSearch.toLowerCase())
-                    );
-
-                    if (filteredProjects.length === 0) {
-                      return (
-                        <div className="text-center py-8">
-                          <p className="text-gray-400">
-                            {previousProjectsSearch ? 'No projects found matching your search.' : 'No previous projects available.'}
-                          </p>
-                        </div>
-                      );
-                    }
-
-                    return filteredProjects.map((project) => {
-                      const isSameEvent = String(project.event_id) === String(eventId);
-                      const contributorNames = project.contributors
-                        ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
-                        : '';
-
-                      return (
-                        <div
-                          key={project.id}
-                          className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
-                        >
-                          <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
-
-                          {project.event_title && project.event_date && (
-                            <p className="text-gray-400 text-sm mb-1">
-                              📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
-                            </p>
-                          )}
-
-                          {project.contributors && (
-                            <p className="text-gray-400 text-sm mb-3">
-                              👥 {contributorNames}
-                            </p>
-                          )}
-
-                          {!isSameEvent && (
-                            <button
-                              onClick={() => handleSelectProjectToAdd(project)}
-                              className="bg-blue-600/50 text-blue-200 hover:bg-blue-500/50 px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-500/50 transition-colors"
-                            >
-                              ➕ Add to This Event
-                            </button>
-                          )}
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-                </div>
-                )
-              ) : selectedMode === "archived" ? (
-                selectedProject ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <button
-                        onClick={() => setSelectedProject(null)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <h3 className="text-xl font-semibold text-white">Add "{selectedProject.idea}" to This Event</h3>
-                    </div>
-
-                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
-                      <p className="text-blue-200 text-sm">
-                        ℹ️ Provide a description specific to what you'll work on for this event.
-                      </p>
-                    </div>
-
-                    <form onSubmit={handleConfirmAddToEvent} className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-300 mb-3">
-                          📝 What will you work on for this event?
-                        </label>
-                        <MarkdownPreviewer textRef={eventDescRef}>
-                          <textarea
-                            ref={eventDescRef}
-                            className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                            value={eventSpecificDescription}
-                            onChange={(e) => setEventSpecificDescription(e.target.value)}
-                            placeholder="Describe what you'll build or improve for this event..."
-                            rows={6}
-                          />
-                        </MarkdownPreviewer>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedProject(null)}
-                          className="flex-1 bg-slate-700/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-600/50 transition-all duration-200 border border-slate-600/50"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
-                        >
-                          ✅ Add to Event
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 mb-4">
-                      <button
-                        onClick={() => setSelectedMode(null)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <h3 className="text-xl font-semibold text-white">Archived Projects (Stage 1)</h3>
-                    </div>
-
-                    {/* Search Bar */}
-                    <div className="relative mb-4">
-                      <input
-                        type="text"
-                        value={archivedProjectsSearch}
-                        onChange={(e) => setArchivedProjectsSearch(e.target.value)}
-                        placeholder="Search projects by title..."
-                        className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm"
-                      />
-                      <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {(() => {
-                      const filteredProjects = archivedProjects.filter(project =>
-                        project.idea.toLowerCase().includes(archivedProjectsSearch.toLowerCase())
-                      );
-
-                      if (filteredProjects.length === 0) {
-                        return (
-                          <div className="text-center py-8">
-                            <p className="text-gray-400">
-                              {archivedProjectsSearch ? 'No projects found matching your search.' : 'No archived projects available.'}
-                            </p>
-                          </div>
-                        );
-                      }
-
-                      return filteredProjects.map((project) => {
-                        const isSameEvent = String(project.event_id) === String(eventId);
-                        const contributorNames = project.contributors
-                          ? project.contributors.split(',').map(c => c.trim().split('@')[0]).join(', ')
-                          : '';
-
-                        return (
-                          <div
-                            key={project.id}
-                            className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
-                          >
-                            <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
-
-                            {project.event_title && project.event_date && (
-                              <p className="text-gray-400 text-sm mb-1">
-                                📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
-                              </p>
-                            )}
-
-                            {project.contributors && (
-                              <p className="text-gray-400 text-sm mb-3">
-                                👥 {contributorNames}
-                              </p>
-                            )}
-
-                            {!isSameEvent && (
-                              <button
-                                onClick={() => handleSelectProjectToAdd(project)}
-                                className="bg-purple-600/50 text-purple-200 hover:bg-purple-500/50 px-3 py-1.5 rounded-lg text-sm font-medium border border-purple-500/50 transition-colors"
-                              >
-                                ➕ Add to This Event
-                              </button>
-                            )}
-                          </div>
-                        );
-                      });
-                    })()}
-                    </div>
-                  </div>
-                )
-              ) : (
+              {selectedProject ? (
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 mb-6">
-                    <button
-                      onClick={() => setSelectedMode(null)}
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
+                    <button onClick={() => setSelectedProject(null)} className="text-gray-400 hover:text-white transition-colors">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <h3 className="text-xl font-semibold text-white">New Idea Form</h3>
+                    <h3 className="text-xl font-semibold text-white">Add "{selectedProject.idea}" to This Event</h3>
                   </div>
 
-                  <form onSubmit={handleIdeaSubmit} className="space-y-6">
+                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+                    <p className="text-blue-200 text-sm">
+                      ℹ️ Provide a description specific to what you'll work on for this event.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleConfirmAddToEvent} className="space-y-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-3">💡 Your Big Idea</label>
-                      <textarea
-                        className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                        value={idea}
-                        onChange={(e) => setIdea(e.target.value)}
-                        placeholder="Describe your groundbreaking concept..."
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-3">📝 Detailed Description</label>
-                      <MarkdownPreviewer textRef={textRef}>
+                      <label className="block text-sm font-semibold text-gray-300 mb-3">
+                        📝 What will you work on for this event?
+                      </label>
+                      <MarkdownPreviewer textRef={eventDescRef}>
                         <textarea
-                          ref={textRef}
+                          ref={eventDescRef}
                           className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Clear and intriguing - easy to grasp yet sparks curiosity..."
-                          rows={4}
+                          value={eventSpecificDescription}
+                          onChange={(e) => setEventSpecificDescription(e.target.value)}
+                          placeholder="Describe what you'll build or improve for this event..."
+                          rows={6}
                         />
                       </MarkdownPreviewer>
                     </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-3">⚡ Tech Stack</label>
-                      <textarea
-                        className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
-                        value={technologies}
-                        onChange={(e) => setTechnologies(e.target.value)}
-                        placeholder="What technologies will you use to bring this to life?"
-                        rows={3}
-                      />
-                    </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-3">
-                        <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        GitHub Repositories <span className="text-gray-500 font-normal">(optional)</span>
-                      </label>
-
-                      {githubRepos.length > 0 && (
-                        <div className="space-y-3 mb-3">
-                          {githubRepos.map((repo, index) => (
-                            <div key={index} className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50 space-y-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-gray-400 text-xs font-medium">Repository {index + 1}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveRepo(index)}
-                                  className="text-red-400 hover:text-red-300 transition-colors"
-                                  title="Remove repository"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                              <input
-                                type="text"
-                                value={repo.title}
-                                onChange={(e) => handleRepoChange(index, 'title', e.target.value)}
-                                placeholder="Title (e.g., Frontend, Backend, Mobile App)"
-                                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                              <input
-                                type="text"
-                                value={repo.url}
-                                onChange={(e) => handleRepoChange(index, 'url', e.target.value)}
-                                placeholder="https://github.com/username/repo"
-                                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
+                    <div className="flex gap-3">
                       <button
                         type="button"
-                        onClick={handleAddRepo}
-                        className="w-full bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500 text-gray-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                        onClick={() => setSelectedProject(null)}
+                        className="flex-1 bg-slate-700/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-600/50 transition-all duration-200 border border-slate-600/50"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        {githubRepos.length === 0 ? 'Add GitHub Repository' : 'Add Another Repository'}
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-lg"
+                      >
+                        ✅ Add to Event
                       </button>
                     </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-slate-700/20 rounded-lg border border-slate-600/30">
-                      <input
-                        type="checkbox"
-                        checked={isBuilt}
-                        onChange={(e) => setIsBuilt(e.target.checked)}
-                        className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
-                      />
-                      <label className="text-sm font-medium text-gray-300">
-                        🚀 This idea is already built and ready
-                      </label>
-                    </div>
-                    
-                    <button
-                      type="submit"
-                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 px-6 font-semibold rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      🚀 Submit Idea
-                    </button>
                   </form>
                 </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-white mb-4">
+                    {pickerMode === "previous" ? "Previous Projects" : "Archived Projects (Stage 1)"}
+                  </h3>
+                  {pickerMode === "previous"
+                    ? renderProjectList(
+                        previousProjects,
+                        previousProjectsSearch,
+                        setPreviousProjectsSearch,
+                        "bg-blue-600/50 text-blue-200 hover:bg-blue-500/50 border-blue-500/50"
+                      )
+                    : renderProjectList(
+                        archivedProjects,
+                        archivedProjectsSearch,
+                        setArchivedProjectsSearch,
+                        "bg-purple-600/50 text-purple-200 hover:bg-purple-500/50 border-purple-500/50"
+                      )}
+                </>
               )}
-              {message && (
-                <div className={`mt-6 p-4 rounded-lg border ${
-                  message.includes("successfully") 
-                    ? "bg-green-600/20 border-green-500/50 text-green-300" 
-                    : "bg-red-600/20 border-red-500/50 text-red-300"
-                }`}>
-                  <div className="flex items-center gap-2">
-                    {message.includes("successfully") ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )}
-                    <p className="text-sm font-medium">{message}</p>
-                  </div>
+
+              {pickerMessage && (
+                <div className="mt-6 p-4 rounded-lg border bg-red-600/20 border-red-500/50 text-red-300">
+                  <p className="text-sm font-medium">{pickerMessage}</p>
                 </div>
               )}
             </div>
