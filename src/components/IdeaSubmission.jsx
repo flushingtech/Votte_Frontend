@@ -133,16 +133,16 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects by title..."
-            className="w-full px-4 py-2.5 pl-10 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+            className="w-full px-4 py-3 pl-11 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
           />
-          <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <p className="text-gray-400">
                 {search ? "No projects found matching your search." : "No projects available."}
               </p>
@@ -157,27 +157,41 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
               return (
                 <div
                   key={project.id}
-                  className="bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
+                  className="flex items-stretch gap-4 bg-slate-800/30 border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/30 transition-colors"
                 >
-                  <h4 className="font-semibold text-white text-base mb-2">{project.idea}</h4>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-white text-lg mb-2">{project.idea}</h4>
 
-                  {project.event_title && project.event_date && (
-                    <p className="text-gray-400 text-sm mb-1">
-                      📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: "UTC" })}
-                    </p>
-                  )}
+                    {project.event_title && project.event_date && (
+                      <p className="text-gray-400 text-sm mb-1">
+                        📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: "UTC" })}
+                      </p>
+                    )}
 
-                  {project.contributors && (
-                    <p className="text-gray-400 text-sm mb-3">👥 {contributorNames}</p>
-                  )}
+                    {project.contributors && (
+                      <p className="text-gray-400 text-sm mb-3">👥 {contributorNames}</p>
+                    )}
 
-                  {!isSameEvent && (
-                    <button
-                      onClick={() => handleSelectProjectToAdd(project)}
-                      className={`${accentClass} px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors`}
-                    >
-                      ➕ Add to This Event
-                    </button>
+                    {!isSameEvent && (
+                      <button
+                        onClick={() => handleSelectProjectToAdd(project)}
+                        className={`${accentClass} px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors`}
+                      >
+                        ➕ Add to This Event
+                      </button>
+                    )}
+                  </div>
+
+                  {project.image_url && (
+                    <div className="w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 rounded-lg overflow-hidden border border-slate-700">
+                      <img
+                        src={cldOptimize(project.image_url, { width: 240, height: 240 })}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
                   )}
                 </div>
               );
@@ -263,7 +277,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas, profilePicture, canManag
         <>
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" style={{ zIndex: "2147483647", position: "fixed" }}></div>
           <div className="fixed inset-0 flex items-start justify-center p-4 pt-16 pb-8" style={{ zIndex: "2147483647", position: "fixed", isolation: "isolate" }}>
-            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 w-full max-w-3xl max-h-[88vh] overflow-y-auto">
               <button
                 onClick={closePicker}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg"
