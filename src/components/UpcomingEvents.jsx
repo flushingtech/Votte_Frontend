@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEvents, getUserProfile } from '../api/API';
 import Navbar from './Navbar';
+import { formatEventDate, eventDateUTC, todayUTCMidnight } from '../utils/eventDate';
 
 const UpcomingEvents = () => {
   const [events, setEvents] = useState([]);
@@ -34,8 +35,8 @@ const UpcomingEvents = () => {
     const loadEvents = async () => {
       try {
         const all = await getEvents();
-        const now = new Date();
-        const upcoming = all.filter((e) => new Date(e.event_date) >= now);
+        const today = todayUTCMidnight();
+        const upcoming = all.filter((e) => eventDateUTC(e.event_date) >= today);
         upcoming.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
         setEvents(upcoming);
       } catch (err) {
@@ -80,7 +81,6 @@ const UpcomingEvents = () => {
           ) : (
             <div className="space-y-3">
               {events.map((event) => {
-                const date = new Date(event.event_date);
                 return (
                   <div
                     key={event.id}
@@ -91,7 +91,7 @@ const UpcomingEvents = () => {
                       <div>
                         <h3 className="text-lg font-semibold text-white">{event.title}</h3>
                         <p className="text-gray-300 text-sm">
-                          {date.toLocaleDateString('en-US', {
+                          {formatEventDate(event.event_date, {
                             weekday: 'long',
                             month: 'long',
                             day: 'numeric',

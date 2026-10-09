@@ -10,6 +10,7 @@ import MarkdownWithPlugins from './MarkdownWithPluggins';
 import MarkdownPreviewer from './MarkdownPreviewer';
 import { extractIdeaId, createIdeaSlug } from '../utils/urlHelpers';
 import { cldOptimize } from '../utils/cloudinaryImage';
+import { formatEventDate } from '../utils/eventDate';
 
 // Shared award palette — matches the badge colors used on the event page's
 // Winners section (gold/amber for the top prize, purple for technical,
@@ -862,9 +863,9 @@ function IdeaScreen() {
                     const isLast = index === idea.events.length - 1;
 
                     const eventDate = new Date(event.event_date);
-                    const monthAbbr = eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-                    const dayNum = eventDate.getDate();
-                    const yearNum = eventDate.getFullYear();
+                    const monthAbbr = eventDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+                    const dayNum = eventDate.getUTCDate();
+                    const yearNum = eventDate.getUTCFullYear();
 
                     return (
                       <div key={event.event_id} className="relative pl-16 pb-4 last:pb-0">
@@ -1284,7 +1285,7 @@ function IdeaScreen() {
                   Edit Event Details
                 </h2>
                 <p className="text-gray-400">
-                  {new Date(editingEvent.event_date).toLocaleDateString('en-US', {
+                  {formatEventDate(editingEvent.event_date, {
                     weekday: 'long',
                     month: 'long',
                     day: 'numeric',
@@ -1371,7 +1372,7 @@ function IdeaScreen() {
                   Manage Contributors
                 </h2>
                 <p className="text-gray-400">
-                  {new Date(contributorsEvent.event_date).toLocaleDateString('en-US', {
+                  {formatEventDate(contributorsEvent.event_date, {
                     weekday: 'long',
                     month: 'long',
                     day: 'numeric',

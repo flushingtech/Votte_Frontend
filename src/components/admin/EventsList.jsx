@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getEvents, deleteEvent, getIdeasForEvent, syncMeetupEvents, updateEventDate } from '../../api/API';
+import { formatEventDate, eventDateDay, eventDateMonthShort, todayUTCMidnight, eventDateUTC } from '../../utils/eventDate';
 
 const EventsList = ({ onEventSelect }) => {
   const [events, setEvents] = useState([]);
@@ -129,7 +130,7 @@ const EventsList = ({ onEventSelect }) => {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return formatEventDate(dateStr, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -157,15 +158,14 @@ const EventsList = ({ onEventSelect }) => {
     );
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = todayUTCMidnight();
 
   const upcomingEvents = events
-    .filter(event => new Date(event.event_date) >= today)
+    .filter(event => eventDateUTC(event.event_date) >= today)
     .filter(event => event.title?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const pastEvents = events
-    .filter(event => new Date(event.event_date) < today)
+    .filter(event => eventDateUTC(event.event_date) < today)
     .filter(event => event.title?.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
 
@@ -186,7 +186,7 @@ const EventsList = ({ onEventSelect }) => {
             }`}
           >
             <span>🔜</span>
-            <span>Upcoming ({events.filter(e => new Date(e.event_date) >= today).length})</span>
+            <span>Upcoming ({events.filter(e => eventDateUTC(e.event_date) >= today).length})</span>
           </button>
           <button
             onClick={() => setSelectedView('past')}
@@ -197,7 +197,7 @@ const EventsList = ({ onEventSelect }) => {
             }`}
           >
             <span>📜</span>
-            <span>Past ({events.filter(e => new Date(e.event_date) < today).length})</span>
+            <span>Past ({events.filter(e => eventDateUTC(e.event_date) < today).length})</span>
           </button>
         </div>
 
@@ -281,15 +281,15 @@ const EventsList = ({ onEventSelect }) => {
               <div className="flex items-center gap-4">
                 {/* Date badge */}
                 <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0 border ${
-                  new Date(event.event_date) >= today
+                  eventDateUTC(event.event_date) >= today
                     ? 'bg-gradient-to-br from-green-600/30 to-emerald-600/30 border-green-500/50'
                     : 'bg-gradient-to-br from-slate-700/30 to-slate-800/30 border-slate-600/50'
                 }`}>
                   <span className="text-xs font-bold text-gray-300 uppercase">
-                    {new Date(event.event_date).toLocaleDateString('en-US', { month: 'short' })}
+                    {eventDateMonthShort(event.event_date)}
                   </span>
                   <span className="text-lg font-bold text-white">
-                    {new Date(event.event_date).getDate()}
+                    {eventDateDay(event.event_date)}
                   </span>
                 </div>
 
@@ -297,7 +297,7 @@ const EventsList = ({ onEventSelect }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-white font-semibold truncate">{event.title}</span>
-                    {new Date(event.event_date) >= today && (
+                    {eventDateUTC(event.event_date) >= today && (
                       <span className="bg-green-500/20 text-green-300 border border-green-500/40 px-2 py-0.5 rounded-full text-xs font-semibold">
                         Upcoming
                       </span>

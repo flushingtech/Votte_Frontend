@@ -16,6 +16,7 @@ import {
 } from "../api/API";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/dashboard/Sidebar";
+import { formatEventDate } from "../utils/eventDate";
 import IdeaSubmission from "../components/IdeaSubmission";
 import Stage_1_Ideas from "../components/Stage_1_Ideas";
 import Stage_2 from "../components/Stage_2";
@@ -862,7 +863,7 @@ function EventScreen() {
                           {event?.title}
                         </h1>
                         <p className="text-sm text-slate-400 mt-1">
-                          {new Date(event?.event_date).toLocaleDateString("en-US", {
+                          {formatEventDate(event?.event_date, {
                             weekday: "long",
                             month: "long",
                             day: "numeric",

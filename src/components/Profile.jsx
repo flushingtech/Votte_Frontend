@@ -612,7 +612,7 @@ const Profile = ({ user, viewingEmail = null }) => {
                       <div>
                         <div className="text-sm font-semibold text-white">{item.event_title}</div>
                         <div className="text-xs text-gray-400">
-                          {new Date(item.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                          {new Date(item.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                         </div>
                       </div>
                       <span className="text-xs bg-white/10 text-white px-2 py-0.5 rounded-full">{item.category || 'Hackathon Winner'}</span>

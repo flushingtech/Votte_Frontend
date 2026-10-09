@@ -330,7 +330,7 @@ function Navbar({ userName, profilePicture }) {
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-sm text-white font-medium truncate">{ev.title}</p>
-                                  <p className="text-xs text-slate-500">{ev.event_date ? new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</p>
+                                  <p className="text-xs text-slate-500">{ev.event_date ? new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : ''}</p>
                                 </div>
                               </button>
                             ))}

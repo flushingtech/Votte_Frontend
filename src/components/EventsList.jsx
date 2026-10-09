@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { dateTimeFormatter } from '/src/utils/intlUtils';
 import { checkInToEvent, checkAdminStatus } from '../api/API';
+import { eventDateUTC, eventDateMonthShort, eventDateDay } from '../utils/eventDate';
 
 // event_date only stores a date (no time-of-day — admins pick a plain date
 // when creating/editing events), so the real start time for our recurring
@@ -25,17 +26,8 @@ function EventsList({ today }) {
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
-  const toEasternDate = (dateString) => {
-    const eastern = new Date(
-      new Date(dateString).toLocaleString('en-US', { timeZone: 'America/New_York' })
-    );
-    eastern.setHours(0, 0, 0, 0);
-    return eastern;
-  };
-
   const isSameDay = (dateStr) => {
-    const eventDate = toEasternDate(dateStr);
-    return eventDate.getTime() === today.getTime();
+    return eventDateUTC(dateStr).getTime() === today.getTime();
   };
 
   useEffect(() => {
@@ -78,29 +70,29 @@ function EventsList({ today }) {
   // how stale it is.
   const RECENT_PAST_WINDOW_DAYS = 16;
   const recentPastCutoff = new Date(today);
-  recentPastCutoff.setDate(recentPastCutoff.getDate() - RECENT_PAST_WINDOW_DAYS);
+  recentPastCutoff.setUTCDate(recentPastCutoff.getUTCDate() - RECENT_PAST_WINDOW_DAYS);
 
   // Multiple events (e.g. the Flushing and Jamaica hackathons) can land on the
   // same date, so find the closest date on each side first, then take every
   // event that falls on it — not just one — so none of them get hidden.
   const pastDates = events
-    .map((e) => toEasternDate(e.event_date))
+    .map((e) => eventDateUTC(e.event_date))
     .filter((d) => d < today && d >= recentPastCutoff);
   const mostRecentPastDate = pastDates.length
     ? new Date(Math.max(...pastDates.map((d) => d.getTime())))
     : null;
   const recentPastEvents = mostRecentPastDate
-    ? events.filter((e) => toEasternDate(e.event_date).getTime() === mostRecentPastDate.getTime())
+    ? events.filter((e) => eventDateUTC(e.event_date).getTime() === mostRecentPastDate.getTime())
     : [];
 
   const upcomingDates = events
-    .map((e) => toEasternDate(e.event_date))
+    .map((e) => eventDateUTC(e.event_date))
     .filter((d) => d >= today);
   const nextUpcomingDate = upcomingDates.length
     ? new Date(Math.min(...upcomingDates.map((d) => d.getTime())))
     : null;
   const nextUpcomingEvents = nextUpcomingDate
-    ? events.filter((e) => toEasternDate(e.event_date).getTime() === nextUpcomingDate.getTime())
+    ? events.filter((e) => eventDateUTC(e.event_date).getTime() === nextUpcomingDate.getTime())
     : [];
 
   const isNextUpcoming = (event) => nextUpcomingEvents.some((e) => e.id === event.id);
@@ -144,7 +136,7 @@ function EventsList({ today }) {
           <p className="text-sm text-slate-500 text-center py-4">No events to show right now.</p>
         )}
         {filteredEvents.map((event) => {
-          const easternDate = toEasternDate(event.event_date);
+          const easternDate = eventDateUTC(event.event_date);
           const isEventToday = isSameDay(event.event_date);
           const isUpcomingBadge = !isEventToday && isNextUpcoming(event);
           const timeLabel = EVENT_TIME_LABELS[event.title];
@@ -171,8 +163,8 @@ function EventsList({ today }) {
             buttonColor = '#334155';
           }
 
-          const monthAbbr = easternDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-          const dayNum = easternDate.getDate();
+          const monthAbbr = eventDateMonthShort(event.event_date).toUpperCase();
+          const dayNum = eventDateDay(event.event_date);
 
           const handleButtonClick = async (e) => {
             e.stopPropagation();

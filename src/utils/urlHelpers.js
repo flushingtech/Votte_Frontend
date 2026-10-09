@@ -10,7 +10,8 @@ export const createIdeaSlug = (ideaId, ideaTitle, eventDate) => {
   const date = new Date(eventDate);
   const monthYear = date.toLocaleDateString('en-US', {
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   }).toLowerCase().replace(' ', '-');
 
   // Combine: id-title-month-year
@@ -37,7 +38,8 @@ export const createEventSlug = (eventId, eventTitle, eventDate) => {
   const dateSlug = date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   }).toLowerCase().replace(/,/g, '').replace(/\s+/g, '-');
 
   // Combine: id-title-date

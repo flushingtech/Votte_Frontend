@@ -7,6 +7,7 @@ import FeaturedProjects from '../components/FeaturedProjects';
 import Leaderboard from '../components/Leaderboard';
 import Sidebar from '../components/dashboard/Sidebar';
 import { getUserProfile, getUserIdeas } from '../api/API';
+import { todayUTCMidnight } from '../utils/eventDate';
 
 // Function to decode JWT manually
 const decodeToken = (token) => {
@@ -39,13 +40,7 @@ function Home() {
   const [lastEvent, setLastEvent] = useState(null);
   // No tabs: always show community view
 
-  const getEasternDate = () => {
-    const eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    eastern.setHours(0, 0, 0, 0); // strip time
-    return eastern;
-  };
-
-  const todayEastern = getEasternDate();
+  const todayEastern = todayUTCMidnight();
 
   // Redirect to landing page if not logged in
   useEffect(() => {

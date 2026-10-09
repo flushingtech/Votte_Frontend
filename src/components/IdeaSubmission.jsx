@@ -320,7 +320,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
 
                           {project.event_title && project.event_date && (
                             <p className="text-gray-400 text-sm mb-1">
-                              📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString()}
+                              📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
                             </p>
                           )}
 
@@ -459,7 +459,7 @@ function IdeaSubmission({ email, eventId, refreshIdeas }) {
 
                             {project.event_title && project.event_date && (
                               <p className="text-gray-400 text-sm mb-1">
-                                📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString()}
+                                📅 {project.event_title} • {new Date(project.event_date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
                               </p>
                             )}
 
