@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/dashboard/Sidebar';
 import AddEvent from '../components/admin/AddEvent';
 import ContributorRequests from '../components/admin/ContributorRequests';
 import { getUserProfile, getMonthlyVisitors, getContributorRequestCount } from '../api/API';
@@ -8,6 +9,7 @@ import { getUserProfile, getMonthlyVisitors, getContributorRequestCount } from '
 const AdminPage = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
@@ -84,26 +86,30 @@ const AdminPage = () => {
       : null;
 
   return (
-    <div
-      className="admin-page flex flex-col min-h-screen relative overflow-hidden"
-      style={{
-        background: '#000000',
-      }}
-    >
-      {/* Light blue flashes/glowing effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-      </div>
-
-      <div className="sticky top-0 z-50">
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#000000' }}>
+      {/* Navbar */}
+      <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
-      <div className="px-4 sm:px-6 py-6">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Light blue flashes/glowing effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute bottom-[10%] right-[25%] w-48 h-48 bg-cyan-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        </div>
+
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+
+        {/* Main scroll area */}
+        <div
+          className="relative flex-1 min-w-0 overflow-y-auto"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+        >
+        <div className="px-4 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Hero + summary strip */}
           <div className="bg-gradient-to-r from-slate-800/80 via-slate-900/80 to-slate-800/80 border border-slate-700/60 p-6 shadow-2xl">
@@ -290,6 +296,8 @@ const AdminPage = () => {
 
           </div>
         </div>
+        </div>
+      </div>
       </div>
     </div>
   );
