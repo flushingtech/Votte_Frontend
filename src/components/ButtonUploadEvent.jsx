@@ -40,40 +40,36 @@ const ButtonUploadEvent = ({ eventId }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex flex-col">
-      {/* <p className="text-white text-sm self-start">Upload an image for this event:</p> */}
+    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2">
+      <input
+        type="file"
+        id="uploadImages"
+        name="uploadImages"
+        hidden
+        ref={inputRef}
+        onChange={(e) => e.target.files[0] && setFile(e.target.files[0])}
+        accept="image/*"
+        disabled={loading}
+      />
 
-      <div className="flex flex-wrap  items-center justify-start w-full max-w-md">
-        <input
-          type="file"
-          id="uploadImages"
-          name="uploadImages"
-          hidden
-          ref={inputRef}
-          onChange={(e) => e.target.files[0] && setFile(e.target.files[0])}
-          accept="image/*"
-          disabled={loading}
-        />
+      <button
+        type="button"
+        onClick={() => inputRef.current.click()}
+        className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors disabled:opacity-50"
+        disabled={loading}
+      >
+        {file ? 'Change Image' : 'Choose Image'}
+      </button>
 
+      {file && (
         <button
-          type="button"
-          onClick={() => inputRef.current.click()}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors disabled:opacity-50"
           disabled={loading}
         >
-          {file ? 'Change Image' : 'Choose Image'}
+          {loading ? 'Uploading...' : 'Submit Image'}
         </button>
-
-        {file && (
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
-            disabled={loading}
-          >
-            {loading ? 'Uploading...' : 'Submit Image'}
-          </button>
-        )}
-      </div>
+      )}
 
       <Toaster />
     </form>

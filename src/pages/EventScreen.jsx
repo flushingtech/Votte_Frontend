@@ -465,6 +465,16 @@ function EventScreen() {
             You're Checked In
           </div>
         )}
+        {canPresent && (
+          <div className="border-t border-slate-800 pt-2.5">
+            <button
+              onClick={() => setIsPresenting(true)}
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-2 px-3 font-semibold text-xs sm:text-sm hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg"
+            >
+              <span aria-hidden="true">▶</span> Present
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
@@ -722,6 +732,15 @@ function EventScreen() {
           <div className="flex flex-col gap-2">
             <p className={sectionLabel}>Stage</p>
 
+            {canPresent && (
+              <button
+                onClick={() => setIsPresenting(true)}
+                className="w-full inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white px-3 py-2 font-semibold text-xs sm:text-sm hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg"
+              >
+                <span aria-hidden="true">▶</span> Present
+              </button>
+            )}
+
             {isLiveCoding ? (
               <>
                 {eventStage === "1" && (
@@ -966,24 +985,13 @@ function EventScreen() {
                     />
                   )}
 
-                  {/* CTA row: status + primary action, content-tight (no dead space) */}
-                  <div className="p-3 sm:p-4 flex flex-wrap items-center gap-2">
-                    {isUserCheckedIn && (
+                  {isUserCheckedIn && (
+                    <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
                         Checked In
                       </span>
-                    )}
-                    {canPresent && (
-                      <div className="ml-auto flex items-center gap-2">
-                        <button
-                          onClick={() => setIsPresenting(true)}
-                          className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-                        >
-                          <span aria-hidden="true">▶</span> Present
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Mobile only: admin/info panel sits right after the hero here.
