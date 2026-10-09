@@ -937,7 +937,7 @@ function EventScreen() {
         <div className="flex flex-col flex-1 min-w-0 overflow-y-auto relative"
           style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}>
 
-          <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto w-full">
+          <div className={`px-4 sm:px-6 py-4 sm:py-6 mx-auto w-full ${showAdminPanel ? 'max-w-[1576px]' : 'max-w-7xl'}`}>
 
             <div className={`grid grid-cols-1 ${showAdminPanel ? 'lg:grid-cols-[280px_minmax(0,1fr)_300px]' : 'lg:grid-cols-[minmax(0,1fr)_300px]'} gap-3 sm:gap-4 lg:items-start`}>
 
