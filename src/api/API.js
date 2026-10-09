@@ -717,6 +717,16 @@ export const updateEventDate = async (eventId, eventDate, email) => {
   return response.data;
 };
 
+// Set which users (by email) can see the Present button for this event.
+// Admin-only; hosts are scoped to the one event, not a global role.
+export const updateEventHosts = async (eventId, hostEmails, email) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/api/events/${eventId}/hosts`, {
+    hosts: hostEmails,
+    email,
+  });
+  return response.data;
+};
+
 // Get leaderboard (top 5)
 export const getLeaderboard = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/ideas/leaderboard`);

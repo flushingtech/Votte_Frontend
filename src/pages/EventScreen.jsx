@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import Select from "react-select";
 import {
   getEvents,
   getEventStage,
@@ -13,6 +14,8 @@ import {
   checkInToEvent,
   addContributorToIdeaEvent,
   getIdeasByEvent,
+  getAllUsers,
+  updateEventHosts,
 } from "../api/API";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/dashboard/Sidebar";
@@ -57,9 +60,18 @@ function EventScreen() {
   const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [showAllParticipants, setShowAllParticipants] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedHosts, setSelectedHosts] = useState([]);
+  const [savingHosts, setSavingHosts] = useState(false);
 
   const slides = event?.slides?.length ? event.slides : LOCAL_EVENT_SLIDES_BY_TITLE[event?.title] || [];
   const hasSlides = slides.length > 0;
+  const eventHosts = useMemo(
+    () => (event?.hosts || "").split(",").map((h) => h.trim()).filter(Boolean),
+    [event?.hosts]
+  );
+  const isHost = eventHosts.includes(email);
+  const canPresent = hasSlides && (isAdmin || isHost);
 
   // Fetch user display name
   useEffect(() => {
@@ -234,6 +246,19 @@ function EventScreen() {
 
     fetchEventDetails();
   }, [eventId, email, eventSlug, navigate]);
+
+  // Keep the host picker in sync with whatever's actually saved on the event.
+  useEffect(() => {
+    setSelectedHosts(eventHosts);
+  }, [eventHosts.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Only admins manage hosts, so only fetch the user list for them.
+  useEffect(() => {
+    if (!isAdmin) return;
+    getAllUsers()
+      .then(setAllUsers)
+      .catch((err) => console.error("Error fetching users for host picker:", err));
+  }, [isAdmin]);
 
   const refreshIdeas = () => setIdeasRefreshKey((prevKey) => prevKey + 1);
   const usernameOnly = (s = "") => s.split("@")[0] || "";
@@ -663,6 +688,20 @@ function EventScreen() {
       }
     };
 
+    const handleSaveHosts = async () => {
+      setSavingHosts(true);
+      try {
+        const data = await updateEventHosts(eventId, selectedHosts, email);
+        setEvent((prev) => (prev ? { ...prev, hosts: data.event?.hosts ?? "" } : prev));
+        showNotification("👤 Hosts updated!", "success");
+      } catch (error) {
+        console.error("Error updating hosts:", error);
+        showNotification("Failed to update hosts.", "error");
+      } finally {
+        setSavingHosts(false);
+      }
+    };
+
     const btnPrimary = "w-full bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
     const btnNeutral = "w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
     const btnDanger = "w-full bg-red-600/15 hover:bg-red-600/25 border border-red-500/40 text-red-300 px-3 py-2 font-semibold text-xs sm:text-sm transition-colors";
@@ -739,6 +778,42 @@ function EventScreen() {
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">Event Image</p>
           <ButtonUploadEvent eventId={eventId} />
         </div>
+
+        {hasSlides && (
+          <>
+            <hr className="border-slate-800 my-0.5" />
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5">
+                Hosts <span className="normal-case text-slate-600">— can use Present</span>
+              </p>
+              <Select
+                isMulti
+                menuPortalTarget={document.body}
+                styles={{
+                  control: (base) => ({ ...base, backgroundColor: '#1e293b', borderColor: '#334155', minHeight: '38px' }),
+                  menu: (base) => ({ ...base, backgroundColor: '#1e293b', color: 'white', zIndex: 9999 }),
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? '#334155' : '#1e293b', color: 'white', cursor: 'pointer' }),
+                  multiValue: (base) => ({ ...base, backgroundColor: '#334155' }),
+                  multiValueLabel: (base) => ({ ...base, color: 'white' }),
+                  input: (base) => ({ ...base, color: 'white' }),
+                  placeholder: (base) => ({ ...base, color: '#94a3b8' }),
+                }}
+                options={allUsers.map((u) => ({ label: `${u.name} (${u.email})`, value: u.email }))}
+                value={selectedHosts.map((hostEmail) => {
+                  const user = allUsers.find((u) => u.email === hostEmail);
+                  return { label: user ? `${user.name} (${user.email})` : hostEmail, value: hostEmail };
+                })}
+                onChange={(selected) => setSelectedHosts((selected || []).map((s) => s.value))}
+                placeholder="Select host(s)..."
+                className="text-sm mb-2"
+              />
+              <button onClick={handleSaveHosts} disabled={savingHosts} className={btnNeutral}>
+                {savingHosts ? 'Saving...' : 'Save Hosts'}
+              </button>
+            </div>
+          </>
+        )}
 
         <hr className="border-slate-800 my-0.5" />
 
@@ -894,9 +969,9 @@ function EventScreen() {
                         Checked In
                       </span>
                     )}
-                    {(hasSlides || (eventStage === "1" && (isLiveCoding || subStage === "1"))) && (
+                    {(canPresent || (eventStage === "1" && (isLiveCoding || subStage === "1"))) && (
                       <div className="ml-auto flex items-center gap-2">
-                        {hasSlides && (
+                        {canPresent && (
                           <button
                             onClick={() => setIsPresenting(true)}
                             className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-1.5 px-3 sm:py-3 sm:px-6 text-xs sm:text-base font-semibold rounded-lg sm:rounded-xl border border-orange-500/50 hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
