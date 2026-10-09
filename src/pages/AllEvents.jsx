@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import EventsList from '../components/admin/EventsList';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/dashboard/Sidebar';
 import { useEffect, useState } from 'react';
 import { getUserProfile, getEvents } from '../api/API';
 
@@ -8,6 +9,7 @@ const AllEvents = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || '';
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
   const [totalEvents, setTotalEvents] = useState(0);
@@ -43,20 +45,27 @@ const AllEvents = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col text-white relative overflow-hidden" style={{ background: '#000000' }}>
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-      </div>
-
-      <div className="sticky top-0 z-50">
+    <div className="flex flex-col h-screen overflow-hidden text-white" style={{ background: '#000000' }}>
+      <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
-      <div className="flex-1 px-4 sm:px-6 py-6 relative z-10">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Background effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+
+        <div
+          className="relative flex-1 min-w-0 overflow-y-auto"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+        >
+        <div className="px-4 sm:px-6 py-6">
         <div className="max-w-6xl mx-auto space-y-4">
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-800/60 to-indigo-800/60 border border-purple-700/50 p-6 shadow-2xl rounded-none">
@@ -85,6 +94,8 @@ const AllEvents = () => {
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 shadow-2xl p-4 rounded-none">
             <EventsList onEventSelect={handleEventSelect} />
           </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>

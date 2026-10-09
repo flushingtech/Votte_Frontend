@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDuplicateIdeas, mergeIdeas, checkAdminStatus, getIdeas, getUserProfile, getDisplayNames } from '../api/API';
 import Navbar from './Navbar';
+import Sidebar from './dashboard/Sidebar';
 
 function AdminDuplicates() {
   const navigate = useNavigate();
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [duplicateGroups, setDuplicateGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -160,17 +162,23 @@ function AdminDuplicates() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col text-white relative overflow-hidden" style={{ background: '#000000' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        </div>
-        <div className="sticky top-0 z-50">
+      <div className="flex flex-col h-screen overflow-hidden text-white" style={{ background: '#000000' }}>
+        <div className="relative z-50 flex-shrink-0">
           <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-400 mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+        <div className="flex flex-1 min-h-0 overflow-hidden relative">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
+          <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+          <div
+            className="relative flex-1 min-w-0 flex flex-col items-center justify-center"
+            style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+          >
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-400 mb-4"></div>
+            <p className="text-gray-400">Loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -178,35 +186,48 @@ function AdminDuplicates() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col text-white relative overflow-hidden" style={{ background: '#000000' }}>
-        <div className="sticky top-0 z-50">
+      <div className="flex flex-col h-screen overflow-hidden text-white" style={{ background: '#000000' }}>
+        <div className="relative z-50 flex-shrink-0">
           <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
-            <span className="text-3xl">🚫</span>
+        <div className="flex flex-1 min-h-0 overflow-hidden relative">
+          <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+          <div
+            className="relative flex-1 min-w-0 flex flex-col items-center justify-center"
+            style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+          >
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl">🚫</span>
+            </div>
+            <p className="text-red-400 font-medium text-xl">Access Denied: Admin Only</p>
           </div>
-          <p className="text-red-400 font-medium text-xl">Access Denied: Admin Only</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col text-white relative overflow-hidden" style={{ background: '#000000' }}>
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-      </div>
-
-      <div className="sticky top-0 z-50">
+    <div className="flex flex-col h-screen overflow-hidden text-white" style={{ background: '#000000' }}>
+      <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
-      <div className="flex-1 px-4 sm:px-6 py-6 relative z-10">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Background effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-[60%] right-[15%] w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-[20%] left-[20%] w-56 h-56 bg-cyan-400/12 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+
+        <div
+          className="relative flex-1 min-w-0 overflow-y-auto"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+        >
+        <div className="px-4 sm:px-6 py-6">
         <div className="max-w-6xl mx-auto space-y-4">
           {/* Header */}
           <div className="bg-gradient-to-r from-amber-800/60 to-orange-800/60 border border-amber-700/50 p-6 shadow-2xl rounded-none">
@@ -525,6 +546,8 @@ function AdminDuplicates() {
               </div>
             )}
           </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>

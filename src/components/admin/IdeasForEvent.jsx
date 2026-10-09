@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../Navbar';
+import Sidebar from '../dashboard/Sidebar';
 import {
   getIdeasForEvent,
   deleteIdea,
@@ -18,6 +19,7 @@ import {
 } from '../../api/API';
 
 const IdeasForEvent = ({ userEmail }) => {
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => window.innerWidth >= 1024);
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -195,16 +197,22 @@ const IdeasForEvent = ({ userEmail }) => {
   if (loading) {
     return (
       <div
-        className="min-h-screen"
-        style={{
-          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
-        }}
+        className="flex flex-col h-screen overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)' }}
       >
-        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-white text-lg">Loading ideas...</p>
+        <div className="relative z-50 flex-shrink-0">
+          <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
+        </div>
+        <div className="flex flex-1 min-h-0 overflow-hidden relative">
+          <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+          <div
+            className="relative flex-1 min-w-0 flex items-center justify-center"
+            style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+          >
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading ideas...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -214,16 +222,22 @@ const IdeasForEvent = ({ userEmail }) => {
   if (error) {
     return (
       <div
-        className="min-h-screen"
-        style={{
-          background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
-        }}
+        className="flex flex-col h-screen overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)' }}
       >
-        <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <p className="text-red-500 text-lg">{error}</p>
+        <div className="relative z-50 flex-shrink-0">
+          <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
+        </div>
+        <div className="flex flex-1 min-h-0 overflow-hidden relative">
+          <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+          <div
+            className="relative flex-1 min-w-0 flex items-center justify-center"
+            style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+          >
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-500 text-lg">{error}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -232,15 +246,20 @@ const IdeasForEvent = ({ userEmail }) => {
 
   return (
     <div
-      className="min-h-screen"
-      style={{
-        background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)',
-      }}
+      className="flex flex-col h-screen overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0F1419 0%, #1A2332 50%, #0F1419 100%)' }}
     >
-      <div className="sticky top-0 z-50">
+      <div className="relative z-50 flex-shrink-0">
         <Navbar userName={userName || userEmail} profilePicture={profilePicture} backToHome={true} />
       </div>
 
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(e => !e)} />
+
+        <div
+          className="relative flex-1 min-w-0 overflow-y-auto"
+          style={{ paddingLeft: sidebarExpanded ? '220px' : '52px', transition: 'padding-left 200ms ease' }}
+        >
       <div className="px-4 sm:px-6 py-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -442,6 +461,8 @@ const IdeasForEvent = ({ userEmail }) => {
           </div>
         </div>
       </div>
+        </div>
+        </div>
 
       {/* Confirmation Modal for Show Results */}
       {showResultsConfirm && (
