@@ -45,4 +45,8 @@ const HACKATHON_DECK = [
 // current event moved past whatever id was hardcoded here.
 export const LOCAL_EVENT_SLIDES_BY_TITLE = {
   "Flushing Tech Bi-Weekly Hackathon": HACKATHON_DECK,
+  // Stopgap: reuses the Flushing Tech deck (still Flushing-branded) so
+  // Present/Host work for Jamaica Tech events too. Swap in a Jamaica-branded
+  // deck here once those slide images exist.
+  "Jamaica Tech Bi-Weekly Hackathon": HACKATHON_DECK,
 };
