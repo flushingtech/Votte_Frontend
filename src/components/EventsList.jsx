@@ -142,6 +142,16 @@ function EventsList({ today }) {
           const monthAbbr = eventDateMonthShort(event.event_date).toUpperCase();
           const dayNum = eventDateDay(event.event_date);
 
+          const checkInAndOpen = async () => {
+            try {
+              await checkInToEvent(event.id, userEmail);
+              navigate(`/event/${event.id}?checkedIn=true`);
+            } catch (err) {
+              console.error('Check-in failed:', err);
+              alert('Check-in failed');
+            }
+          };
+
           const handleButtonClick = async (e) => {
             e.stopPropagation();
 
@@ -155,13 +165,17 @@ function EventsList({ today }) {
             }
 
             if (buttonText === 'Check In') {
-              try {
-                await checkInToEvent(event.id, userEmail);
-                navigate(`/event/${event.id}?checkedIn=true`);
-              } catch (err) {
-                console.error('Check-in failed:', err);
-                alert('Check-in failed');
-              }
+              await checkInAndOpen();
+            } else {
+              navigate(`/event/${event.id}`);
+            }
+          };
+
+          // Clicking the card while Check In is offered checks the user in too,
+          // so opening the event that way doesn't leave them un-checked-in.
+          const handleCardClick = () => {
+            if (buttonText === 'Check In') {
+              checkInAndOpen();
             } else {
               navigate(`/event/${event.id}`);
             }
@@ -170,7 +184,7 @@ function EventsList({ today }) {
           return (
             <div
               key={event.id}
-              onClick={() => navigate(`/event/${event.id}`)}
+              onClick={handleCardClick}
               className="flex items-center gap-3 p-2.5 sm:p-3 bg-white border cursor-pointer hover:border-blue-400 transition-colors"
               style={{
                 borderColor: event.canceled
