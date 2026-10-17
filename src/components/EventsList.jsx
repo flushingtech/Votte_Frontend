@@ -63,28 +63,10 @@ function EventsList({ today }) {
   if (error) return <p className="text-center text-sm text-red-400 py-6">{error}</p>;
 
   // --- pick candidates ---
-  // Only surface "recent past" events if they actually happened recently
-  // (within one bi-weekly cycle). Without this bound, a hackathon that never
-  // got closed out (stuck at an earlier stage) stays "the most recent past
-  // event" forever and shows up here looking like it's upcoming, no matter
-  // how stale it is.
-  const RECENT_PAST_WINDOW_DAYS = 16;
-  const recentPastCutoff = new Date(today);
-  recentPastCutoff.setUTCDate(recentPastCutoff.getUTCDate() - RECENT_PAST_WINDOW_DAYS);
-
-  // Multiple events (e.g. the Flushing and Jamaica hackathons) can land on the
-  // same date, so find the closest date on each side first, then take every
-  // event that falls on it — not just one — so none of them get hidden.
-  const pastDates = events
-    .map((e) => eventDateUTC(e.event_date))
-    .filter((d) => d < today && d >= recentPastCutoff);
-  const mostRecentPastDate = pastDates.length
-    ? new Date(Math.max(...pastDates.map((d) => d.getTime())))
-    : null;
-  const recentPastEvents = mostRecentPastDate
-    ? events.filter((e) => eventDateUTC(e.event_date).getTime() === mostRecentPastDate.getTime())
-    : [];
-
+  // Only show a single date: today if anything is on today, otherwise the
+  // next upcoming date. Multiple events (e.g. the Flushing and Jamaica
+  // hackathons) can land on the same date, so take every event on that date
+  // — not just one — so none of them get hidden.
   const upcomingDates = events
     .map((e) => eventDateUTC(e.event_date))
     .filter((d) => d >= today);
@@ -96,13 +78,7 @@ function EventsList({ today }) {
     : [];
 
   const isNextUpcoming = (event) => nextUpcomingEvents.some((e) => e.id === event.id);
-
-  // --- both dates' events on all screen sizes ---
-  const recentPastIds = new Set(recentPastEvents.map((e) => e.id));
-  const filteredEvents = [
-    ...recentPastEvents,
-    ...nextUpcomingEvents.filter((e) => !recentPastIds.has(e.id)),
-  ];
+  const filteredEvents = nextUpcomingEvents;
 
   return (
     <div className="events-container relative flex flex-col">
