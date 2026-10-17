@@ -45,6 +45,8 @@ function IdeaScreen() {
   const [selectedContributor, setSelectedContributor] = useState(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [editingGithubRepos, setEditingGithubRepos] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
   const [githubRepos, setGithubRepos] = useState([]);
   const [displayNames, setDisplayNames] = useState({});
   const [contributorProfiles, setContributorProfiles] = useState({});
@@ -294,6 +296,36 @@ function IdeaScreen() {
       console.error('Full error:', error.message);
       setMessage(`Failed: ${error.message}`);
       setTimeout(() => setMessage(''), 8000);
+    }
+  };
+
+  const handleSaveTitle = async () => {
+    const newTitle = titleDraft.trim();
+    if (!newTitle) {
+      setMessage('Title cannot be empty');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/ideas/editIdea/${ideaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea: newTitle })
+      });
+
+      if (!response.ok) throw new Error('Failed to update');
+
+      // Refresh idea data
+      const ideaData = await getIdeaById(ideaId);
+      setIdea(ideaData);
+
+      setEditingTitle(false);
+      setMessage('Title updated successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating title:', error);
+      setMessage('Failed to update title');
     }
   };
 
@@ -805,9 +837,52 @@ function IdeaScreen() {
                   </svg>
                   Back to Projects
                 </button>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
-                  {idea?.idea}
-                </h1>
+                {editingTitle ? (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={titleDraft}
+                      onChange={(e) => setTitleDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveTitle();
+                        if (e.key === 'Escape') setEditingTitle(false);
+                      }}
+                      autoFocus
+                      className="flex-1 min-w-0 px-3 py-2 bg-slate-800 border border-slate-600 text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveTitle}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingTitle(false)}
+                        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-3">
+                    <h1 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
+                      {idea?.idea}
+                    </h1>
+                    {isLoggedIn && (idea?.email === userEmail || isAdmin) && (
+                      <button
+                        onClick={() => {
+                          setTitleDraft(idea?.idea || '');
+                          setEditingTitle(true);
+                        }}
+                        className="flex-shrink-0 mt-1 text-blue-400 hover:text-blue-300 transition-colors text-xs font-semibold"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                )}
                 <p className="text-xs text-slate-400 mt-1">
                   Submitted by: {idea?.email?.split('@')[0] || 'Unknown'}
                 </p>
