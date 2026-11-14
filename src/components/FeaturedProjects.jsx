@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getFeaturedProjects } from '../api/API';
 import { useNavigate } from 'react-router-dom';
 import { cldOptimize } from '../utils/cloudinaryImage';
@@ -20,6 +20,100 @@ const FB_AWARD = { emoji:'🏅', label:'Award', color:'#cbd5e1', border:'rgba(14
 const PAL = ['#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777'];
 const aCol = email => PAL[(email||'').charCodeAt(0) % PAL.length];
 
+// ─── Desktop rotation ────────────────────────────────────────────────────────
+// When there are more featured projects than desktop slots, a random slot
+// fades out every few seconds and is replaced by a project not on screen.
+const DESKTOP_SLOTS = 4;
+const FADE_MS = 600;
+const ROTATE_MIN_MS = 3500;
+const ROTATE_MAX_MS = 6500;
+const IMG_WAIT_MAX_MS = 2500;
+
+const randInt = (n) => Math.floor(Math.random() * n);
+const shuffle = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+// Resolve once the image is cached (or failed / took too long), so a card
+// never fades in with a blank thumbnail.
+const preload = (url) => new Promise(resolve => {
+  if (!url) return resolve();
+  const img = new Image();
+  const done = () => resolve();
+  img.onload = done;
+  img.onerror = done;
+  setTimeout(done, IMG_WAIT_MAX_MS);
+  img.src = url;
+});
+
+function useRotatingSlots(projects, slotCount) {
+  const [slots, setSlots] = useState([]);       // project ids shown per slot
+  const [hiddenSlot, setHiddenSlot] = useState(null);
+  const pausedRef = useRef(false);
+  const slotsRef = useRef(slots);
+  slotsRef.current = slots;
+
+  // Initial random pick whenever the project list changes.
+  useEffect(() => {
+    setSlots(shuffle(projects.map(p => p.id)).slice(0, slotCount));
+    setHiddenSlot(null);
+  }, [projects, slotCount]);
+
+  useEffect(() => {
+    if (projects.length <= slotCount) return undefined;
+
+    let cancelled = false;
+    let timer;
+    let lastSlot = -1;
+    const wait = (ms) => new Promise(r => { timer = setTimeout(r, ms); });
+
+    const loop = async () => {
+      while (!cancelled) {
+        await wait(ROTATE_MIN_MS + randInt(ROTATE_MAX_MS - ROTATE_MIN_MS));
+        if (cancelled) return;
+        // Skip while paused, in a background tab, or below md (grid hidden).
+        if (pausedRef.current || document.hidden || !window.matchMedia('(min-width: 768px)').matches) continue;
+
+        const current = slotsRef.current;
+        const candidates = projects.filter(p => !current.includes(p.id));
+        if (!candidates.length || !current.length) continue;
+
+        // Pick a random slot, avoiding the one we just swapped.
+        let slot = randInt(current.length);
+        if (current.length > 1 && slot === lastSlot) slot = (slot + 1 + randInt(current.length - 1)) % current.length;
+        lastSlot = slot;
+        const next = candidates[randInt(candidates.length)];
+
+        setHiddenSlot(slot);
+        await Promise.all([
+          wait(FADE_MS),
+          preload(next.image_url ? cldOptimize(next.image_url, { width: 500 }) : null),
+        ]);
+        if (cancelled) return;
+        setSlots(s => s.map((id, i) => (i === slot ? next.id : id)));
+        // Let the new card mount at opacity 0 before fading it in.
+        requestAnimationFrame(() => { if (!cancelled) setHiddenSlot(null); });
+      }
+    };
+    loop();
+
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [projects, slotCount]);
+
+  const byId = new Map(projects.map(p => [p.id, p]));
+  return {
+    visible: slots.map(id => byId.get(id)).filter(Boolean),
+    hiddenSlot,
+    pause: () => { pausedRef.current = true; },
+    resume: () => { pausedRef.current = false; },
+  };
+}
+
 // ─── Global CSS ──────────────────────────────────────────────────────────────
 const STYLES = `
   .fp-card, .fp-feed-card {
@@ -31,6 +125,14 @@ const STYLES = `
   }
   .fp-card-img {
     width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .fp-slot {
+    height:100%;
+    transition:opacity ${FADE_MS}ms ease;
+  }
+  .fp-slot.is-hidden { opacity:0; }
+  @media (prefers-reduced-motion: reduce) {
+    .fp-slot { transition:none; }
   }
   .fp-viewall {
     cursor:pointer;
@@ -330,6 +432,7 @@ export default function FeaturedProjects() {
   const [projects, setProjects] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const navigate = useNavigate();
+  const rotation = useRotatingSlots(projects, DESKTOP_SLOTS);
 
   useEffect(() => {
     getFeaturedProjects()
@@ -348,7 +451,6 @@ export default function FeaturedProjects() {
   if (loading) return <LoadingSkeleton />;
 
   const total = projects.length;
-  const desktopProjects = projects.slice(0, 4);
 
   if (!total) return (
     <div style={{ ...ROOT, alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
@@ -382,11 +484,21 @@ export default function FeaturedProjects() {
         </button>
       </div>
 
-      {/* Desktop / tablet: curated grid, up to 4 cards, all the same height */}
+      {/* Desktop / tablet: up to 4 cards, all the same height. With more
+          featured projects than slots, cards randomly fade out and in. */}
       <div className="hidden md:block" style={{ padding: 14 }}>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4" style={{ gap: 14 }}>
-          {desktopProjects.map(p => (
-            <ProjectCard key={p.id} project={p} navigate={navigate} />
+        <div
+          className="grid md:grid-cols-2 lg:grid-cols-4"
+          style={{ gap: 14 }}
+          onMouseEnter={rotation.pause}
+          onMouseLeave={rotation.resume}
+          onFocus={rotation.pause}
+          onBlur={rotation.resume}
+        >
+          {rotation.visible.map((p, i) => (
+            <div key={i} className={`fp-slot${rotation.hiddenSlot === i ? ' is-hidden' : ''}`}>
+              <ProjectCard key={p.id} project={p} navigate={navigate} />
+            </div>
           ))}
         </div>
       </div>
