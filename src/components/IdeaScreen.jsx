@@ -85,6 +85,11 @@ function IdeaScreen() {
   ) || [], [idea]);
   const uniqueContributors = useMemo(() => [...new Set(allContributors)], [allContributors]);
   const eventCount = idea?.events?.length || 0;
+  // Timeline shows the most recent event first.
+  const timelineEvents = useMemo(
+    () => [...(idea?.events || [])].sort((a, b) => new Date(b.event_date) - new Date(a.event_date)),
+    [idea]
+  );
 
   const user = JSON.parse(localStorage.getItem('user'));
   const userEmail = user?.email || localStorage.getItem('userEmail') || '';
@@ -928,14 +933,15 @@ function IdeaScreen() {
 
                 <div className="relative mt-3">
                   {/* Timeline vertical line */}
-                  <div className="absolute left-[23px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-emerald-500/40 via-slate-700 to-blue-500/40"></div>
+                  <div className="absolute left-[23px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-blue-500/40 via-slate-700 to-emerald-500/40"></div>
 
                   {/* Event cards with timeline nodes */}
-                  {idea?.events?.map((event, index) => {
+                  {timelineEvents.map((event, index) => {
                     const hasAwards = event?.awards && Array.isArray(event.awards) && event.awards.length > 0;
                     const hasVotes = event?.votes > 0 || event?.most_creative_votes > 0 || event?.most_technical_votes > 0 || event?.most_impactful_votes > 0;
-                    const isFirst = index === 0;
-                    const isLast = index === idea.events.length - 1;
+                    // Sorted newest-first: the oldest event (Start) is at the bottom.
+                    const isFirst = index === timelineEvents.length - 1;
+                    const isLast = index === 0;
 
                     const eventDate = new Date(event.event_date);
                     const monthAbbr = eventDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase();
